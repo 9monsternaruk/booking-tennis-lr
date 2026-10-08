@@ -5,36 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Laddarom Elegance - Court Booking</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- FullCalendar -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-    
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- html2pdf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <!-- Tailwind Config for Theme Colors -->
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0d9488', // Teal 600
-                        secondary: '#0f766e', // Teal 700
-                        accent: '#f59e0b', // Amber 500
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'Sarabun', 'sans-serif'],
-                    }
-                }
-            }
+            theme: { extend: { colors: { primary: '#0d9488', secondary: '#0f766e', accent: '#f59e0b' }, fontFamily: { sans: ['Inter', 'Sarabun', 'sans-serif'] } } }
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
@@ -43,42 +22,31 @@
         body { font-family: 'Inter', 'Sarabun', sans-serif; background-color: #f3f4f6; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        /* Calendar Customizations */
         .fc-toolbar-title { font-size: 1.25rem !important; font-weight: 600 !important; }
         .fc-button-primary { background-color: #0d9488 !important; border-color: #0d9488 !important; }
         .fc-daygrid-day-number { color: #374151; font-weight: 500; }
         .fc .fc-daygrid-day.fc-day-today { background-color: #e0f2fe; }
         .booking-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #f59e0b; margin: 1px; }
         
-        /* Modal Animation */
-        .modal-enter { opacity: 0; transform: scale(0.95); }
-        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms, transform 200ms; }
-
-        /* Toggle Switch */
         .toggle-checkbox:checked { right: 0; border-color: #0d9488; }
         .toggle-checkbox:checked + .toggle-label { background-color: #0d9488; }
         
-        /* Loading Overlay (บังคับ Flex) */
-        .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; }
-        .loading-hidden { opacity: 0; pointer-events: none; }
+        /* หน้าจอโหลด */
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
     </style>
 </head>
 <body class="text-gray-800 pb-20 relative">
 
     <!-- Loading Overlay -->
-    <div id="mainLoadingOverlay" class="loading-screen">
-        <div id="loadingSpinner" style="display: flex; flex-direction: column; align-items: center;">
-            <i class="fa-solid fa-spinner fa-spin text-4xl text-primary mb-3"></i>
-            <p class="font-bold text-gray-700">กำลังเชื่อมต่อระบบจองสนาม...</p>
-        </div>
-        <div id="loadingError" style="display: none; flex-direction: column; align-items: center; text-align: center;" class="max-w-sm px-4">
-            <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-3"></i>
-            <h3 class="font-bold text-red-600 text-lg mb-1">การเชื่อมต่อล้มเหลว</h3>
-            <p id="errorMessageDetails" class="text-sm text-gray-600 bg-red-50 p-3 rounded border border-red-100 mb-4">
-                ตรวจสอบ Firebase Config
-            </p>
-            <button onclick="document.getElementById('mainLoadingOverlay').classList.add('loading-hidden');" class="bg-gray-200 text-gray-800 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-300 transition">ปิดหน้าต่างนี้เพื่อใช้งาน (Offline)</button>
-        </div>
+    <div id="loadingOverlay">
+        <i class="fa-solid fa-spinner fa-spin text-4xl text-primary mb-3"></i>
+        <p class="font-bold text-gray-700">กำลังเชื่อมต่อระบบจองสนาม...</p>
+        <p id="loadingErrorText" class="text-red-500 text-sm mt-3 hidden text-center px-4"></p>
     </div>
 
     <!-- Header -->
@@ -99,7 +67,7 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
+    <!-- Main Content -->
     <main class="max-w-4xl mx-auto p-4">
 
         <!-- TAB 1: Booking -->
@@ -108,7 +76,6 @@
                 <div id="calendar"></div>
             </div>
 
-            <!-- Date Details Section -->
             <div id="dateDetailsSection" class="hidden">
                 <div class="flex justify-between items-center mb-3">
                     <h2 id="selectedDateTitle" class="text-lg font-bold text-gray-700">รายการวันที่...</h2>
@@ -116,11 +83,7 @@
                         <i class="fa-solid fa-plus"></i> เพิ่มรายการ
                     </button>
                 </div>
-                
-                <!-- Bookings List -->
-                <div id="bookingsList" class="space-y-3">
-                    <!-- Populated by JS -->
-                </div>
+                <div id="bookingsList" class="space-y-3"></div>
             </div>
         </section>
 
@@ -130,11 +93,10 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-chart-pie text-primary mr-2"></i> สรุปยอด (Dashboard)</h2>
                     <button id="btnPrintPdf" onclick="exportPDF()" class="hidden bg-gray-800 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-700 transition flex items-center gap-2">
-                        <i class="fa-solid fa-print"></i> Print PDF
+                        <i class="fa-solid fa-print"></i> PDF
                     </button>
                 </div>
 
-                <!-- Admin Month Filter -->
                 <div id="adminFilter" class="hidden mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <label class="block text-sm font-semibold text-gray-600 mb-1">เลือกเดือนที่ต้องการดู (ย้อนหลัง)</label>
                     <input type="month" id="monthFilter" class="w-full p-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary" onchange="renderDashboard()">
@@ -155,12 +117,8 @@
                     </div>
                 </div>
 
-                <!-- Chart -->
-                <div class="mb-6">
-                    <canvas id="revenueChart" height="200"></canvas>
-                </div>
+                <div class="mb-6"><canvas id="revenueChart" height="200"></canvas></div>
 
-                <!-- Summary Table -->
                 <h3 class="text-md font-bold text-gray-700 mb-2 border-b pb-2">รายการที่มีการใช้ไฟ (Paid Light Usage)</h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm text-left text-gray-500">
@@ -171,9 +129,7 @@
                                 <th class="px-3 py-2 text-right">ยอดเงิน / สลิป</th>
                             </tr>
                         </thead>
-                        <tbody id="dashboardTableBody">
-                            <!-- Populated by JS -->
-                        </tbody>
+                        <tbody id="dashboardTableBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -184,11 +140,8 @@
             <div class="bg-white rounded-xl shadow p-5 mb-4 space-y-6">
                 <h2 class="text-xl font-bold text-gray-700 border-b pb-2"><i class="fa-solid fa-circle-info text-primary mr-2"></i> ข้อมูล & กฎระเบียบ</h2>
                 
-                <!-- บัญชีโอนเงิน -->
                 <div class="bg-sky-50 p-4 rounded-lg border border-sky-100 relative overflow-hidden">
-                    <div class="absolute top-2 right-2 text-sky-200 opacity-30 text-6xl">
-                        <i class="fa-solid fa-building-columns"></i>
-                    </div>
+                    <div class="absolute top-2 right-2 text-sky-200 opacity-30 text-6xl"><i class="fa-solid fa-building-columns"></i></div>
                     <div class="relative z-10">
                         <h3 class="font-bold text-sky-900 mb-2 flex items-center">
                             <span class="bg-sky-500 text-white text-[10px] px-2 py-0.5 rounded-full mr-2">Krungthai</span>บัญชีโอนค่าไฟ
@@ -197,24 +150,22 @@
                         <p class="text-sm text-gray-700">ชื่อบัญชี: <strong>บัญชีนิติบุคคล</strong></p>
                         <div class="flex items-center gap-3 mt-3">
                             <p class="text-2xl font-bold text-sky-700 tracking-wider">663-1-87244-8</p>
-                            <button onclick="copyAccount()" class="bg-sky-200 text-sky-800 hover:bg-sky-300 px-3 py-1.5 rounded shadow-sm transition flex items-center gap-1 text-sm font-semibold" title="คัดลอกเลขบัญชี">
+                            <button onclick="copyAccount()" class="bg-sky-200 text-sky-800 hover:bg-sky-300 px-3 py-1.5 rounded shadow-sm transition flex items-center gap-1 text-sm font-semibold">
                                 <i class="fa-regular fa-copy"></i> คัดลอก
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- กฎระเบียบ -->
                 <div>
                     <h3 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-solid fa-clipboard-check text-primary mr-2"></i> กฎการจองสนาม (Booking Rules)</h3>
                     <ul class="list-disc pl-5 text-sm text-gray-600 space-y-2">
                         <li>สามารถจองสนามได้ล่วงหน้า <strong>1 สัปดาห์</strong> โดยแต่ละรอบจองได้สูงสุด <strong>1.5 ชั่วโมง</strong></li>
-                        <li>หากไม่สามารถมาเล่นได้ กรุณาแจ้งให้ทราบล่วงหน้า <strong>อย่างน้อย 1 ชั่วโมง</strong> เพื่อให้ผู้อื่นมีโอกาสจองแทน</li>
+                        <li>หากไม่สามารถมาเล่นได้ กรุณาแจ้งให้ทราบล่วงหน้า <strong>อย่างน้อย 1 ชั่วโมง</strong></li>
                         <li>สามารถจองสนามได้ต่อเมื่อมีผู้เล่น <strong>อย่างน้อยหนึ่งคนเป็นผู้อยู่อาศัย</strong> ในโครงการ</li>
                     </ul>
                 </div>
 
-                <!-- อัตราค่าไฟ -->
                 <div>
                     <h3 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-solid fa-bolt text-accent mr-2"></i> อัตราค่าบริการไฟแสงสว่าง</h3>
                     <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
@@ -230,21 +181,17 @@
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 w-full bg-white border-t flex justify-around items-center h-16 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-40">
         <button onclick="switchTab('booking')" id="nav-booking" class="nav-btn w-full h-full flex flex-col items-center justify-center text-primary font-semibold transition-colors">
-            <i class="fa-solid fa-calendar-check text-xl mb-1"></i>
-            <span class="text-[10px] uppercase">รับจอง (Booking)</span>
+            <i class="fa-solid fa-calendar-check text-xl mb-1"></i><span class="text-[10px] uppercase">รับจอง (Booking)</span>
         </button>
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
-            <i class="fa-solid fa-chart-simple text-xl mb-1"></i>
-            <span class="text-[10px] uppercase">สรุปยอด (Dashboard)</span>
+            <i class="fa-solid fa-chart-simple text-xl mb-1"></i><span class="text-[10px] uppercase">สรุปยอด (Dashboard)</span>
         </button>
         <button onclick="switchTab('info')" id="nav-info" class="nav-btn w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
-            <i class="fa-solid fa-circle-info text-xl mb-1"></i>
-            <span class="text-[10px] uppercase">กฎระเบียบ (Info)</span>
+            <i class="fa-solid fa-circle-info text-xl mb-1"></i><span class="text-[10px] uppercase">กฎระเบียบ (Info)</span>
         </button>
     </nav>
 
     <!-- Modals (Add Booking, Upload Meter, View Images, Login, Alert) -->
-    <!-- Modal: Add Booking -->
     <div id="modalBooking" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-primary p-4 text-white flex justify-between items-center shrink-0">
@@ -255,25 +202,25 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">วันที่ต้องการจอง (Date) *</label>
-                        <input type="date" id="inpDate" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition text-gray-700">
+                        <input type="date" id="inpDate" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">บ้านเลขที่ (House No.) *</label>
-                        <input type="text" id="inpHouseNo" placeholder="เช่น 123/45" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary transition">
+                        <input type="text" id="inpHouseNo" placeholder="เช่น 123/45" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">เวลาเริ่ม (Start) *</label>
-                            <input type="time" id="inpStartTime" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary transition">
+                            <input type="time" id="inpStartTime" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">เวลาสิ้นสุด (End) *</label>
-                            <input type="time" id="inpEndTime" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary transition">
+                            <input type="time" id="inpEndTime" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">หมายเหตุเพิ่มเติม (Note)</label>
-                        <input type="text" id="inpNote" placeholder="ระบุเพิ่มเติมถ้ามี..." class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary transition">
+                        <input type="text" id="inpNote" placeholder="ระบุเพิ่มเติมถ้ามี..." class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
                     </div>
                     <hr class="my-2 border-gray-200">
                     <div class="flex items-center justify-between bg-amber-50 p-3 rounded-lg border border-amber-100">
@@ -298,7 +245,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">อัปโหลดสลิปโอนเงิน (Transfer Slip) *</label>
-                            <input type="file" id="inpInitialSlip" accept="image/*" class="w-full text-sm text-gray-500 border p-1 rounded transition cursor-pointer">
+                            <input type="file" id="inpInitialSlip" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer">
                             <img id="previewInitialSlip" class="mt-2 h-24 object-contain hidden border rounded p-1 bg-white mx-auto">
                         </div>
                     </div>
@@ -311,7 +258,6 @@
         </div>
     </div>
 
-    <!-- Modal: Add Light Usage -->
     <div id="modalLight" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-full">
             <div class="bg-accent p-4 text-white flex justify-between items-center">
@@ -349,7 +295,6 @@
         </div>
     </div>
 
-    <!-- Modal: View Images -->
     <div id="modalViewImages" class="fixed inset-0 bg-black/80 z-[60] hidden flex flex-col items-center justify-center p-4">
         <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 transition"><i class="fa-solid fa-xmark"></i></button>
         <div class="w-full max-w-lg bg-white rounded-lg p-4">
@@ -364,7 +309,6 @@
         </div>
     </div>
 
-    <!-- Modal: Login Admin -->
     <div id="modalLogin" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
             <div class="bg-gray-800 p-4 text-white text-center">
@@ -389,7 +333,6 @@
         </div>
     </div>
 
-    <!-- Alert Custom -->
     <div id="customAlert" class="fixed inset-0 bg-black/40 z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-sm text-center transform scale-95 transition-transform duration-300" id="customAlertBox">
             <div id="alertIcon" class="text-4xl mb-3"></div>
@@ -399,22 +342,38 @@
         </div>
     </div>
 
-    <!-- Script ควบคุมแอป (เปลี่ยน let เป็น var เพื่อแก้ปัญหา Scope) -->
+    <!-- UI Scripts -->
     <script>
-        var selectedDate = new Date().toISOString().split('T')[0];
+        // ฟังก์ชันดึงเวลาเครื่อง (Local Time) ป้องกันวันที่เพี้ยน 
+        function getLocalISODate(d) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        var selectedDate = getLocalISODate(new Date()); // แก้จาก toISOString()
         var calendar = null;
         var chartInstance = null;
         var isAdmin = localStorage.getItem('isAdmin') === 'true'; 
 
-        // Fail-Safe: ปิดหน้าจอโหลดอัตโนมัติภายใน 5 วินาที
-        window.firebaseLoadTimeout = setTimeout(() => {
-            const overlay = document.getElementById('mainLoadingOverlay');
-            if (overlay && !overlay.classList.contains('loading-hidden')) {
-                document.getElementById('loadingSpinner').style.display = 'none';
-                document.getElementById('loadingError').style.display = 'flex';
-                document.getElementById('errorMessageDetails').innerHTML = "เชื่อมต่อฐานข้อมูลล่าช้า<br>กำลังเข้าสู่โหมดออฟไลน์ (อ่านได้อย่างเดียว)";
+        // ระบบป้องกันหน้าจอค้าง
+        window.hideLoader = function() {
+            const overlay = document.getElementById('loadingOverlay');
+            if(overlay) overlay.style.display = 'none';
+        };
+        window.showLoaderError = function(msg) {
+            const overlay = document.getElementById('loadingOverlay');
+            if(overlay) {
+                overlay.querySelector('i').className = 'fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-3';
+                const errEl = document.getElementById('loadingErrorText');
+                errEl.innerHTML = msg;
+                errEl.classList.remove('hidden');
             }
-        }, 5000);
+        };
+
+        // ตั้งเวลา 5 วินาที ถ้าต่อ Firebase ไม่สำเร็จ ให้บังคับปิดหน้าโหลด
+        setTimeout(window.hideLoader, 5000);
 
         window.initAppUI = function() {
             setupAdminUI();
@@ -536,11 +495,12 @@
             });
             window.calendar.render();
             
-            // ไฮไลท์วันที่ปัจจุบันตอนเปิดแอป
+            // สั่งไฮไลท์และวาดข้อมูลของวันนี้ทันทีที่เปิดแอป (แก้ Invalid Date)
             setTimeout(() => {
                 const todayEl = document.querySelector(`.fc-day[data-date="${window.selectedDate}"]`);
                 if(todayEl) todayEl.classList.add('bg-teal-50');
-            }, 100);
+                window.renderBookingsForDate(window.selectedDate);
+            }, 200);
         }
 
         window.refreshCalendarEvents = function() {
@@ -555,9 +515,10 @@
 
         window.renderBookingsForDate = function(dateStr) {
             document.getElementById('dateDetailsSection').classList.remove('hidden');
-            document.getElementById('selectedDateTitle').innerText = new Date(dateStr).toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const dateObj = new Date(dateStr);
+            document.getElementById('selectedDateTitle').innerText = dateObj.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
             const container = document.getElementById('bookingsList'); container.innerHTML = '';
-
             const dailyBookings = window.allBookings.filter(b => b.date === dateStr);
             dailyBookings.sort((a,b) => a.startTime.localeCompare(b.startTime));
 
@@ -651,7 +612,7 @@
 
         window.openBookingModal = function() {
             const di = document.getElementById('inpDate'); const t = new Date(); const m = new Date(); m.setDate(t.getDate() + 7);
-            di.min = t.toISOString().split('T')[0]; di.max = m.toISOString().split('T')[0]; di.value = window.selectedDate;
+            di.min = getLocalISODate(t); di.max = getLocalISODate(m); di.value = window.selectedDate; // แก้การใช้วันที่ให้ถูกต้อง
             const md = document.getElementById('modalBooking'); md.classList.remove('hidden'); md.querySelector('div').classList.add('modal-enter'); setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
         }
 
@@ -689,7 +650,7 @@
         window.closeAlert = function() { const box = document.getElementById('customAlertBox'); const el = document.getElementById('customAlert'); el.classList.add('opacity-0'); box.classList.add('scale-95'); setTimeout(() => { el.classList.add('hidden'); }, 300); }
     </script>
 
-    <!-- Firebase Scripts (ดึงข้อมูล) -->
+    <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -711,24 +672,24 @@
         window.allBookings = [];
 
         async function initFirebase() {
-            // โชว์แอปให้เห็นก่อนเลย ไม่ต้องรอต่อเน็ตเสร็จ
-            window.initAppUI();
+            window.initAppUI(); // สั่งให้วาดปฏิทินขึ้นมาก่อนเลย ไม่ต้องรอเน็ต
 
             try {
                 // เช็คว่าลืมใส่ Config หรือไม่
-                if (Object.keys(myNetlifyFirebaseConfig).length === 0) {
-                    throw new Error("Missing Firebase Configuration");
+                const finalConfig = (typeof __firebase_config !== 'undefined' && Object.keys(myNetlifyFirebaseConfig).length === 0) ? JSON.parse(__firebase_config) : myNetlifyFirebaseConfig;
+                
+                if (Object.keys(finalConfig).length === 0) {
+                    window.showLoaderError("ยังไม่ได้ใส่โค้ด Firebase Config<br>กรุณานำโค้ดมาใส่ในไฟล์บรรทัดที่ 325");
+                    return;
                 }
 
-                const app = initializeApp(myNetlifyFirebaseConfig);
+                const app = initializeApp(finalConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
                 await signInAnonymously(auth);
                 
-                // ต่อสำเร็จ! ปิดหน้าโหลด และเคลียร์ Timeout
-                clearTimeout(window.firebaseLoadTimeout);
-                document.getElementById('mainLoadingOverlay').classList.add('loading-hidden');
+                window.hideLoader(); // เชื่อมต่อสำเร็จ ปิดหน้าจอโหลด!
                 
                 onSnapshot(collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings'), (snapshot) => {
                     window.allBookings = [];
@@ -740,7 +701,6 @@
                     
                     window.refreshCalendarEvents();
                     
-                    // เรียกวาดข้อมูลลงจอทันทีที่โหลดเสร็จ
                     if(document.getElementById('tab-booking').classList.contains('active')) {
                         window.renderBookingsForDate(window.selectedDate);
                     } else if(document.getElementById('tab-dashboard').classList.contains('active')) {
@@ -749,21 +709,8 @@
                 });
 
             } catch (error) {
-                console.error("Firebase Initialization Error:", error);
-                clearTimeout(window.firebaseLoadTimeout);
-                
-                // ถ้ามี Error ให้โชว์กล่องแดง
-                document.getElementById('loadingSpinner').style.display = 'none';
-                document.getElementById('loadingError').style.display = 'flex';
-                
-                const errorDetails = document.getElementById('errorMessageDetails');
-                if (error.message === "Missing Firebase Configuration") {
-                    errorDetails.innerHTML = "ลืมใส่โค้ด Firebase Config<br>กรุณานำโค้ดมาใส่ในไฟล์ index.html บรรทัดที่ 299";
-                } else if (error.code === 'auth/admin-restricted-operation' || error.code === 'auth/operation-not-allowed') {
-                    errorDetails.innerHTML = `ลืมเปิดสิทธิ์ใช้งาน<br><br><b>วิธีแก้:</b> ไปที่ Firebase -> Authentication -> Sign-in method -> เปิด <b>"Anonymous"</b>`;
-                } else {
-                     errorDetails.innerHTML = `สาเหตุ: ${error.message}`;
-                }
+                console.error("Firebase Error:", error);
+                window.showLoaderError(`เชื่อมต่อฐานข้อมูลล้มเหลว<br>สาเหตุ: ${error.message}`);
             }
         }
 
@@ -782,7 +729,6 @@
             } catch (e) { console.error(e); return false; }
         };
 
-        // เริ่มสตาร์ทระบบ
         initFirebase();
     </script>
 </body>
