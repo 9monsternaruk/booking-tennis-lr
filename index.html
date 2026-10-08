@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -55,43 +54,26 @@
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms, transform 200ms; }
 
         /* Toggle Switch */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #0d9488;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #0d9488;
-        }
-
-        /* Overlay Fullscreen สำหรับหน้าโหลดเข้าแอป */
-        #mainLoadingOverlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(255, 255, 255, 0.95);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+        .toggle-checkbox:checked { right: 0; border-color: #0d9488; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #0d9488; }
     </style>
 </head>
 <body class="text-gray-800 pb-20 relative">
 
-    <!-- Loading Overlay ตอนเข้าแอป -->
-    <div id="mainLoadingOverlay">
-        <div id="loadingSpinner" class="flex flex-col items-center">
+    <!-- Loading Overlay ตอนเข้าแอป (แก้ไขระบบแสดงผลแบบ Inline CSS บังคับซ่อนเด็ดขาด) -->
+    <div id="mainLoadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div id="loadingSpinner" style="display: flex; flex-direction: column; align-items: center;">
             <i class="fa-solid fa-spinner fa-spin text-4xl text-primary mb-3"></i>
             <p class="font-bold text-gray-700">กำลังเชื่อมต่อระบบจองสนาม...</p>
         </div>
         <!-- ข้อความ Error (ซ่อนไว้ก่อน) -->
-        <div id="loadingError" class="hidden flex flex-col items-center max-w-sm text-center px-4">
+        <div id="loadingError" style="display: none; flex-direction: column; align-items: center; text-align: center;" class="max-w-sm px-4">
             <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-3"></i>
             <h3 class="font-bold text-red-600 text-lg mb-1">การเชื่อมต่อล้มเหลว</h3>
-            <p id="errorMessageDetails" class="text-sm text-gray-600 bg-red-50 p-3 rounded border border-red-100">
+            <p id="errorMessageDetails" class="text-sm text-gray-600 bg-red-50 p-3 rounded border border-red-100 mb-4">
                 พบปัญหาบางอย่าง ไม่สามารถเชื่อมต่อฐานข้อมูลได้
             </p>
-            <button onclick="document.getElementById('mainLoadingOverlay').classList.add('hidden');" class="mt-4 bg-gray-200 px-4 py-2 rounded text-sm hover:bg-gray-300">ปิดหน้าต่างนี้เพื่อดู UI (แบบออฟไลน์)</button>
+            <button onclick="document.getElementById('mainLoadingOverlay').style.display='none';" class="bg-gray-200 text-gray-800 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-300 transition">ปิดหน้าต่างนี้เข้าแอป (Offline)</button>
         </div>
     </div>
 
@@ -237,48 +219,6 @@
                         <li class="text-red-500 font-semibold mt-2 list-none text-xs bg-red-50 p-2 rounded inline-block border border-red-100">* กรุณาโอนเงินและแนบสลิปผ่านระบบก่อน รปภ. ทำการเปิดสวิตช์ไฟ</li>
                     </ul>
                 </div>
-
-                <!-- ติดต่อฉุกเฉิน -->
-                <div>
-                    <h3 class="font-bold text-gray-800 mb-3 flex items-center border-b pb-2"><i class="fa-solid fa-address-book text-primary mr-2"></i> ติดต่อ เจ้าหน้าที่นิติบุคคลฯ</h3>
-                    <div class="space-y-3">
-                        <a href="tel:0930391222" class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border hover:bg-gray-100 transition group">
-                            <div>
-                                <p class="font-semibold text-gray-800 group-hover:text-primary transition">นิติบุคคล</p>
-                                <p class="text-sm text-gray-500">093-0391222</p>
-                            </div>
-                            <i class="fa-solid fa-phone text-primary bg-teal-50 p-2.5 rounded-full border border-teal-100 group-hover:bg-primary group-hover:text-white transition"></i>
-                        </a>
-                        <a href="tel:0960628562" class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border hover:bg-gray-100 transition group">
-                            <div>
-                                <p class="font-semibold text-gray-800 group-hover:text-primary transition">ทราย (เจ้าหน้าที่)</p>
-                                <p class="text-sm text-gray-500">096-0628562</p>
-                            </div>
-                            <i class="fa-solid fa-phone text-primary bg-teal-50 p-2.5 rounded-full border border-teal-100 group-hover:bg-primary group-hover:text-white transition"></i>
-                        </a>
-                        <a href="tel:0818822646" class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border hover:bg-gray-100 transition group">
-                            <div>
-                                <p class="font-semibold text-gray-800 group-hover:text-primary transition">คุณป้าศรีทร</p>
-                                <p class="text-sm text-gray-500">081-8822646</p>
-                            </div>
-                            <i class="fa-solid fa-phone text-primary bg-teal-50 p-2.5 rounded-full border border-teal-100 group-hover:bg-primary group-hover:text-white transition"></i>
-                        </a>
-                        
-                        <!-- โซน รปภ -->
-                        <div class="grid grid-cols-2 gap-2 pt-2">
-                            <a href="tel:0659509106" class="flex flex-col items-center justify-center bg-cyan-50 p-3 rounded-lg border border-cyan-100 hover:bg-cyan-100 transition text-center group">
-                                <i class="fa-solid fa-shield-halved text-cyan-600 mb-1 text-lg group-hover:scale-110 transition-transform"></i>
-                                <p class="font-semibold text-cyan-800 text-sm">ป้อม 1 รปภ.</p>
-                                <p class="text-xs text-cyan-700 mt-1">065-9509106</p>
-                            </a>
-                            <a href="tel:0800695186" class="flex flex-col items-center justify-center bg-cyan-50 p-3 rounded-lg border border-cyan-100 hover:bg-cyan-100 transition text-center group">
-                                <i class="fa-solid fa-shield-halved text-cyan-600 mb-1 text-lg group-hover:scale-110 transition-transform"></i>
-                                <p class="font-semibold text-cyan-800 text-sm">ป้อม 2 รปภ.</p>
-                                <p class="text-xs text-cyan-700 mt-1">080-0695186</p>
-                            </a>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
     </main>
@@ -299,7 +239,7 @@
         </button>
     </nav>
 
-    <!-- Modals (Add Booking, Upload Light, View Images, Login) -->
+    <!-- Modals -->
     <!-- Modal: Add Booking -->
     <div id="modalBooking" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
@@ -307,20 +247,16 @@
                 <h3 class="font-bold">บันทึกการจองสนาม (New Booking)</h3>
                 <button onclick="closeModals()" class="text-white hover:text-gray-200 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            
             <div class="p-5 overflow-y-auto grow">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">วันที่ต้องการจอง (Date) *</label>
                         <input type="date" id="inpDate" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition text-gray-700">
-                        <p class="text-[10px] text-gray-500 mt-1">* จองล่วงหน้าได้ไม่เกิน 7 วัน</p>
                     </div>
-
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">บ้านเลขที่ (House No.) *</label>
-                        <input type="text" id="inpHouseNo" placeholder="เช่น 123/45" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition">
+                        <input type="text" id="inpHouseNo" placeholder="เช่น 123/45" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary transition">
                     </div>
-                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">เวลาเริ่ม (Start) *</label>
@@ -331,25 +267,21 @@
                             <input type="time" id="inpEndTime" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary transition">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">หมายเหตุเพิ่มเติม (Note)</label>
                         <input type="text" id="inpNote" placeholder="ระบุเพิ่มเติมถ้ามี..." class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary transition">
                     </div>
-
                     <hr class="my-2 border-gray-200">
-
                     <div class="flex items-center justify-between bg-amber-50 p-3 rounded-lg border border-amber-100">
                         <div>
                             <p class="font-semibold text-gray-800 text-sm"><i class="fa-solid fa-lightbulb text-accent mr-1"></i> ต้องการใช้ไฟแสงสว่าง</p>
                             <p class="text-xs text-gray-500">จองหลัง 18:00 น. หรือช่วงค่ำ</p>
                         </div>
                         <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                            <input type="checkbox" name="toggle" id="toggleNeedLight" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="toggleLightUploadSection()"/>
+                            <input type="checkbox" id="toggleNeedLight" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="toggleLightUploadSection()"/>
                             <label for="toggleNeedLight" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                         </div>
                     </div>
-
                     <div id="lightUploadSection" class="hidden bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">จำนวนเงินค่าไฟที่โอน (บาท) *</label>
@@ -362,14 +294,12 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">อัปโหลดสลิปโอนเงิน (Transfer Slip) *</label>
-                            <input type="file" id="inpInitialSlip" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border p-1 rounded transition cursor-pointer">
+                            <input type="file" id="inpInitialSlip" accept="image/*" class="w-full text-sm text-gray-500 border p-1 rounded transition cursor-pointer">
                             <img id="previewInitialSlip" class="mt-2 h-24 object-contain hidden border rounded p-1 bg-white mx-auto">
                         </div>
-                        <p class="text-[10px] text-red-500">* กรุณาโอนเงินและแนบสลิปเลย รปภ.จะตรวจสอบก่อนเปิดไฟให้</p>
                     </div>
                 </div>
             </div>
-            
             <div class="p-4 border-t bg-gray-50 flex gap-2 shrink-0">
                 <button onclick="closeModals()" class="w-1/3 bg-gray-200 text-gray-800 p-2 rounded font-semibold hover:bg-gray-300 transition">ยกเลิก</button>
                 <button onclick="saveBooking()" id="btnSaveBooking" class="w-2/3 bg-primary text-white p-2 rounded font-semibold hover:bg-secondary transition shadow-sm">บันทึกการจอง</button>
@@ -389,24 +319,20 @@
                     <p class="font-semibold">บ้านเลขที่: <span id="lightHouseNo"></span></p>
                     <p>เวลาที่จอง: <span id="lightTime"></span></p>
                 </div>
-                
                 <div class="space-y-4">
                     <div id="delayedSlipSection">
                         <label class="block text-sm font-semibold text-gray-700 mb-1">จำนวนเงินค่าไฟที่โอน (บาท)</label>
                         <select id="inpAmount" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-accent">
                             <option value="100">100 บาท (ครึ่งชั่วโมง)</option>
                             <option value="200" selected>200 บาท (1 ชั่วโมง)</option>
-                            <option value="300">300 บาท (1.5 ชั่วโมง)</option>
-                            <option value="400">400 บาท (2 ชั่วโมง)</option>
                         </select>
                         <label class="block text-sm font-semibold text-gray-700 mt-3 mb-1">อัปโหลดสลิปโอนเงิน (หากยังไม่แนบ)</label>
-                        <input type="file" id="inpSlipImg" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border p-1 rounded transition cursor-pointer">
+                        <input type="file" id="inpSlipImg" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer">
                         <img id="previewSlip" class="mt-2 h-32 object-contain hidden border rounded p-1 bg-gray-50">
                     </div>
-
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">อัปโหลดภาพมิเตอร์ไฟ (ก่อนเปิดสวิตช์) *</label>
-                        <input type="file" id="inpMeterImg" accept="image/*" capture="environment" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 border p-1 rounded transition cursor-pointer">
+                        <input type="file" id="inpMeterImg" accept="image/*" capture="environment" class="w-full text-sm border p-1 rounded transition cursor-pointer">
                         <img id="previewMeter" class="mt-2 h-32 object-contain hidden border rounded p-1 bg-gray-50">
                     </div>
                 </div>
@@ -426,13 +352,10 @@
             <h4 class="text-center font-bold mb-2 text-gray-800">สลิปโอนเงิน (Slip)</h4>
             <a id="linkImgSlip" href="#" target="_blank" class="block mb-4 text-center group">
                 <img id="viewImgSlip" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded group-hover:opacity-80 transition">
-                <span class="text-xs text-blue-500 underline mt-1 block group-hover:text-blue-700">คลิกดูภาพขนาดเต็ม</span>
             </a>
-            
             <h4 class="text-center font-bold mb-2 text-gray-800">มิเตอร์ไฟ (Meter)</h4>
             <a id="linkImgMeter" href="#" target="_blank" class="block text-center group">
                 <img id="viewImgMeter" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded group-hover:opacity-80 transition">
-                <span class="text-xs text-blue-500 underline mt-1 block group-hover:text-blue-700">คลิกดูภาพขนาดเต็ม</span>
             </a>
         </div>
     </div>
@@ -443,27 +366,26 @@
             <div class="bg-gray-800 p-4 text-white text-center">
                 <i class="fa-solid fa-user-shield text-3xl mb-2 text-accent"></i>
                 <h3 class="font-bold">เข้าสู่ระบบสำหรับนิติบุคคล</h3>
-                <p class="text-xs text-gray-300">Juristic Personnel Login</p>
             </div>
             <div class="p-5 space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
-                    <input type="text" id="inpUser" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-gray-800 transition">
+                    <input type="text" id="inpUser" class="w-full border border-gray-300 p-2 rounded focus:outline-none transition">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                    <input type="password" id="inpPass" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-gray-800 transition">
+                    <input type="password" id="inpPass" class="w-full border border-gray-300 p-2 rounded focus:outline-none transition">
                 </div>
                 <p id="loginError" class="text-xs text-red-500 hidden text-center font-semibold">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
             </div>
             <div class="p-4 border-t bg-gray-50 flex gap-2">
-                <button onclick="closeModals()" class="w-1/2 bg-gray-200 text-gray-800 p-2 rounded font-semibold hover:bg-gray-300 transition">ปิด</button>
-                <button onclick="performLogin()" class="w-1/2 bg-gray-800 text-white p-2 rounded font-semibold hover:bg-gray-900 transition shadow-sm">Login</button>
+                <button onclick="closeModals()" class="w-1/2 bg-gray-200 text-gray-800 p-2 rounded font-semibold transition">ปิด</button>
+                <button onclick="performLogin()" class="w-1/2 bg-gray-800 text-white p-2 rounded font-semibold transition">Login</button>
             </div>
         </div>
     </div>
 
-    <!-- Message Box / Alert Replacement -->
+    <!-- Alert Custom -->
     <div id="customAlert" class="fixed inset-0 bg-black/40 z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-sm text-center transform scale-95 transition-transform duration-300" id="customAlertBox">
             <div id="alertIcon" class="text-4xl mb-3"></div>
@@ -472,6 +394,18 @@
             <button onclick="closeAlert()" class="bg-primary text-white px-6 py-2 rounded-lg font-semibold w-full hover:bg-secondary transition shadow-sm">ตกลง (OK)</button>
         </div>
     </div>
+
+    <!-- Script สำหรับ Fail-Safe ป้องกันหน้าจอค้างเด็ดขาด -->
+    <script>
+        // ตั้งเวลา 5 วินาที ถ้าโหลดระบบไม่สำเร็จ ให้บังคับปิดหน้าจอโหลดทันที
+        window.firebaseLoadTimeout = setTimeout(() => {
+            document.getElementById('mainLoadingOverlay').style.display = 'none';
+            if (!window.firebaseInitialized) {
+                if(typeof window.initAppUI === 'function') window.initAppUI();
+                window.showAlert('แจ้งเตือน', 'การเชื่อมต่อฐานข้อมูลล่าช้าหรือผิดพลาด คุณกำลังเข้าสู่โหมดออฟไลน์', 'warning');
+            }
+        }, 5000);
+    </script>
 
     <!-- Firebase Scripts -->
     <script type="module">
@@ -482,106 +416,99 @@
         // 🚨🚨🚨 วาง Config ของคุณที่นี่ (สำคัญมาก: ห้ามปล่อยว่าง!) 🚨🚨🚨
         const myNetlifyFirebaseConfig = {
             apiKey: "AIzaSyCXuj7Pl1JnBn2Y7BtyzkHHQm4MQH-isrM",
-            authDomain: "time-attendance-69699.firebaseapp.com",
-            projectId: "time-attendance-69699",
-            storageBucket: "time-attendance-69699.firebasestorage.app",
-            messagingSenderId: "793986547170",
-            appId: "1:793986547170:web:337bfe602d9b3e32f34dbb"
+  authDomain: "time-attendance-69699.firebaseapp.com",
+  projectId: "time-attendance-69699",
+  storageBucket: "time-attendance-69699.firebasestorage.app",
+  messagingSenderId: "793986547170",
+  appId: "1:793986547170:web:337bfe602d9b3e32f34dbb"
         };
         // 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
         
         let db, auth;
-        const COURT_APP_ID = 'laddarom-court-app'; // ใช้ชื่อโฟลเดอร์แอปใหม่ แยกจากแอปเวลาทำงาน
+        const COURT_APP_ID = 'laddarom-court-app'; 
         window.allBookings = [];
 
         async function initFirebase() {
-            // เรียกฟังก์ชันวาดหน้าจอก่อนเลย (เผื่อกรณี Config ผิด จะได้ยังเห็น UI บ้าง)
-            window.initAppUI();
+            // เรียกวาดปฏิทินทันที เพื่อไม่ให้หน้าจอว่างเปล่า
+            if(typeof window.initAppUI === 'function') window.initAppUI();
             
             try {
-                // บังคับใช้ myNetlifyFirebaseConfig ไปเลย เพื่อตัดปัญหาเรื่อง Environment Variables ตอน Test
+                // เช็คว่ามี Config หรือยัง
+                if (Object.keys(myNetlifyFirebaseConfig).length === 0) {
+                    throw new Error("ยังไม่ได้ใส่โค้ด Firebase Config");
+                }
+
                 const app = initializeApp(myNetlifyFirebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // พยายามเข้าระบบแบบไม่ระบุตัวตน
                 await signInAnonymously(auth);
                 
-                // ถ้ารอดมาถึงตรงนี้ แสดงว่าเชื่อมต่อสำเร็จ! ซ่อน Overlay ทิ้งไปเลย
-                document.getElementById('mainLoadingOverlay').classList.add('hidden');
+                // ถ้ารอดมาถึงตรงนี้ แสดงว่าเชื่อมต่อสำเร็จสมบูรณ์!
+                clearTimeout(window.firebaseLoadTimeout);
+                window.firebaseInitialized = true;
                 
-                // Real-time Sync ดึงข้อมูลตลอดเวลาแบบไม่ต้องกดรีเฟรช
+                // ใช้คำสั่งสไตล์เพื่อบังคับซ่อน (ป้องกันบั๊ก CSS ชนกัน)
+                document.getElementById('mainLoadingOverlay').style.display = 'none';
+                
                 onSnapshot(collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings'), (snapshot) => {
                     window.allBookings = [];
                     snapshot.forEach(doc => { 
                         let data = doc.data();
-                        data.id = doc.id; // ใช้ document ID เป็น Booking ID
+                        data.id = doc.id; 
                         window.allBookings.push(data); 
                     });
                     
-                    window.refreshCalendarEvents();
+                    if(typeof window.refreshCalendarEvents === 'function') window.refreshCalendarEvents();
                     if(document.getElementById('tab-booking').classList.contains('active')) {
-                        window.renderBookingsForDate(window.selectedDate);
+                        if(typeof window.renderBookingsForDate === 'function') window.renderBookingsForDate(window.selectedDate);
                     } else if(document.getElementById('tab-dashboard').classList.contains('active')) {
-                        window.renderDashboard();
+                        if(typeof window.renderDashboard === 'function') window.renderDashboard();
                     }
                 });
 
             } catch (error) {
                 console.error("Firebase Initialization Error:", error);
+                clearTimeout(window.firebaseLoadTimeout);
                 
-                // ซ่อน Spinner และโชว์กล่อง Error สีแดงแทน พร้อมบอกสาเหตุเชิงลึก
-                document.getElementById('loadingSpinner').classList.add('hidden');
-                const errorBox = document.getElementById('loadingError');
-                errorBox.classList.remove('hidden');
+                // โชว์กล่อง Error แบบชัดเจน
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('loadingError').style.display = 'flex';
                 
                 const errorDetails = document.getElementById('errorMessageDetails');
-                
-                // ดักจับ Error ที่เจอบ่อย
                 if (error.code === 'auth/admin-restricted-operation' || error.code === 'auth/operation-not-allowed') {
-                    errorDetails.innerHTML = `เชื่อมต่อสำเร็จ แต่ติดสิทธิ์การเข้าถึง<br><br><b>วิธีแก้:</b> ไปที่ Firebase Console -> เลือก Authentication -> เลือกเมนู Sign-in method -> กดเปิดใช้งานปุ่ม <b>"Anonymous (ไม่ระบุตัวตน)"</b>`;
-                } else if (error.message && error.message.includes("API key not valid")) {
-                     errorDetails.innerHTML = `API Key ใน Config ไม่ถูกต้อง กรุณาตรวจสอบการก๊อปปี้โค้ดอีกครั้ง`;
+                    errorDetails.innerHTML = `ลืมเปิดสิทธิ์ใช้งาน<br><br><b>วิธีแก้:</b> ไปที่ Firebase -> Authentication -> Sign-in method -> กดเปิด <b>"Anonymous (ไม่ระบุตัวตน)"</b>`;
                 } else {
-                     errorDetails.innerHTML = `ไม่สามารถเชื่อมต่อฐานข้อมูลได้<br>Error: ${error.message}`;
+                     errorDetails.innerHTML = `สาเหตุ: ${error.message}`;
                 }
             }
         }
 
-        // Export functions to global scope for UI buttons to access
         window.cloudSaveBooking = async function(bookingData) {
             try {
-                if(!db) throw new Error("Database not connected");
-                const docId = `B_${Date.now()}_${bookingData.houseNo.replace('/','-')}`; // สร้าง ID สุ่มจากเวลา
+                const docId = `B_${Date.now()}_${bookingData.houseNo.replace('/','-')}`; 
                 await setDoc(doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings', docId), bookingData);
                 return true;
-            } catch (e) { 
-                console.error("Error saving booking:", e); 
-                window.showAlert('การบันทึกล้มเหลว', 'คุณยังไม่ได้เชื่อมต่อฐานข้อมูล หรือติดสิทธิ์การเขียน', 'error');
-                return false; 
-            }
+            } catch (e) { console.error(e); return false; }
         };
 
         window.cloudUpdateLight = async function(bookingId, updateData) {
             try {
-                if(!db) throw new Error("Database not connected");
                 await updateDoc(doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings', bookingId), updateData);
                 return true;
             } catch (e) { console.error(e); return false; }
         };
 
-        // เริ่มต้นเชื่อมต่อฐานข้อมูล
         initFirebase();
     </script>
 
-    <!-- App UI & Logic Scripts (ส่วนแสดงผลหน้าจอ) -->
+    <!-- App Logic Scripts -->
     <script>
         let selectedDate = new Date().toISOString().split('T')[0];
         let calendar;
         let chartInstance = null;
         let isAdmin = localStorage.getItem('isAdmin') === 'true'; 
 
-        // ฟังก์ชันนี้จะถูกเรียกจาก Firebase Module
         window.initAppUI = function() {
             setupAdminUI();
             initCalendar();
@@ -620,28 +547,21 @@
                 };
 
                 const success = await window.cloudSaveBooking(bookingData);
-                
                 if (success) {
-                    closeModals();
-                    showAlert('สำเร็จ', 'บันทึกการจองเรียบร้อยแล้ว', 'success');
-                    
+                    closeModals(); showAlert('สำเร็จ', 'บันทึกการจองเรียบร้อยแล้ว', 'success');
                     document.getElementById('inpHouseNo').value = ''; document.getElementById('inpStartTime').value = '';
                     document.getElementById('inpEndTime').value = ''; document.getElementById('inpNote').value = '';
                     document.getElementById('toggleNeedLight').checked = false; toggleLightUploadSection();
                     document.getElementById('inpInitialSlip').value = ''; document.getElementById('previewInitialSlip').classList.add('hidden');
-
-                    selectedDate = bookDate;
-                    if(calendar) calendar.gotoDate(bookDate);
-                }
-            } catch (error) {
-                showAlert('ผิดพลาด', 'ไม่สามารถบันทึกได้', 'error');
-            } finally { btn.innerHTML = 'บันทึกการจอง'; btn.disabled = false; }
+                    selectedDate = bookDate; if(calendar) calendar.gotoDate(bookDate);
+                } else throw new Error();
+            } catch (error) { showAlert('ผิดพลาด', 'ไม่สามารถบันทึกได้ กรุณาเชื่อมต่ออินเทอร์เน็ต', 'error'); } 
+            finally { btn.innerHTML = 'บันทึกการจอง'; btn.disabled = false; }
         }
 
         function compressImage(file, callback) {
             if(!file) { callback(""); return; }
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
+            const reader = new FileReader(); reader.readAsDataURL(file);
             reader.onload = event => {
                 const img = new Image(); img.src = event.target.result;
                 img.onload = () => {
@@ -682,11 +602,7 @@
                 const meterBase64 = await new Promise(r => compressImage(meterFile, r));
 
                 const updateData = { meterImg: meterBase64 };
-                if (slipBase64) {
-                    updateData.slipImg = slipBase64;
-                    updateData.amountPaid = amount;
-                    updateData.isLightUsed = true;
-                }
+                if (slipBase64) { updateData.slipImg = slipBase64; updateData.amountPaid = amount; updateData.isLightUsed = true; }
 
                 const success = await window.cloudUpdateLight(bookingId, updateData);
                 if (success) {
@@ -699,9 +615,7 @@
         }
 
         function initCalendar() {
-            // ป้องกันการวาดปฏิทินซ้ำถ้ามีอยู่แล้ว
-            if(calendar) return; 
-            
+            if(calendar) return;
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: 'dayGridMonth', height: 'auto', headerToolbar: { left: 'prev', center: 'title', right: 'next' },
                 locale: 'th', selectable: true,
@@ -774,7 +688,6 @@
             else {
                 paidBookings.sort((a,b) => b.date.localeCompare(a.date)).forEach(b => {
                     const [y, m, d] = b.date.split('-');
-                    // อัปเดตตารางบัญชี มีปุ่มดูสลิป
                     tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="px-3 py-3">${d}/${m}</td><td class="px-3 py-3 font-medium">${b.houseNo}</td><td class="px-3 py-3 text-right"><span class="text-green-600 font-bold block mb-1">฿${b.amountPaid}</span><button onclick="openViewImages('${b.id}')" class="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded shadow-sm w-full font-semibold hover:bg-blue-100"><i class="fa-solid fa-image"></i> ดูสลิป</button></td></tr>`;
                 });
             }
@@ -845,7 +758,7 @@
         }
 
         window.openLoginModal = function() { document.getElementById('inpUser').value = ''; document.getElementById('inpPass').value = ''; document.getElementById('loginError').classList.add('hidden'); document.getElementById('modalLogin').classList.remove('hidden'); }
-        window.closeModals = function() { document.querySelectorAll('.fixed.inset-0').forEach(el => { if(el.id !== 'customAlert' && el.id !== 'mainLoadingOverlay') el.classList.add('hidden'); }); }
+        window.closeModals = function() { document.querySelectorAll('.fixed.inset-0').forEach(el => { if(el.id !== 'customAlert') el.classList.add('hidden'); }); }
         window.closeImageModal = function() { document.getElementById('modalViewImages').classList.add('hidden'); }
 
         window.copyAccount = function() {
