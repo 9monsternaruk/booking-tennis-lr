@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -22,7 +21,11 @@
         body { font-family: 'Inter', 'Sarabun', sans-serif; background-color: #f3f4f6; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .fc-toolbar-title { font-size: 1.25rem !important; font-weight: 600 !important; }
+        
+        /* ปรับขนาดปฏิทินให้เล็กลง 10% */
+        #calendar { font-size: 0.9rem; }
+        .fc-toolbar-title { font-size: 1.15rem !important; font-weight: 600 !important; }
+        
         .fc-button-primary { background-color: #0d9488 !important; border-color: #0d9488 !important; }
         .fc-daygrid-day-number { color: #374151; font-weight: 500; }
         .fc .fc-daygrid-day.fc-day-today { background-color: #e0f2fe; }
@@ -352,12 +355,12 @@
             return `${year}-${month}-${day}`;
         }
 
-        var selectedDate = getLocalISODate(new Date()); // แก้จาก toISOString()
+        var selectedDate = getLocalISODate(new Date()); 
         var calendar = null;
         var chartInstance = null;
         var isAdmin = localStorage.getItem('isAdmin') === 'true'; 
 
-        // ระบบป้องกันหน้าจอค้าง
+        // ระบบป้องกันหน้าจอค้าง (ปิดอัตโนมัติภายใน 5 วินาที)
         window.hideLoader = function() {
             const overlay = document.getElementById('loadingOverlay');
             if(overlay) overlay.style.display = 'none';
@@ -372,7 +375,6 @@
             }
         };
 
-        // ตั้งเวลา 5 วินาที ถ้าต่อ Firebase ไม่สำเร็จ ให้บังคับปิดหน้าโหลด
         setTimeout(window.hideLoader, 5000);
 
         window.initAppUI = function() {
@@ -483,8 +485,17 @@
         function initCalendar() {
             if(window.calendar) return;
             window.calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                initialView: 'dayGridMonth', height: 'auto', headerToolbar: { left: 'prev', center: 'title', right: 'next' },
-                locale: 'th', selectable: true,
+                initialView: 'dayGridMonth', 
+                height: 'auto',
+                aspectRatio: 1.45, // ทำให้เซลล์เตี้ยลงเล็กน้อย
+                headerToolbar: { left: 'prev', center: 'title', right: 'next' },
+                locale: 'th', 
+                selectable: true,
+                dayHeaderContent: function(arg) {
+                    // บังคับเปลี่ยนเฉพาะหัวตารางให้เป็นภาษาอังกฤษแบบย่อ (Sun, Mon, Tue...)
+                    const enDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    return enDays[arg.date.getDay()];
+                },
                 dateClick: function(info) {
                     window.selectedDate = info.dateStr;
                     document.querySelectorAll('.fc-day').forEach(el => el.classList.remove('bg-teal-50'));
@@ -495,7 +506,7 @@
             });
             window.calendar.render();
             
-            // สั่งไฮไลท์และวาดข้อมูลของวันนี้ทันทีที่เปิดแอป (แก้ Invalid Date)
+            // ไฮไลท์และวาดข้อมูลของวันนี้ทันทีที่เปิดแอป
             setTimeout(() => {
                 const todayEl = document.querySelector(`.fc-day[data-date="${window.selectedDate}"]`);
                 if(todayEl) todayEl.classList.add('bg-teal-50');
@@ -612,7 +623,7 @@
 
         window.openBookingModal = function() {
             const di = document.getElementById('inpDate'); const t = new Date(); const m = new Date(); m.setDate(t.getDate() + 7);
-            di.min = getLocalISODate(t); di.max = getLocalISODate(m); di.value = window.selectedDate; // แก้การใช้วันที่ให้ถูกต้อง
+            di.min = getLocalISODate(t); di.max = getLocalISODate(m); di.value = window.selectedDate;
             const md = document.getElementById('modalBooking'); md.classList.remove('hidden'); md.querySelector('div').classList.add('modal-enter'); setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
         }
 
@@ -656,7 +667,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🚨🚨🚨 วาง Config ของคุณที่นี่ (ห้ามปล่อยว่าง!) 🚨🚨🚨
+        // 🚨🚨🚨 วาง Config ของคุณที่นี่ (สำคัญมาก: ห้ามปล่อยว่าง!) 🚨🚨🚨
         const myNetlifyFirebaseConfig = {
             apiKey: "AIzaSyCXuj7Pl1JnBn2Y7BtyzkHHQm4MQH-isrM",
   authDomain: "time-attendance-69699.firebaseapp.com",
@@ -672,14 +683,13 @@
         window.allBookings = [];
 
         async function initFirebase() {
-            window.initAppUI(); // สั่งให้วาดปฏิทินขึ้นมาก่อนเลย ไม่ต้องรอเน็ต
+            window.initAppUI(); 
 
             try {
-                // เช็คว่าลืมใส่ Config หรือไม่
                 const finalConfig = (typeof __firebase_config !== 'undefined' && Object.keys(myNetlifyFirebaseConfig).length === 0) ? JSON.parse(__firebase_config) : myNetlifyFirebaseConfig;
                 
                 if (Object.keys(finalConfig).length === 0) {
-                    window.showLoaderError("ยังไม่ได้ใส่โค้ด Firebase Config<br>กรุณานำโค้ดมาใส่ในไฟล์บรรทัดที่ 325");
+                    window.showLoaderError("กรุณาใส่ Firebase Config ในไฟล์โค้ด");
                     return;
                 }
 
@@ -689,7 +699,7 @@
                 
                 await signInAnonymously(auth);
                 
-                window.hideLoader(); // เชื่อมต่อสำเร็จ ปิดหน้าจอโหลด!
+                window.hideLoader(); 
                 
                 onSnapshot(collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings'), (snapshot) => {
                     window.allBookings = [];
@@ -710,7 +720,7 @@
 
             } catch (error) {
                 console.error("Firebase Error:", error);
-                window.showLoaderError(`เชื่อมต่อฐานข้อมูลล้มเหลว<br>สาเหตุ: ${error.message}`);
+                window.showLoaderError(`เชื่อมต่อล้มเหลว: ${error.message}`);
             }
         }
 
