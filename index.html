@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -87,9 +88,8 @@
         <div id="loadingError" class="hidden flex flex-col items-center max-w-sm text-center px-4">
             <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-3"></i>
             <h3 class="font-bold text-red-600 text-lg mb-1">การเชื่อมต่อล้มเหลว</h3>
-            <p class="text-sm text-gray-600 bg-red-50 p-3 rounded border border-red-100">
-                คุณยังไม่ได้ใส่การตั้งค่า Firebase Config ในโค้ด<br>
-                กรุณานำโค้ด <code>firebaseConfig</code> มาวางในแท็ก script ให้เรียบร้อย
+            <p id="errorMessageDetails" class="text-sm text-gray-600 bg-red-50 p-3 rounded border border-red-100">
+                พบปัญหาบางอย่าง ไม่สามารถเชื่อมต่อฐานข้อมูลได้
             </p>
             <button onclick="document.getElementById('mainLoadingOverlay').classList.add('hidden');" class="mt-4 bg-gray-200 px-4 py-2 rounded text-sm hover:bg-gray-300">ปิดหน้าต่างนี้เพื่อดู UI (แบบออฟไลน์)</button>
         </div>
@@ -482,11 +482,11 @@
         // 🚨🚨🚨 วาง Config ของคุณที่นี่ (สำคัญมาก: ห้ามปล่อยว่าง!) 🚨🚨🚨
         const myNetlifyFirebaseConfig = {
             apiKey: "AIzaSyCXuj7Pl1JnBn2Y7BtyzkHHQm4MQH-isrM",
-  authDomain: "time-attendance-69699.firebaseapp.com",
-  projectId: "time-attendance-69699",
-  storageBucket: "time-attendance-69699.firebasestorage.app",
-  messagingSenderId: "793986547170",
-  appId: "1:793986547170:web:337bfe602d9b3e32f34dbb"
+            authDomain: "time-attendance-69699.firebaseapp.com",
+            projectId: "time-attendance-69699",
+            storageBucket: "time-attendance-69699.firebasestorage.app",
+            messagingSenderId: "793986547170",
+            appId: "1:793986547170:web:337bfe602d9b3e32f34dbb"
         };
         // 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
         
@@ -499,17 +499,12 @@
             window.initAppUI();
             
             try {
-                // ตรวจสอบว่าใส่ Config หรือยัง (เช็คว่ามีค่าใน Object ไหม)
-                const finalConfig = (typeof __firebase_config !== 'undefined' && Object.keys(myNetlifyFirebaseConfig).length === 0) ? JSON.parse(__firebase_config) : myNetlifyFirebaseConfig;
-                
-                if (Object.keys(finalConfig).length === 0) {
-                    throw new Error("Missing Firebase Configuration");
-                }
-
-                const app = initializeApp(finalConfig);
+                // บังคับใช้ myNetlifyFirebaseConfig ไปเลย เพื่อตัดปัญหาเรื่อง Environment Variables ตอน Test
+                const app = initializeApp(myNetlifyFirebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
+                // พยายามเข้าระบบแบบไม่ระบุตัวตน
                 await signInAnonymously(auth);
                 
                 // ถ้ารอดมาถึงตรงนี้ แสดงว่าเชื่อมต่อสำเร็จ! ซ่อน Overlay ทิ้งไปเลย
@@ -533,10 +528,23 @@
                 });
 
             } catch (error) {
-                console.error("Firebase Error:", error);
-                // ถ้ามี Error (เช่น Config ว่างเปล่า) ให้โชว์กล่อง Error สีแดง
+                console.error("Firebase Initialization Error:", error);
+                
+                // ซ่อน Spinner และโชว์กล่อง Error สีแดงแทน พร้อมบอกสาเหตุเชิงลึก
                 document.getElementById('loadingSpinner').classList.add('hidden');
-                document.getElementById('loadingError').classList.remove('hidden');
+                const errorBox = document.getElementById('loadingError');
+                errorBox.classList.remove('hidden');
+                
+                const errorDetails = document.getElementById('errorMessageDetails');
+                
+                // ดักจับ Error ที่เจอบ่อย
+                if (error.code === 'auth/admin-restricted-operation' || error.code === 'auth/operation-not-allowed') {
+                    errorDetails.innerHTML = `เชื่อมต่อสำเร็จ แต่ติดสิทธิ์การเข้าถึง<br><br><b>วิธีแก้:</b> ไปที่ Firebase Console -> เลือก Authentication -> เลือกเมนู Sign-in method -> กดเปิดใช้งานปุ่ม <b>"Anonymous (ไม่ระบุตัวตน)"</b>`;
+                } else if (error.message && error.message.includes("API key not valid")) {
+                     errorDetails.innerHTML = `API Key ใน Config ไม่ถูกต้อง กรุณาตรวจสอบการก๊อปปี้โค้ดอีกครั้ง`;
+                } else {
+                     errorDetails.innerHTML = `ไม่สามารถเชื่อมต่อฐานข้อมูลได้<br>Error: ${error.message}`;
+                }
             }
         }
 
@@ -549,7 +557,7 @@
                 return true;
             } catch (e) { 
                 console.error("Error saving booking:", e); 
-                window.showAlert('การบันทึกล้มเหลว', 'คุณยังไม่ได้เชื่อมต่อฐานข้อมูล', 'error');
+                window.showAlert('การบันทึกล้มเหลว', 'คุณยังไม่ได้เชื่อมต่อฐานข้อมูล หรือติดสิทธิ์การเขียน', 'error');
                 return false; 
             }
         };
@@ -573,7 +581,7 @@
         let chartInstance = null;
         let isAdmin = localStorage.getItem('isAdmin') === 'true'; 
 
-        // ฟังก์ชันนี้จะถูกเรียกจาก Firebase Module (บรรทัดที่ 325)
+        // ฟังก์ชันนี้จะถูกเรียกจาก Firebase Module
         window.initAppUI = function() {
             setupAdminUI();
             initCalendar();
