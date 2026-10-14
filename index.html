@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -13,7 +13,18 @@
 
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { primary: '#0d9488', secondary: '#0f766e', accent: '#f59e0b', }, fontFamily: { sans: ['Inter', 'Sarabun', 'sans-serif'], } } }
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0d9488',
+                        secondary: '#0f766e',
+                        accent: '#f59e0b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Sarabun', 'sans-serif'],
+                    }
+                }
+            }
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
@@ -26,20 +37,58 @@
         /* ------------------------------------------------------------------
            Extreme Calendar Optimization (เพื่อให้เห็นข้อมูลครบจบในหน้าจอเดียว) 
         ------------------------------------------------------------------ */
-        #calendar { font-size: 0.85rem; } /* บีบขนาดตัวอักษรปฏิทิน */
+        #calendar { font-size: 0.85rem; }
         .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 600 !important; }
-        .fc-header-toolbar { margin-bottom: 0.5rem !important; } /* ลดช่องว่างใต้หัวเดือน */
+        .fc-header-toolbar { margin-bottom: 0.5rem !important; }
         
-        /* รีดพื้นที่ด้านในช่องวันที่ให้แบนที่สุด */
-        .fc .fc-daygrid-day-frame { min-height: 10px !important; padding-top: 2px !important; padding-bottom: 2px !important; }
-        .fc .fc-daygrid-day-top { flex-direction: row; justify-content: center; } /* ตัวเลขอยู่ตรงกลางประหยัดที่ */
-        .fc-daygrid-day-number { color: #374151; font-weight: 500; font-size: 0.85rem; padding: 2px !important; }
-        .fc .fc-daygrid-day.fc-day-today { background-color: #e0f2fe; }
+        /* รีดพื้นที่ด้านในช่องวันที่ให้กระชับและเรียงจุดแนวนอนสวยงาม */
+        .fc .fc-daygrid-day-frame {
+            min-height: 36px !important;
+            padding-top: 2px !important;
+            padding-bottom: 2px !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .fc .fc-daygrid-day-top { flex-direction: row; justify-content: center; }
+        .fc-daygrid-day-number { color: #1f2937; font-weight: 600; font-size: 0.82rem; padding: 1px 4px !important; line-height: 1.1; }
+        .fc .fc-daygrid-day.fc-day-today { background-color: #e0f2fe !important; }
+        .fc .fc-daygrid-day.selected-day-highlight { background-color: #ccfbf1 !important; box-shadow: inset 0 0 0 1.5px #0d9488; }
         
+        /* ซ่อนกรอบ Event เริ่มต้นของ FullCalendar เพื่อให้แสดงเฉพาะแถวจุดสีแนวนอน */
+        .fc-daygrid-day-events { margin: 0 !important; padding: 0 !important; min-height: 10px !important; }
+        .fc-daygrid-event-harness { margin: 0 !important; }
+        .fc-h-event, .fc-daygrid-event {
+            background: transparent !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .fc-daygrid-day-bottom { display: none !important; }
+
         /* ปุ่มเลื่อนเดือน */
         .fc-button-primary { background-color: #0d9488 !important; border-color: #0d9488 !important; padding: 0.2rem 0.5rem !important; }
-        .booking-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #f59e0b; margin: 1px; }
         
+        /* จุดสีแสดงจำนวนรายการจอง (สีแดงสดตัดขอบขาว เด่นชัดบนทุกพื้นหลัง เรียงแนวนอน) */
+        .booking-dots-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2.5px;
+            padding: 1px 2px 2px 2px;
+            line-height: 1;
+        }
+        .booking-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 9999px;
+            background-color: #ef4444; /* สีแดงสดตัดกับพื้นขาว/ฟ้า/เขียวชัดเจน */
+            border: 1px solid #ffffff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+            flex-shrink: 0;
+        }
         /* ------------------------------------------------------------------ */
         
         .modal-enter { opacity: 0; transform: scale(0.95); }
@@ -52,13 +101,14 @@
 </head>
 <body class="text-gray-800 pb-20 relative">
 
+    <!-- Loading Overlay -->
     <div id="loadingOverlay">
         <i class="fa-solid fa-spinner fa-spin text-4xl text-primary mb-3"></i>
         <p class="font-bold text-gray-700">กำลังเชื่อมต่อระบบจองสนาม...</p>
         <p id="loadingErrorText" class="text-red-500 text-sm mt-3 hidden text-center px-4"></p>
     </div>
 
-    <!-- Header (ลด Padding ลงเพื่อประหยัดพื้นที่) -->
+    <!-- Header -->
     <header class="bg-primary text-white py-2 px-3 shadow-md sticky top-0 z-40 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fa-solid fa-tennis-ball text-xl text-accent"></i>
@@ -71,7 +121,7 @@
             <i class="fa-solid fa-user-circle text-xl"></i>
         </button>
         <div id="userInfo" class="hidden text-sm font-semibold text-accent flex items-center gap-2">
-            <span>นิติบุคคล</span>
+            <span><i class="fa-solid fa-shield-halved mr-1"></i>นิติบุคคล</span>
             <button onclick="logout()" class="text-xs bg-white text-primary px-2 py-1 rounded shadow-sm hover:bg-gray-100 transition">ออก</button>
         </div>
     </header>
@@ -81,16 +131,19 @@
 
         <!-- TAB 1: Booking -->
         <section id="tab-booking" class="tab-content active">
-            <!-- ปฏิทิน (ลด Padding) -->
+            <!-- ปฏิทิน -->
             <div class="bg-white rounded-xl shadow p-2 mb-2">
                 <div id="calendar"></div>
+                <div class="flex items-center justify-end gap-2 mt-1 px-1 text-[10px] text-gray-500">
+                    <span class="inline-flex items-center gap-1"><span class="booking-dot"></span> 1 จุด = 1 รายการจอง</span>
+                </div>
             </div>
 
-            <!-- ส่วนแสดงรายละเอียดการจอง (ออกแบบให้ชิดขึ้น) -->
+            <!-- ส่วนแสดงรายละเอียดการจองรายวัน -->
             <div id="dateDetailsSection" class="hidden mt-1">
                 <div class="flex justify-between items-center mb-2 px-1">
-                    <h2 id="selectedDateTitle" class="text-md font-bold text-gray-800 tracking-tight">รายการวันที่...</h2>
-                    <button onclick="openBookingModal()" class="bg-primary text-white px-3 py-1.5 rounded-lg text-sm font-semibold shadow hover:bg-secondary transition flex items-center gap-1">
+                    <h2 id="selectedDateTitle" class="text-sm sm:text-md font-bold text-gray-800 tracking-tight">รายการวันที่...</h2>
+                    <button onclick="openBookingModal()" class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold shadow hover:bg-secondary transition flex items-center gap-1 shrink-0">
                         <i class="fa-solid fa-plus"></i> เพิ่มรายการ
                     </button>
                 </div>
@@ -101,43 +154,80 @@
         <!-- TAB 2: Dashboard -->
         <section id="tab-dashboard" class="tab-content">
             <div class="bg-white rounded-xl shadow p-4 mb-4" id="pdfExportArea">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-chart-pie text-primary mr-2"></i> สรุปยอด (Dashboard)</h2>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-chart-pie text-primary mr-2"></i> สรุปยอดจองสนามเทนนิส (Dashboard)</h2>
                     <button id="btnPrintPdf" onclick="exportPDF()" class="hidden bg-gray-800 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-700 transition flex items-center gap-2">
                         <i class="fa-solid fa-print"></i> PDF
                     </button>
                 </div>
 
-                <div id="adminFilter" class="hidden mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <label class="block text-sm font-semibold text-gray-600 mb-1">เลือกเดือนที่ต้องการดู (ย้อนหลัง)</label>
-                    <input type="month" id="monthFilter" class="w-full p-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary" onchange="renderDashboard()">
+                <!-- ช่องเลือกค้นหาย้อนหลังแบบรายเดือน -->
+                <div id="monthFilterBox" class="mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="monthFilter" class="text-xs font-bold text-gray-600 flex items-center gap-1">
+                            <i class="fa-regular fa-calendar-days text-primary"></i> เลือกเดือนที่ต้องการดู (ค้นหาย้อนหลัง)
+                        </label>
+                        <button onclick="resetToCurrentMonth()" class="text-[11px] bg-teal-50 text-primary border border-teal-200 px-2 py-0.5 rounded font-semibold hover:bg-teal-100 transition">
+                            เดือนปัจจุบัน
+                        </button>
+                    </div>
+                    <input type="month" id="monthFilter" class="w-full p-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" onchange="renderDashboard()">
                 </div>
 
-                <div id="guardFilterNote" class="text-xs text-gray-500 mb-4 bg-yellow-50 p-2 rounded border border-yellow-200 border-l-4 border-l-accent">
-                    <i class="fa-solid fa-info-circle mr-1"></i> รปภ. จะมองเห็นเฉพาะข้อมูลของเดือนปัจจุบันเท่านั้น
+                <div id="guardFilterNote" class="hidden text-xs text-gray-500 mb-4 bg-yellow-50 p-2 rounded border border-yellow-200 border-l-4 border-l-accent">
+                    <i class="fa-solid fa-info-circle mr-1"></i> แสดงเฉพาะข้อมูลของเดือนปัจจุบันเท่านั้น
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-teal-50 p-4 rounded-xl border border-teal-100">
-                        <p class="text-sm text-teal-700 font-semibold">จำนวนจอง (Bookings)</p>
+                <!-- การ์ดสรุปยอด คลิกสลับดูตารางและกราฟเส้นด้านล่างได้ -->
+                <p class="text-[11px] text-gray-500 mb-1.5"><i class="fa-solid fa-hand-pointer text-primary mr-1"></i>แตะที่กล่องเพื่อสลับดู <strong>จำนวนจอง</strong> หรือ <strong>รายได้ค่าไฟ</strong> (กราฟและตารางจะเปลี่ยนตาม)</p>
+                <div class="grid grid-cols-2 gap-3 mb-5">
+                    <!-- กล่องจำนวนจองทั้งหมด -->
+                    <div id="cardBookings" onclick="setDashboardView('all')" class="bg-teal-50 p-3.5 rounded-xl border-2 border-primary ring-2 ring-teal-200 cursor-pointer transition-all select-none relative">
+                        <div class="flex justify-between items-start">
+                            <p class="text-xs text-teal-800 font-bold">จำนวนจอง (Bookings)</p>
+                            <i class="fa-solid fa-list-check text-teal-600 text-xs"></i>
+                        </div>
                         <p id="dashTotalBookings" class="text-3xl font-bold text-primary mt-1">0</p>
+                        <p class="text-[10px] text-teal-700 mt-1 flex items-center gap-1"><i class="fa-solid fa-eye"></i> แสดงแนวโน้มและรายการจอง</p>
                     </div>
-                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
-                        <p class="text-sm text-amber-700 font-semibold">รายได้ค่าไฟ (Revenue)</p>
+
+                    <!-- กล่องรายได้ค่าไฟ -->
+                    <div id="cardRevenue" onclick="setDashboardView('revenue')" class="bg-amber-50 p-3.5 rounded-xl border border-amber-200 opacity-80 hover:opacity-100 cursor-pointer transition-all select-none relative">
+                        <div class="flex justify-between items-start">
+                            <p class="text-xs text-amber-800 font-bold">รายได้ค่าไฟ (Revenue)</p>
+                            <i class="fa-solid fa-bolt text-amber-500 text-xs"></i>
+                        </div>
                         <p id="dashTotalRevenue" class="text-3xl font-bold text-accent mt-1">฿0</p>
+                        <p class="text-[10px] text-amber-700 mt-1 flex items-center gap-1"><i class="fa-solid fa-eye"></i> แสดงแนวโน้มและรายการค่าไฟ</p>
                     </div>
                 </div>
 
-                <div class="mb-6"><canvas id="revenueChart" height="200"></canvas></div>
+                <!-- กราฟเส้นแนวโน้ม (Dynamic Line Chart สลับข้อมูลตามกล่องที่เลือก) -->
+                <div class="mb-5 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 id="chartTitle" class="text-xs font-bold text-gray-700 flex items-center gap-1">
+                            <i class="fa-solid fa-chart-line text-primary"></i> แนวโน้มจำนวนการจองรายสัปดาห์ (ครั้ง)
+                        </h3>
+                    </div>
+                    <div style="height: 180px;"><canvas id="revenueChart"></canvas></div>
+                </div>
 
-                <h3 class="text-md font-bold text-gray-700 mb-2 border-b pb-2">รายการที่มีการใช้ไฟ (Paid Light Usage)</h3>
+                <!-- ส่วนหัวตารางรายละเอียดด้านล่าง -->
+                <div class="flex justify-between items-center mb-2 border-b pb-2">
+                    <h3 id="dashboardTableTitle" class="text-sm font-bold text-gray-700">
+                        <i class="fa-solid fa-list-check text-primary mr-1"></i> รายการจองทั้งหมดในเดือนนี้
+                    </h3>
+                    <span id="dashboardTableCount" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">0 รายการ</span>
+                </div>
+
+                <!-- ตารางแสดงข้อมูลรายเดือน -->
                 <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <table class="min-w-full text-sm text-left text-gray-600">
+                        <thead id="dashboardTableHead" class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
                             <tr>
                                 <th class="px-3 py-2 w-16">วันที่</th>
-                                <th class="px-3 py-2">บ้านเลขที่</th>
-                                <th class="px-3 py-2 text-right">ยอดเงิน / สลิป</th>
+                                <th class="px-3 py-2">บ้านเลขที่ / เวลา</th>
+                                <th class="px-3 py-2 text-right">สถานะไฟ</th>
                             </tr>
                         </thead>
                         <tbody id="dashboardTableBody"></tbody>
@@ -202,15 +292,15 @@
         </button>
     </nav>
 
-    <!-- Modals (Add Booking, Upload Meter, View Images, Login, Alert) -->
-    <!-- (เว้นโครงสร้าง Modal ไว้เหมือนเดิม เพราะมันโชว์แยกต่างหาก) -->
+    <!-- Modal: Add / Edit Booking -->
     <div id="modalBooking" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-primary p-4 text-white flex justify-between items-center shrink-0">
-                <h3 class="font-bold">บันทึกการจองสนาม (New Booking)</h3>
+                <h3 id="modalBookingTitle" class="font-bold">บันทึกการจองสนาม (New Booking)</h3>
                 <button onclick="closeModals()" class="text-white hover:text-gray-200 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-5 overflow-y-auto grow">
+                <input type="hidden" id="editingBookingId" value="">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">วันที่ต้องการจอง (Date) *</label>
@@ -248,7 +338,7 @@
                     <div id="lightUploadSection" class="hidden bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">จำนวนเงินค่าไฟที่โอน (บาท) *</label>
-                            <select id="inpInitialAmount" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-accent">
+                            <select id="inpInitialAmount" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-accent bg-white">
                                 <option value="100">100 บาท (ครึ่งชั่วโมง)</option>
                                 <option value="200" selected>200 บาท (1 ชั่วโมง)</option>
                                 <option value="300">300 บาท (1.5 ชั่วโมง)</option>
@@ -257,7 +347,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">อัปโหลดสลิปโอนเงิน (Transfer Slip) *</label>
-                            <input type="file" id="inpInitialSlip" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer">
+                            <input type="file" id="inpInitialSlip" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer bg-white">
                             <img id="previewInitialSlip" class="mt-2 h-24 object-contain hidden border rounded p-1 bg-white mx-auto">
                         </div>
                     </div>
@@ -270,6 +360,7 @@
         </div>
     </div>
 
+    <!-- Modal: Upload Meter & Light (เลือกได้ทั้งถ่ายภาพสด หรือเลือกไฟล์จากเครื่อง) -->
     <div id="modalLight" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-full">
             <div class="bg-accent p-4 text-white flex justify-between items-center">
@@ -284,18 +375,21 @@
                 <div class="space-y-4">
                     <div id="delayedSlipSection">
                         <label class="block text-sm font-semibold text-gray-700 mb-1">จำนวนเงินค่าไฟที่โอน (บาท)</label>
-                        <select id="inpAmount" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-accent">
+                        <select id="inpAmount" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-accent bg-white">
                             <option value="100">100 บาท (ครึ่งชั่วโมง)</option>
                             <option value="200" selected>200 บาท (1 ชั่วโมง)</option>
+                            <option value="300">300 บาท (1.5 ชั่วโมง)</option>
+                            <option value="400">400 บาท (2 ชั่วโมง)</option>
                         </select>
                         <label class="block text-sm font-semibold text-gray-700 mt-3 mb-1">อัปโหลดสลิปโอนเงิน (หากยังไม่แนบ)</label>
-                        <input type="file" id="inpSlipImg" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer">
-                        <img id="previewSlip" class="mt-2 h-32 object-contain hidden border rounded p-1 bg-gray-50">
+                        <input type="file" id="inpSlipImg" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer bg-white">
+                        <img id="previewSlip" class="mt-2 h-32 object-contain hidden border rounded p-1 bg-gray-50 mx-auto">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">อัปโหลดภาพมิเตอร์ไฟ (ก่อนเปิดสวิตช์) *</label>
-                        <input type="file" id="inpMeterImg" accept="image/*" capture="environment" class="w-full text-sm border p-1 rounded transition cursor-pointer">
-                        <img id="previewMeter" class="mt-2 h-32 object-contain hidden border rounded p-1 bg-gray-50">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">อัปโหลดภาพมิเตอร์ไฟ (ถ่ายภาพ หรือ เลือกไฟล์) *</label>
+                        <input type="file" id="inpMeterImg" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer bg-white">
+                        <p class="text-[11px] text-gray-400 mt-1"><i class="fa-solid fa-camera mr-1"></i>สามารถเลือกถ่ายภาพสด หรือเลือกไฟล์ภาพจากอัลบั้มในเครื่องได้</p>
+                        <img id="previewMeter" class="mt-2 h-32 object-contain hidden border rounded p-1 bg-gray-50 mx-auto">
                     </div>
                 </div>
             </div>
@@ -307,20 +401,38 @@
         </div>
     </div>
 
-    <div id="modalViewImages" class="fixed inset-0 bg-black/80 z-[60] hidden flex flex-col items-center justify-center p-4">
-        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 transition"><i class="fa-solid fa-xmark"></i></button>
-        <div class="w-full max-w-lg bg-white rounded-lg p-4">
-            <h4 class="text-center font-bold mb-2 text-gray-800">สลิปโอนเงิน (Slip)</h4>
-            <a id="linkImgSlip" href="#" target="_blank" class="block mb-4 text-center group">
-                <img id="viewImgSlip" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded group-hover:opacity-80 transition">
-            </a>
-            <h4 class="text-center font-bold mb-2 text-gray-800">มิเตอร์ไฟ (Meter)</h4>
-            <a id="linkImgMeter" href="#" target="_blank" class="block text-center group">
-                <img id="viewImgMeter" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded group-hover:opacity-80 transition">
-            </a>
+    <!-- Modal: Confirm Delete Booking -->
+    <div id="modalConfirmDelete" class="fixed inset-0 bg-black/50 z-[65] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm text-center">
+            <div class="w-14 h-14 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-1">ยืนยันการลบรายการจอง?</h3>
+            <p id="deleteConfirmDetail" class="text-sm text-gray-600 mb-5"></p>
+            <input type="hidden" id="deletingBookingId">
+            <div class="flex gap-2">
+                <button onclick="closeModals()" class="w-1/2 bg-gray-200 text-gray-800 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">ยกเลิก</button>
+                <button onclick="confirmDeleteBooking()" id="btnConfirmDelete" class="w-1/2 bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition shadow">ยืนยันลบ</button>
+            </div>
         </div>
     </div>
 
+    <!-- Modal: View Images -->
+    <div id="modalViewImages" class="fixed inset-0 bg-black/80 z-[60] hidden flex flex-col items-center justify-center p-4">
+        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 transition"><i class="fa-solid fa-xmark"></i></button>
+        <div class="w-full max-w-lg bg-white rounded-xl p-4 overflow-y-auto max-h-[90vh]">
+            <h4 class="text-center font-bold mb-2 text-gray-800">สลิปโอนเงิน (Slip)</h4>
+            <div class="mb-4 text-center">
+                <img id="viewImgSlip" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded border mx-auto">
+            </div>
+            <h4 class="text-center font-bold mb-2 text-gray-800">มิเตอร์ไฟ (Meter)</h4>
+            <div class="text-center">
+                <img id="viewImgMeter" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded border mx-auto">
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Login -->
     <div id="modalLogin" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
             <div class="bg-gray-800 p-4 text-white text-center">
@@ -345,6 +457,7 @@
         </div>
     </div>
 
+    <!-- Custom Alert -->
     <div id="customAlert" class="fixed inset-0 bg-black/40 z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-sm text-center transform scale-95 transition-transform duration-300" id="customAlertBox">
             <div id="alertIcon" class="text-4xl mb-3"></div>
@@ -354,8 +467,16 @@
         </div>
     </div>
 
-    <!-- UI Scripts -->
+    <!-- UI & Logic Scripts -->
     <script>
+        // =========================================================================
+        // ตั้งค่าสิทธิ์การใช้งานสำหรับปรับเปลี่ยนในอนาคต (Permission Switches)
+        // true  = เปิดให้ทุกคนใช้งานได้ทันที
+        // false = จำกัดสิทธิ์ให้เฉพาะแอดมิน (นิติบุคคล) ที่ Login แล้วเท่านั้น
+        // =========================================================================
+        const ALLOW_ALL_VIEW_HISTORY = true; // สิทธิ์เลือกดูข้อมูลย้อนหลังรายเดือนในหน้า Dashboard
+        const ALLOW_ALL_EDIT_DELETE  = true; // สิทธิ์กดแก้ไขและลบรายการจองในหน้ารับจอง
+
         function getLocalISODate(d) {
             const year = d.getFullYear();
             const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -363,10 +484,16 @@
             return `${year}-${month}-${day}`;
         }
 
+        function getCurrentYearMonth() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+
         var selectedDate = getLocalISODate(new Date()); 
         var calendar = null;
         var chartInstance = null;
-        var isAdmin = localStorage.getItem('isAdmin') === 'true'; 
+        var isAdmin = localStorage.getItem('isAdmin') === 'true';
+        var dashboardViewMode = 'all'; // 'all' = รายการจองทั้งหมด, 'revenue' = รายการที่มีการใช้ไฟ
         
         var firebaseLoaded = false;
         var failSafeTimer = setTimeout(function() {
@@ -379,6 +506,7 @@
         }, 5000);
 
         window.initAppUI = function() {
+            document.getElementById('monthFilter').value = getCurrentYearMonth();
             setupAdminUI();
             initCalendar();
         }
@@ -389,6 +517,7 @@
         }
 
         window.saveBooking = async function() {
+            const editingId = document.getElementById('editingBookingId').value;
             const bookDate = document.getElementById('inpDate').value; 
             const houseNo = document.getElementById('inpHouseNo').value.trim();
             const startTime = document.getElementById('inpStartTime').value;
@@ -398,34 +527,151 @@
             const initialSlipFile = document.getElementById('inpInitialSlip').files[0];
             const initialAmount = document.getElementById('inpInitialAmount').value;
 
-            if(!bookDate || !houseNo || !startTime || !endTime) return window.showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-            if(startTime >= endTime) return window.showAlert('เวลาผิดพลาด', 'เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น', 'warning');
-            if(needLights && !initialSlipFile) return window.showAlert('ข้อมูลไม่ครบ', 'แนบภาพสลิปโอนเงินค่าไฟด้วยครับ', 'warning');
+            if(!bookDate || !houseNo || !startTime || !endTime) {
+                return window.showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+            }
+            if(startTime >= endTime) {
+                return window.showAlert('เวลาผิดพลาด', 'เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น', 'warning');
+            }
+
+            const existingBooking = editingId ? window.allBookings.find(x => x.id === editingId) : null;
+            const hasExistingSlip = existingBooking && existingBooking.slipImg;
+
+            if(needLights && !initialSlipFile && !hasExistingSlip) {
+                return window.showAlert('ข้อมูลไม่ครบ', 'กรุณาแนบภาพสลิปโอนเงินค่าไฟด้วยครับ', 'warning');
+            }
 
             const btn = document.getElementById('btnSaveBooking');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...'; btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+            btn.disabled = true;
 
             try {
-                let slipBase64 = "";
-                if(needLights && initialSlipFile) slipBase64 = await new Promise(resolve => compressImage(initialSlipFile, resolve));
+                let slipBase64 = existingBooking ? (existingBooking.slipImg || "") : "";
+                if(needLights && initialSlipFile) {
+                    slipBase64 = await new Promise(resolve => compressImage(initialSlipFile, resolve));
+                } else if(!needLights) {
+                    slipBase64 = "";
+                }
 
                 const bookingData = {
-                    date: bookDate, houseNo: houseNo, startTime: startTime, endTime: endTime, note: note,
-                    isLightUsed: needLights, amountPaid: needLights ? parseInt(initialAmount) : 0,
-                    slipImg: slipBase64, meterImg: ""
+                    date: bookDate,
+                    houseNo: houseNo,
+                    startTime: startTime,
+                    endTime: endTime,
+                    note: note,
+                    isLightUsed: needLights,
+                    amountPaid: needLights ? parseInt(initialAmount) : 0,
+                    slipImg: slipBase64,
+                    meterImg: needLights && existingBooking ? (existingBooking.meterImg || "") : ""
                 };
 
-                const success = await window.cloudSaveBooking(bookingData);
+                let success = false;
+                if (editingId) {
+                    success = await window.cloudUpdateBooking(editingId, bookingData);
+                } else {
+                    success = await window.cloudSaveBooking(bookingData);
+                }
+
                 if (success) {
-                    window.closeModals(); window.showAlert('สำเร็จ', 'บันทึกการจองเรียบร้อยแล้ว', 'success');
-                    document.getElementById('inpHouseNo').value = ''; document.getElementById('inpStartTime').value = '';
-                    document.getElementById('inpEndTime').value = ''; document.getElementById('inpNote').value = '';
-                    document.getElementById('toggleNeedLight').checked = false; toggleLightUploadSection();
-                    document.getElementById('inpInitialSlip').value = ''; document.getElementById('previewInitialSlip').classList.add('hidden');
-                    window.selectedDate = bookDate; if(window.calendar) window.calendar.gotoDate(bookDate);
-                } else throw new Error();
-            } catch (error) { window.showAlert('ผิดพลาด', 'ไม่สามารถบันทึกได้ กรุณาเชื่อมต่ออินเทอร์เน็ต', 'error'); } 
-            finally { btn.innerHTML = 'บันทึกการจอง'; btn.disabled = false; }
+                    window.closeModals();
+                    window.showAlert('สำเร็จ', editingId ? 'แก้ไขข้อมูลการจองเรียบร้อยแล้ว' : 'บันทึกการจองเรียบร้อยแล้ว', 'success');
+                    resetBookingForm();
+                    window.selectedDate = bookDate;
+                    if(window.calendar) window.calendar.gotoDate(bookDate);
+                    highlightSelectedDayOnCalendar(bookDate);
+                } else {
+                    throw new Error();
+                }
+            } catch (error) {
+                window.showAlert('ผิดพลาด', 'ไม่สามารถบันทึกได้ กรุณาเชื่อมต่ออินเทอร์เน็ต', 'error');
+            } finally {
+                btn.innerHTML = 'บันทึกการจอง';
+                btn.disabled = false;
+            }
+        }
+
+        function resetBookingForm() {
+            document.getElementById('editingBookingId').value = '';
+            document.getElementById('inpHouseNo').value = '';
+            document.getElementById('inpStartTime').value = '';
+            document.getElementById('inpEndTime').value = '';
+            document.getElementById('inpNote').value = '';
+            document.getElementById('toggleNeedLight').checked = false;
+            toggleLightUploadSection();
+            document.getElementById('inpInitialSlip').value = '';
+            document.getElementById('previewInitialSlip').src = '';
+            document.getElementById('previewInitialSlip').classList.add('hidden');
+        }
+
+        window.openEditBookingModal = function(bookingId) {
+            const b = window.allBookings.find(x => x.id === bookingId);
+            if (!b) return;
+
+            document.getElementById('editingBookingId').value = b.id;
+            document.getElementById('modalBookingTitle').innerText = 'แก้ไขข้อมูลการจอง (Edit Booking)';
+            document.getElementById('btnSaveBooking').innerText = 'บันทึกการแก้ไข';
+
+            const di = document.getElementById('inpDate');
+            di.removeAttribute('min');
+            di.removeAttribute('max');
+            di.value = b.date;
+
+            document.getElementById('inpHouseNo').value = b.houseNo || '';
+            document.getElementById('inpStartTime').value = b.startTime || '';
+            document.getElementById('inpEndTime').value = b.endTime || '';
+            document.getElementById('inpNote').value = b.note || '';
+
+            const needLight = !!b.isLightUsed;
+            document.getElementById('toggleNeedLight').checked = needLight;
+            toggleLightUploadSection();
+
+            if (needLight) {
+                document.getElementById('inpInitialAmount').value = String(b.amountPaid || 200);
+                if (b.slipImg) {
+                    const prev = document.getElementById('previewInitialSlip');
+                    prev.src = b.slipImg;
+                    prev.classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('previewInitialSlip').classList.add('hidden');
+            }
+
+            const md = document.getElementById('modalBooking');
+            md.classList.remove('hidden');
+            md.querySelector('div').classList.add('modal-enter');
+            setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
+        }
+
+        window.openDeleteBookingModal = function(bookingId) {
+            const b = window.allBookings.find(x => x.id === bookingId);
+            if (!b) return;
+            document.getElementById('deletingBookingId').value = b.id;
+            document.getElementById('deleteConfirmDetail').innerHTML = `บ้านเลขที่ <strong>${b.houseNo}</strong><br>วันที่ ${b.date} เวลา ${b.startTime} - ${b.endTime}`;
+            document.getElementById('modalConfirmDelete').classList.remove('hidden');
+        }
+
+        window.confirmDeleteBooking = async function() {
+            const bookingId = document.getElementById('deletingBookingId').value;
+            if (!bookingId) return;
+
+            const btn = document.getElementById('btnConfirmDelete');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังลบ...';
+            btn.disabled = true;
+
+            try {
+                const success = await window.cloudDeleteBooking(bookingId);
+                if (success) {
+                    window.closeModals();
+                    window.showAlert('ลบสำเร็จ', 'ลบรายการจองเรียบร้อยแล้ว', 'success');
+                } else {
+                    throw new Error();
+                }
+            } catch (e) {
+                window.showAlert('ผิดพลาด', 'ไม่สามารถลบรายการได้', 'error');
+            } finally {
+                btn.innerHTML = 'ยืนยันลบ';
+                btn.disabled = false;
+            }
         }
 
         function compressImage(file, callback) {
@@ -448,12 +694,17 @@
             document.getElementById(inputId).addEventListener('change', function() {
                 if(this.files && this.files[0]) {
                     const reader = new FileReader();
-                    reader.onload = e => { document.getElementById(previewId).src = e.target.result; document.getElementById(previewId).classList.remove('hidden'); }
+                    reader.onload = e => {
+                        document.getElementById(previewId).src = e.target.result;
+                        document.getElementById(previewId).classList.remove('hidden');
+                    }
                     reader.readAsDataURL(this.files[0]);
                 }
             });
         }
-        handleImageInput('inpInitialSlip', 'previewInitialSlip'); handleImageInput('inpSlipImg', 'previewSlip'); handleImageInput('inpMeterImg', 'previewMeter');
+        handleImageInput('inpInitialSlip', 'previewInitialSlip');
+        handleImageInput('inpSlipImg', 'previewSlip');
+        handleImageInput('inpMeterImg', 'previewMeter');
 
         window.saveLightUsage = async function() {
             const bookingId = document.getElementById('currentLightBookingId').value;
@@ -483,12 +734,18 @@
             finally { btn.innerHTML = 'บันทึกข้อมูล'; btn.disabled = false; }
         }
 
+        function highlightSelectedDayOnCalendar(dateStr) {
+            document.querySelectorAll('.fc-daygrid-day').forEach(el => el.classList.remove('selected-day-highlight'));
+            const targetEl = document.querySelector(`.fc-daygrid-day[data-date="${dateStr}"]`);
+            if (targetEl) targetEl.classList.add('selected-day-highlight');
+        }
+
         function initCalendar() {
             if(window.calendar) return;
             window.calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: 'dayGridMonth', 
                 height: 'auto',
-                aspectRatio: 1.8, /* บีบปฏิทินให้แบนมาก เพื่อเปิดพื้นที่ให้ข้อมูลด้านล่าง */
+                aspectRatio: 1.75,
                 headerToolbar: { left: 'prev', center: 'title', right: 'next' },
                 locale: 'th', 
                 selectable: true,
@@ -498,17 +755,26 @@
                 },
                 dateClick: function(info) {
                     window.selectedDate = info.dateStr;
-                    document.querySelectorAll('.fc-day').forEach(el => el.classList.remove('bg-teal-50'));
-                    info.dayEl.classList.add('bg-teal-50');
+                    highlightSelectedDayOnCalendar(window.selectedDate);
                     window.renderBookingsForDate(window.selectedDate);
                 },
-                eventContent: function(arg) { return { html: `<div class="booking-dot"></div>` }; }
+                datesSet: function() {
+                    highlightSelectedDayOnCalendar(window.selectedDate);
+                },
+                // วาดจุดสีเรียงกันในแนวนอนตามจำนวนรายการจองของวันนั้นๆ
+                eventContent: function(arg) {
+                    const count = arg.event.extendedProps.count || 1;
+                    let dotsHtml = '';
+                    for (let i = 0; i < count; i++) {
+                        dotsHtml += `<span class="booking-dot"></span>`;
+                    }
+                    return { html: `<div class="booking-dots-row">${dotsHtml}</div>` };
+                }
             });
             window.calendar.render();
             
             setTimeout(() => {
-                const todayEl = document.querySelector(`.fc-day[data-date="${window.selectedDate}"]`);
-                if(todayEl) todayEl.classList.add('bg-teal-50');
+                highlightSelectedDayOnCalendar(window.selectedDate);
                 window.renderBookingsForDate(window.selectedDate);
             }, 200);
         }
@@ -516,11 +782,17 @@
         window.refreshCalendarEvents = function() {
             if(!window.calendar) return;
             const counts = {};
-            window.allBookings.forEach(b => { counts[b.date] = (counts[b.date] || 0) + 1; });
-            const events = Object.keys(counts).map(date => {
-                const dateEvents = []; for(let i=0; i<counts[date]; i++) dateEvents.push({ start: date, display: 'background' }); return dateEvents;
-            }).flat();
-            window.calendar.removeAllEvents(); window.calendar.addEventSource(events);
+            window.allBookings.forEach(b => {
+                if (b.date) counts[b.date] = (counts[b.date] || 0) + 1;
+            });
+            // รวบยอดแต่ละวันเป็น 1 แถวแนวนอนที่มีจำนวนจุดเท่ากับจำนวนจองจริง
+            const events = Object.keys(counts).map(date => ({
+                start: date,
+                allDay: true,
+                extendedProps: { count: counts[date] }
+            }));
+            window.calendar.removeAllEvents();
+            window.calendar.addEventSource(events);
         }
 
         window.renderBookingsForDate = function(dateStr) {
@@ -528,71 +800,266 @@
             const dateObj = new Date(dateStr);
             document.getElementById('selectedDateTitle').innerText = dateObj.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             
-            const container = document.getElementById('bookingsList'); container.innerHTML = '';
+            const container = document.getElementById('bookingsList');
+            container.innerHTML = '';
             const dailyBookings = window.allBookings.filter(b => b.date === dateStr);
             dailyBookings.sort((a,b) => a.startTime.localeCompare(b.startTime));
 
             if(dailyBookings.length === 0) {
-                container.innerHTML = `<div class="text-center py-4 text-gray-400 bg-gray-50 rounded-lg border border-dashed"><i class="fa-regular fa-calendar-xmark text-2xl mb-1"></i><p class="mt-1 text-[11px]">ยังไม่มีรายการจองในวันนี้</p></div>`; return;
+                container.innerHTML = `<div class="text-center py-4 text-gray-400 bg-gray-50 rounded-lg border border-dashed"><i class="fa-regular fa-calendar-xmark text-2xl mb-1"></i><p class="mt-1 text-[11px]">ยังไม่มีรายการจองในวันนี้</p></div>`;
+                return;
             }
 
+            const canEditDelete = ALLOW_ALL_EDIT_DELETE || window.isAdmin;
+
             dailyBookings.forEach(b => {
-                const isPaid = b.isLightUsed; const hasMeter = !!b.meterImg;
+                const isPaid = b.isLightUsed;
+                const hasMeter = !!b.meterImg;
                 let actionHtml = '';
                 
                 if (isPaid && hasMeter) {
-                    actionHtml = `<div class="mt-2 flex gap-2"><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded font-semibold"><i class="fa-solid fa-check-circle mr-1"></i> เรียบร้อย (฿${b.amountPaid})</span><button onclick="openViewImages('${b.id}')" class="text-[10px] bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 rounded shadow-sm"><i class="fa-solid fa-image mr-1"></i>ดูรูปภาพ</button></div>`;
+                    actionHtml = `<div class="mt-2 flex items-center justify-between gap-2"><span class="bg-green-100 text-green-700 text-[11px] px-2.5 py-1 rounded-full font-semibold"><i class="fa-solid fa-check-circle mr-1"></i> เรียบร้อย (฿${b.amountPaid})</span><button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 px-3 py-1 rounded-lg shadow-sm font-semibold"><i class="fa-solid fa-image mr-1 text-primary"></i>ดูรูปสลิป/มิเตอร์</button></div>`;
                 } else if (isPaid && !hasMeter) {
-                    actionHtml = `<div class="mt-2 flex flex-col gap-1.5"><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded font-semibold inline-block w-fit"><i class="fa-solid fa-file-invoice mr-1"></i> แนบสลิปแล้ว (รออัปโหลดมิเตอร์)</span><div class="flex gap-2"><button onclick="openLightModal('${b.id}', '${b.houseNo}', '${b.startTime}-${b.endTime}', true)" class="w-full bg-accent text-white text-xs py-1.5 rounded-lg font-bold hover:bg-amber-600 shadow flex justify-center items-center gap-1.5"><i class="fa-solid fa-camera"></i> ถ่ายรูปมิเตอร์ไฟ</button><button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded shadow-sm"><i class="fa-solid fa-image"></i></button></div></div>`;
+                    actionHtml = `<div class="mt-2 flex flex-col gap-1.5"><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded font-semibold inline-block w-fit"><i class="fa-solid fa-file-invoice mr-1"></i> แนบสลิปแล้ว (รออัปโหลดมิเตอร์)</span><div class="flex gap-2"><button onclick="openLightModal('${b.id}', '${b.houseNo}', '${b.startTime}-${b.endTime}', true)" class="w-full bg-accent text-white text-xs py-1.5 rounded-lg font-bold hover:bg-amber-600 shadow flex justify-center items-center gap-1.5"><i class="fa-solid fa-camera"></i> แนบรูปมิเตอร์ไฟ</button><button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-lg shadow-sm"><i class="fa-solid fa-image"></i></button></div></div>`;
                 } else {
                     actionHtml = `<div class="mt-2"><button onclick="openLightModal('${b.id}', '${b.houseNo}', '${b.startTime}-${b.endTime}', false)" class="w-full bg-gray-100 text-gray-700 border border-gray-300 text-xs py-1.5 rounded-lg font-semibold hover:bg-gray-200 shadow-sm flex justify-center items-center gap-1.5"><i class="fa-regular fa-lightbulb text-sm text-accent"></i> ขอเปิดไฟเพิ่ม (แนบสลิป+มิเตอร์)</button></div>`;
                 }
 
-                container.innerHTML += `<div class="border rounded-xl p-3 bg-white shadow-sm hover:shadow-md ${isPaid ? 'border-green-200 border-l-4 border-l-green-500' : 'border-gray-200 border-l-4 border-l-primary'}"><div class="flex justify-between items-start"><div><h4 class="font-bold text-gray-800 text-sm">บ้านเลขที่: ${b.houseNo}</h4><p class="text-[11px] text-gray-600"><i class="fa-regular fa-clock mr-1 text-primary"></i> ${b.startTime} - ${b.endTime}</p>${b.note ? `<p class="text-[10px] text-gray-500 mt-0.5"><i class="fa-solid fa-note-sticky mr-1"></i> ${b.note}</p>` : ''}</div></div>${actionHtml}</div>`;
+                const editDeleteBtns = canEditDelete ? `
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="openEditBookingModal('${b.id}')" title="แก้ไขรายการ" class="w-7 h-7 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 flex items-center justify-center transition">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button onclick="openDeleteBookingModal('${b.id}')" title="ลบรายการ" class="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 flex items-center justify-center transition">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                ` : '';
+
+                container.innerHTML += `
+                    <div class="border rounded-xl p-3 bg-white shadow-sm hover:shadow-md transition ${isPaid ? 'border-green-200 border-l-4 border-l-green-500' : 'border-gray-200 border-l-4 border-l-primary'}">
+                        <div class="flex justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm">บ้านเลขที่: ${b.houseNo}</h4>
+                                <p class="text-xs text-gray-600 mt-0.5"><i class="fa-regular fa-clock mr-1 text-primary"></i> ${b.startTime} - ${b.endTime}</p>
+                                ${b.note ? `<p class="text-[11px] text-gray-500 mt-0.5"><i class="fa-solid fa-note-sticky mr-1"></i> ${b.note}</p>` : ''}
+                            </div>
+                            ${editDeleteBtns}
+                        </div>
+                        ${actionHtml}
+                    </div>
+                `;
             });
         }
 
+        window.setDashboardView = function(mode) {
+            window.dashboardViewMode = mode;
+            const cardBookings = document.getElementById('cardBookings');
+            const cardRevenue = document.getElementById('cardRevenue');
+
+            if (mode === 'all') {
+                cardBookings.className = "bg-teal-50 p-3.5 rounded-xl border-2 border-primary ring-2 ring-teal-200 cursor-pointer transition-all select-none relative";
+                cardRevenue.className = "bg-amber-50 p-3.5 rounded-xl border border-amber-200 opacity-80 hover:opacity-100 cursor-pointer transition-all select-none relative";
+            } else {
+                cardBookings.className = "bg-teal-50 p-3.5 rounded-xl border border-teal-200 opacity-80 hover:opacity-100 cursor-pointer transition-all select-none relative";
+                cardRevenue.className = "bg-amber-50 p-3.5 rounded-xl border-2 border-accent ring-2 ring-amber-200 cursor-pointer transition-all select-none relative";
+            }
+            window.renderDashboard();
+        }
+
+        window.resetToCurrentMonth = function() {
+            document.getElementById('monthFilter').value = getCurrentYearMonth();
+            window.renderDashboard();
+        }
+
         window.renderDashboard = function() {
-            let filterDate = new Date();
-            const filterInput = document.getElementById('monthFilter').value;
-            if (window.isAdmin && filterInput) filterDate = new Date(filterInput + '-01');
-            else document.getElementById('monthFilter').value = `${filterDate.getFullYear()}-${String(filterDate.getMonth() + 1).padStart(2, '0')}`;
+            const currentYM = getCurrentYearMonth();
+            const filterEl = document.getElementById('monthFilter');
+            
+            if (!filterEl.value || (!ALLOW_ALL_VIEW_HISTORY && !window.isAdmin)) {
+                filterEl.value = currentYM;
+            }
 
-            const tYear = filterDate.getFullYear(), tMonth = filterDate.getMonth() + 1;
-            const monthData = window.allBookings.filter(b => { const d = new Date(b.date); return d.getFullYear() === tYear && (d.getMonth() + 1) === tMonth; });
-
+            const selectedYM = filterEl.value; // YYYY-MM
+            const monthData = window.allBookings.filter(b => b.date && b.date.startsWith(selectedYM));
             const paidBookings = monthData.filter(b => b.isLightUsed);
             const totalRevenue = paidBookings.reduce((sum, b) => sum + (Number(b.amountPaid) || 0), 0);
 
             document.getElementById('dashTotalBookings').innerText = monthData.length;
             document.getElementById('dashTotalRevenue').innerText = `฿${totalRevenue.toLocaleString()}`;
 
-            const tbody = document.getElementById('dashboardTableBody'); tbody.innerHTML = '';
-            if(paidBookings.length === 0) { tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4">ไม่มีรายการใช้ไฟในเดือนนี้</td></tr>`; } 
-            else {
-                paidBookings.sort((a,b) => b.date.localeCompare(a.date)).forEach(b => {
-                    const [y, m, d] = b.date.split('-');
-                    tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="px-3 py-3">${d}/${m}</td><td class="px-3 py-3 font-medium">${b.houseNo}</td><td class="px-3 py-3 text-right"><span class="text-green-600 font-bold block mb-1">฿${b.amountPaid}</span><button onclick="openViewImages('${b.id}')" class="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded shadow-sm w-full font-semibold hover:bg-blue-100"><i class="fa-solid fa-image"></i> ดูสลิป</button></td></tr>`;
-                });
+            const thead = document.getElementById('dashboardTableHead');
+            const tbody = document.getElementById('dashboardTableBody');
+            const tableTitle = document.getElementById('dashboardTableTitle');
+            const tableCount = document.getElementById('dashboardTableCount');
+            const chartTitle = document.getElementById('chartTitle');
+            tbody.innerHTML = '';
+
+            const [selYear, selMonth] = selectedYM.split('-');
+            const thaiMonthName = new Date(Number(selYear), Number(selMonth) - 1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+
+            if (window.dashboardViewMode === 'all') {
+                chartTitle.innerHTML = `<i class="fa-solid fa-chart-line text-primary"></i> แนวโน้มจำนวนการจองรายสัปดาห์ (ครั้ง) - ${thaiMonthName}`;
+                tableTitle.innerHTML = `<i class="fa-solid fa-list-check text-primary mr-1"></i> รายการจองทั้งหมด (${thaiMonthName})`;
+                tableCount.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200";
+                tableCount.innerText = `${monthData.length} รายการ`;
+                thead.innerHTML = `
+                    <tr>
+                        <th class="px-3 py-2 w-16">วันที่</th>
+                        <th class="px-3 py-2">บ้านเลขที่ / เวลา</th>
+                        <th class="px-3 py-2 text-right">สถานะไฟ</th>
+                    </tr>
+                `;
+
+                if (monthData.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-400">ไม่มีรายการจองในเดือนนี้</td></tr>`;
+                } else {
+                    const sortedAll = [...monthData].sort((a, b) => b.date.localeCompare(a.date) || a.startTime.localeCompare(b.startTime));
+                    sortedAll.forEach(b => {
+                        const [y, m, d] = b.date.split('-');
+                        let lightStatusHtml = '';
+
+                        if (b.isLightUsed) {
+                            lightStatusHtml = `
+                                <span class="bg-amber-100 text-amber-800 text-[11px] px-2 py-0.5 rounded-full font-semibold inline-block mb-1">
+                                    <i class="fa-solid fa-bolt text-accent mr-0.5"></i>ใช้ไฟ (฿${b.amountPaid})
+                                </span>
+                                <button onclick="openViewImages('${b.id}')" class="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded shadow-sm block ml-auto font-semibold hover:bg-blue-100">
+                                    <i class="fa-solid fa-image mr-1"></i>ดูรูป
+                                </button>
+                            `;
+                        } else {
+                            lightStatusHtml = `<span class="bg-gray-100 text-gray-500 text-[11px] px-2 py-0.5 rounded-full font-medium inline-block">ไม่ใช้ไฟ</span>`;
+                        }
+
+                        tbody.innerHTML += `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-3 py-3 align-top font-semibold text-gray-700">${d}/${m}</td>
+                                <td class="px-3 py-3 align-top">
+                                    <div class="font-bold text-gray-800">บ้านเลขที่ ${b.houseNo}</div>
+                                    <div class="text-xs text-gray-500 mt-0.5"><i class="fa-regular fa-clock mr-1 text-primary"></i>${b.startTime} - ${b.endTime}</div>
+                                    ${b.note ? `<div class="text-[11px] text-gray-400 mt-0.5"><i class="fa-solid fa-note-sticky mr-1"></i>${b.note}</div>` : ''}
+                                </td>
+                                <td class="px-3 py-3 align-top text-right">${lightStatusHtml}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } else {
+                chartTitle.innerHTML = `<i class="fa-solid fa-chart-line text-accent"></i> แนวโน้มรายได้ค่าไฟรายสัปดาห์ (บาท) - ${thaiMonthName}`;
+                tableTitle.innerHTML = `<i class="fa-solid fa-bolt text-accent mr-1"></i> รายการที่มีการใช้ไฟ (${thaiMonthName})`;
+                tableCount.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200";
+                tableCount.innerText = `${paidBookings.length} รายการ`;
+                thead.innerHTML = `
+                    <tr>
+                        <th class="px-3 py-2 w-16">วันที่</th>
+                        <th class="px-3 py-2">บ้านเลขที่ / เวลา</th>
+                        <th class="px-3 py-2 text-right">ยอดเงิน / สลิป</th>
+                    </tr>
+                `;
+
+                if (paidBookings.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-400">ไม่มีรายการใช้ไฟในเดือนนี้</td></tr>`;
+                } else {
+                    const sortedPaid = [...paidBookings].sort((a, b) => b.date.localeCompare(a.date) || a.startTime.localeCompare(b.startTime));
+                    sortedPaid.forEach(b => {
+                        const [y, m, d] = b.date.split('-');
+                        tbody.innerHTML += `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-3 py-3 align-top font-semibold text-gray-700">${d}/${m}</td>
+                                <td class="px-3 py-3 align-top">
+                                    <div class="font-bold text-gray-800">บ้านเลขที่ ${b.houseNo}</div>
+                                    <div class="text-xs text-gray-500 mt-0.5"><i class="fa-regular fa-clock mr-1 text-amber-500"></i>${b.startTime} - ${b.endTime}</div>
+                                    ${b.note ? `<div class="text-[11px] text-gray-400 mt-0.5"><i class="fa-solid fa-note-sticky mr-1"></i>${b.note}</div>` : ''}
+                                </td>
+                                <td class="px-3 py-3 align-top text-right">
+                                    <span class="text-green-600 font-bold block mb-1">฿${b.amountPaid}</span>
+                                    <button onclick="openViewImages('${b.id}')" class="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded shadow-sm block ml-auto font-semibold hover:bg-blue-100">
+                                        <i class="fa-solid fa-image mr-1"></i>ดูสลิป/มิเตอร์
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
             }
-            renderChart(monthData);
+
+            renderDynamicChart(monthData);
         }
 
-        function renderChart(monthData) {
+        // กราฟเส้นแบบโค้งมน (Dynamic Smooth Line Chart) สลับข้อมูลระหว่างจำนวนจอง และ รายได้ค่าไฟ
+        function renderDynamicChart(monthData) {
             const ctx = document.getElementById('revenueChart').getContext('2d');
-            const wRev = [0, 0, 0, 0, 0];
-            monthData.filter(b => b.isLightUsed).forEach(b => {
-                const day = parseInt(b.date.split('-')[2]); const weekIdx = Math.floor((day - 1) / 7);
-                if(weekIdx < 5) wRev[weekIdx] += Number(b.amountPaid);
+            const wBookings = [0, 0, 0, 0, 0];
+            const wRevenue = [0, 0, 0, 0, 0];
+
+            monthData.forEach(b => {
+                if (b.date) {
+                    const day = parseInt(b.date.split('-')[2]);
+                    const weekIdx = Math.floor((day - 1) / 7);
+                    if (weekIdx < 5) {
+                        wBookings[weekIdx] += 1;
+                        if (b.isLightUsed) {
+                            wRevenue[weekIdx] += Number(b.amountPaid) || 0;
+                        }
+                    }
+                }
             });
 
+            const isRevenue = window.dashboardViewMode === 'revenue';
+            const chartData = isRevenue ? wRevenue : wBookings;
+            const chartLabel = isRevenue ? 'รายได้ค่าไฟ (บาท)' : 'จำนวนการจอง (ครั้ง)';
+            const lineColor = isRevenue ? '#f59e0b' : '#0d9488';
+            const fillColor = isRevenue ? 'rgba(245, 158, 11, 0.1)' : 'rgba(13, 148, 136, 0.1)';
+
             if(window.chartInstance) window.chartInstance.destroy();
-            window.chartInstance = new Chart(ctx, { type: 'bar', data: { labels: ['W1', 'W2', 'W3', 'W4', 'W5'], datasets: [{ label: 'รายได้ (บาท)', data: wRev, backgroundColor: '#0d9488', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            window.chartInstance = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels: ['W1', 'W2', 'W3', 'W4', 'W5'], 
+                    datasets: [{ 
+                        label: chartLabel, 
+                        data: chartData, 
+                        borderColor: lineColor, 
+                        backgroundColor: fillColor,
+                        borderWidth: 2.5,
+                        pointBackgroundColor: lineColor,
+                        pointRadius: 4,
+                        tension: 0.35,
+                        fill: true 
+                    }] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false } 
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: isRevenue ? 0 : 0 // บังคับให้แกน Y เป็นจำนวนเต็มเสมอ
+                            }
+                        }
+                    }
+                } 
+            });
         }
 
         window.exportPDF = function() {
-            document.getElementById('btnPrintPdf').classList.add('hidden'); document.getElementById('adminFilter').classList.add('hidden');
-            html2pdf().set({ margin: 10, filename: `Report_${document.getElementById('monthFilter').value}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(document.getElementById('pdfExportArea')).save().then(()=>{ document.getElementById('btnPrintPdf').classList.remove('hidden'); document.getElementById('adminFilter').classList.remove('hidden'); });
+            document.getElementById('btnPrintPdf').classList.add('hidden');
+            document.getElementById('monthFilterBox').classList.add('hidden');
+            html2pdf().set({
+                margin: 10,
+                filename: `Report_${document.getElementById('monthFilter').value}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(document.getElementById('pdfExportArea')).save().then(() => {
+                document.getElementById('btnPrintPdf').classList.remove('hidden');
+                setupAdminUI();
+            });
         }
 
         window.switchTab = function(tabId) {
@@ -600,82 +1067,164 @@
             document.querySelectorAll('.nav-btn').forEach(el => { el.classList.remove('text-primary'); el.classList.add('text-gray-400'); });
             document.getElementById('tab-' + tabId).classList.add('active');
             const aBtn = document.getElementById('nav-' + tabId); aBtn.classList.remove('text-gray-400'); aBtn.classList.add('text-primary');
-            if(tabId === 'booking' && window.calendar) window.calendar.updateSize(); if(tabId === 'dashboard') renderDashboard();
+            
+            if(tabId === 'booking' && window.calendar) {
+                window.calendar.updateSize();
+                window.renderBookingsForDate(window.selectedDate);
+            }
+            if(tabId === 'dashboard') {
+                window.setDashboardView('all');
+            }
         }
 
         function setupAdminUI() {
             document.getElementById('btnLoginIcon').classList.toggle('hidden', window.isAdmin);
             document.getElementById('userInfo').classList.toggle('hidden', !window.isAdmin);
-            document.getElementById('adminFilter').classList.toggle('hidden', !window.isAdmin);
-            document.getElementById('guardFilterNote').classList.toggle('hidden', window.isAdmin);
             document.getElementById('btnPrintPdf').classList.toggle('hidden', !window.isAdmin);
+
+            const canViewHistory = ALLOW_ALL_VIEW_HISTORY || window.isAdmin;
+            document.getElementById('monthFilterBox').classList.toggle('hidden', !canViewHistory);
+            document.getElementById('guardFilterNote').classList.toggle('hidden', canViewHistory);
         }
 
         window.performLogin = function() {
             if(document.getElementById('inpUser').value === 'admin' && document.getElementById('inpPass').value === 'admin') {
-                localStorage.setItem('isAdmin', 'true'); window.isAdmin = true; setupAdminUI(); window.closeModals(); window.showAlert('สำเร็จ', 'เข้าสู่ระบบนิติบุคคลเรียบร้อย', 'success');
+                localStorage.setItem('isAdmin', 'true');
+                window.isAdmin = true;
+                setupAdminUI();
+                window.closeModals();
+                window.showAlert('สำเร็จ', 'เข้าสู่ระบบนิติบุคคลเรียบร้อย', 'success');
+                window.renderBookingsForDate(window.selectedDate);
                 if(document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
-            } else { document.getElementById('loginError').classList.remove('hidden'); }
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
         }
 
-        window.logout = function() { localStorage.setItem('isAdmin', 'false'); window.isAdmin = false; setupAdminUI(); if(document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard(); }
+        window.logout = function() {
+            localStorage.setItem('isAdmin', 'false');
+            window.isAdmin = false;
+            setupAdminUI();
+            window.renderBookingsForDate(window.selectedDate);
+            if(document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
+        }
 
         window.openBookingModal = function() {
-            const di = document.getElementById('inpDate'); const t = new Date(); const m = new Date(); m.setDate(t.getDate() + 7);
-            di.min = getLocalISODate(t); di.max = getLocalISODate(m); di.value = window.selectedDate;
-            const md = document.getElementById('modalBooking'); md.classList.remove('hidden'); md.querySelector('div').classList.add('modal-enter'); setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
+            resetBookingForm();
+            document.getElementById('modalBookingTitle').innerText = 'บันทึกการจองสนาม (New Booking)';
+            document.getElementById('btnSaveBooking').innerText = 'บันทึกการจอง';
+
+            const di = document.getElementById('inpDate');
+            const t = new Date();
+            const m = new Date();
+            m.setDate(t.getDate() + 7);
+            di.min = getLocalISODate(t);
+            di.max = getLocalISODate(m);
+            di.value = window.selectedDate;
+
+            const md = document.getElementById('modalBooking');
+            md.classList.remove('hidden');
+            md.querySelector('div').classList.add('modal-enter');
+            setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
         }
 
         window.openLightModal = function(bookingId, houseNo, timeStr, hasSlip) {
-            document.getElementById('currentLightBookingId').value = bookingId; document.getElementById('lightHouseNo').innerText = houseNo; document.getElementById('lightTime').innerText = timeStr;
+            document.getElementById('currentLightBookingId').value = bookingId;
+            document.getElementById('lightHouseNo').innerText = houseNo;
+            document.getElementById('lightTime').innerText = timeStr;
             document.getElementById('delayedSlipSection').classList.toggle('hidden', hasSlip);
-            const md = document.getElementById('modalLight'); md.classList.remove('hidden'); md.querySelector('div').classList.add('modal-enter'); setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
+            const md = document.getElementById('modalLight');
+            md.classList.remove('hidden');
+            md.querySelector('div').classList.add('modal-enter');
+            setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
         }
 
         window.openViewImages = function(bookingId) {
             const b = window.allBookings.find(x => x.id === bookingId);
             if(b) {
-                const defImg = 'https://via.placeholder.com/400x400?text=No+Image';
-                document.getElementById('viewImgSlip').src = b.slipImg || defImg; document.getElementById('viewImgMeter').src = b.meterImg || defImg;
+                const defImg = 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image';
+                document.getElementById('viewImgSlip').src = b.slipImg || defImg;
+                document.getElementById('viewImgMeter').src = b.meterImg || defImg;
                 document.getElementById('modalViewImages').classList.remove('hidden');
             }
         }
 
-        window.openLoginModal = function() { document.getElementById('inpUser').value = ''; document.getElementById('inpPass').value = ''; document.getElementById('loginError').classList.add('hidden'); document.getElementById('modalLogin').classList.remove('hidden'); }
-        window.closeModals = function() { document.querySelectorAll('.fixed.inset-0').forEach(el => { if(el.id !== 'customAlert') el.classList.add('hidden'); }); }
-        window.closeImageModal = function() { document.getElementById('modalViewImages').classList.add('hidden'); }
+        window.openLoginModal = function() {
+            document.getElementById('inpUser').value = '';
+            document.getElementById('inpPass').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+            document.getElementById('modalLogin').classList.remove('hidden');
+        }
+
+        window.closeModals = function() {
+            document.querySelectorAll('.fixed.inset-0').forEach(el => {
+                if(el.id !== 'customAlert' && el.id !== 'loadingOverlay') el.classList.add('hidden');
+            });
+        }
+
+        window.closeImageModal = function() {
+            document.getElementById('modalViewImages').classList.add('hidden');
+        }
 
         window.copyAccount = function() {
-            const acc = "6631872448"; 
-            if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(acc).then(() => window.showAlert('คัดลอกแล้ว', 'คัดลอกบัญชีเรียบร้อย', 'success')).catch(() => fallbackCopy(acc)); } else { fallbackCopy(acc); }
+            const acc = "6631872448";
+            fallbackCopy(acc);
         }
-        function fallbackCopy(text) { const el = document.createElement('textarea'); el.value = text; el.style.position = 'fixed'; el.style.left = '-9999px'; document.body.appendChild(el); el.select(); try { document.execCommand('copy'); window.showAlert('คัดลอกแล้ว', 'คัดลอกบัญชีเรียบร้อย', 'success'); } catch (err) { window.showAlert('แจ้งเตือน', 'กรุณาคัดลอกเลขเอง', 'warning'); } document.body.removeChild(el); }
+
+        function fallbackCopy(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            el.style.position = 'fixed';
+            el.style.left = '-9999px';
+            document.body.appendChild(el);
+            el.select();
+            try {
+                document.execCommand('copy');
+                window.showAlert('คัดลอกแล้ว', 'คัดลอกเลขที่บัญชีเรียบร้อยแล้ว', 'success');
+            } catch (err) {
+                window.showAlert('แจ้งเตือน', 'กรุณาคัดลอกเลขบัญชีด้วยตนเอง', 'warning');
+            }
+            document.body.removeChild(el);
+        }
 
         window.showAlert = function(title, msg, type='info') {
-            const box = document.getElementById('customAlertBox'); const el = document.getElementById('customAlert'); const ic = document.getElementById('alertIcon');
-            document.getElementById('alertTitle').innerText = title; document.getElementById('alertMessage').innerText = msg;
-            if(type === 'success') ic.innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i>'; else if (type === 'error') ic.innerHTML = '<i class="fa-solid fa-circle-xmark text-red-500"></i>'; else if (type === 'warning') ic.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>'; else ic.innerHTML = '<i class="fa-solid fa-circle-info text-blue-500"></i>';
-            el.classList.remove('hidden'); setTimeout(() => { el.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
+            const box = document.getElementById('customAlertBox');
+            const el = document.getElementById('customAlert');
+            const ic = document.getElementById('alertIcon');
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = msg;
+            if(type === 'success') ic.innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i>';
+            else if (type === 'error') ic.innerHTML = '<i class="fa-solid fa-circle-xmark text-red-500"></i>';
+            else if (type === 'warning') ic.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>';
+            else ic.innerHTML = '<i class="fa-solid fa-circle-info text-blue-500"></i>';
+            el.classList.remove('hidden');
+            setTimeout(() => { el.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
         }
-        window.closeAlert = function() { const box = document.getElementById('customAlertBox'); const el = document.getElementById('customAlert'); el.classList.add('opacity-0'); box.classList.add('scale-95'); setTimeout(() => { el.classList.add('hidden'); }, 300); }
+
+        window.closeAlert = function() {
+            const box = document.getElementById('customAlertBox');
+            const el = document.getElementById('customAlert');
+            el.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            setTimeout(() => { el.classList.add('hidden'); }, 300);
+        }
     </script>
 
     <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🚨🚨🚨 วาง Config ของคุณที่นี่ (สำคัญมาก: ห้ามปล่อยว่าง!) 🚨🚨🚨
+        // 🚨🚨🚨 Config ของโครงการ Laddarom Elegance 🚨🚨🚨
         const myNetlifyFirebaseConfig = {
             apiKey: "AIzaSyCXuj7Pl1JnBn2Y7BtyzkHHQm4MQH-isrM",
-  authDomain: "time-attendance-69699.firebaseapp.com",
-  projectId: "time-attendance-69699",
-  storageBucket: "time-attendance-69699.firebasestorage.app",
-  messagingSenderId: "793986547170",
-  appId: "1:793986547170:web:337bfe602d9b3e32f34dbb"
+            authDomain: "time-attendance-69699.firebaseapp.com",
+            projectId: "time-attendance-69699",
+            storageBucket: "time-attendance-69699.firebasestorage.app",
+            messagingSenderId: "793986547170",
+            appId: "1:793986547170:web:337bfe602d9b3e32f34dbb"
         };
-        // 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
         
         let db, auth;
         const COURT_APP_ID = 'laddarom-court-app'; 
@@ -683,7 +1232,9 @@
 
         async function initFirebase() {
             try {
-                const finalConfig = (typeof __firebase_config !== 'undefined' && Object.keys(myNetlifyFirebaseConfig).length === 0) ? JSON.parse(__firebase_config) : myNetlifyFirebaseConfig;
+                const finalConfig = (typeof __firebase_config !== 'undefined' && Object.keys(myNetlifyFirebaseConfig).length === 0)
+                    ? JSON.parse(__firebase_config)
+                    : myNetlifyFirebaseConfig;
                 
                 if (Object.keys(finalConfig).length === 0) {
                     throw new Error("Missing Firebase Configuration");
@@ -693,36 +1244,42 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                await signInAnonymously(auth);
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
                 
-                // ถ้าระบบเชื่อมต่อสำเร็จ ให้ล้างเวลา Fail-Safe ออกไป
                 firebaseLoaded = true;
                 clearTimeout(failSafeTimer);
                 
-                // ปิดหน้าจอโหลด
                 const overlay = document.getElementById('loadingOverlay');
                 if(overlay) overlay.style.display = 'none';
                 
-                // วาดปฏิทิน
                 window.initAppUI(); 
                 
-                // เริ่มดึงข้อมูล Real-time
-                onSnapshot(collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings'), (snapshot) => {
-                    window.allBookings = [];
-                    snapshot.forEach(doc => { 
-                        let data = doc.data();
-                        data.id = doc.id; 
-                        window.allBookings.push(data); 
-                    });
-                    
-                    window.refreshCalendarEvents();
-                    
-                    if(document.getElementById('tab-booking').classList.contains('active')) {
-                        window.renderBookingsForDate(window.selectedDate);
-                    } else if(document.getElementById('tab-dashboard').classList.contains('active')) {
-                        window.renderDashboard();
+                onSnapshot(
+                    collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings'),
+                    (snapshot) => {
+                        window.allBookings = [];
+                        snapshot.forEach(docSnap => { 
+                            let data = docSnap.data();
+                            data.id = docSnap.id; 
+                            window.allBookings.push(data); 
+                        });
+                        
+                        window.refreshCalendarEvents();
+                        
+                        if(document.getElementById('tab-booking').classList.contains('active')) {
+                            window.renderBookingsForDate(window.selectedDate);
+                        } else if(document.getElementById('tab-dashboard').classList.contains('active')) {
+                            window.renderDashboard();
+                        }
+                    },
+                    (error) => {
+                        console.error("Firestore Listener Error:", error);
                     }
-                });
+                );
 
             } catch (error) {
                 console.error("Firebase Error:", error);
@@ -736,14 +1293,32 @@
             }
         }
 
+        // สร้างรายการจองใหม่
         window.cloudSaveBooking = async function(bookingData) {
             try {
-                const docId = `B_${Date.now()}_${bookingData.houseNo.replace('/','-')}`; 
+                const docId = `B_${Date.now()}_${bookingData.houseNo.replace(/\//g,'-')}`; 
                 await setDoc(doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings', docId), bookingData);
                 return true;
             } catch (e) { console.error(e); return false; }
         };
 
+        // แก้ไขข้อมูลการจอง
+        window.cloudUpdateBooking = async function(bookingId, bookingData) {
+            try {
+                await updateDoc(doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings', bookingId), bookingData);
+                return true;
+            } catch (e) { console.error(e); return false; }
+        };
+
+        // ลบรายการจอง
+        window.cloudDeleteBooking = async function(bookingId) {
+            try {
+                await deleteDoc(doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings', bookingId));
+                return true;
+            } catch (e) { console.error(e); return false; }
+        };
+
+        // อัปเดตข้อมูลสลิปและมิเตอร์ไฟ
         window.cloudUpdateLight = async function(bookingId, updateData) {
             try {
                 await updateDoc(doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', 'bookings', bookingId), updateData);
