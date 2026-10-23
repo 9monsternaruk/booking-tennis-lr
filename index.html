@@ -10,6 +10,10 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- นำเข้า Viewer.js สำหรับการซูมภาพบนมือถือและทุกอุปกรณ์ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -441,20 +445,20 @@
         </div>
     </div>
 
-    <!-- Modal: View Images -->
+    <!-- Modal: View Images (รองรับ Viewer.js) -->
     <div id="modalViewImages" class="fixed inset-0 bg-black/80 z-[60] hidden flex flex-col items-center justify-center p-4">
-        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 transition"><i class="fa-solid fa-xmark"></i></button>
-        <div class="w-full max-w-lg bg-white rounded-xl p-4 overflow-y-auto max-h-[90vh]">
+        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 transition z-[70]"><i class="fa-solid fa-xmark"></i></button>
+        <div class="w-full max-w-lg bg-white rounded-xl p-4 overflow-y-auto max-h-[90vh]" id="galleryContainer">
             <div id="cleanedImageBanner" class="hidden mb-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs p-2.5 rounded-lg text-center font-semibold">
                 <i class="fa-solid fa-clock-rotate-left mr-1"></i> รูปภาพในรายการนี้ถูกลบออกอัตโนมัติเนื่องจากเก่าเกิน 3 เดือน (เพื่อประหยัดพื้นที่ฐานข้อมูล)
             </div>
             <h4 class="text-center font-bold mb-2 text-gray-800">สลิปโอนเงิน (Slip)</h4>
             <div class="mb-4 text-center">
-                <img id="viewImgSlip" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded border mx-auto">
+                <img id="viewImgSlip" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded border mx-auto cursor-pointer">
             </div>
             <h4 class="text-center font-bold mb-2 text-gray-800">มิเตอร์ไฟ (Meter)</h4>
             <div class="text-center">
-                <img id="viewImgMeter" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded border mx-auto">
+                <img id="viewImgMeter" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded border mx-auto cursor-pointer">
             </div>
         </div>
     </div>
@@ -519,6 +523,9 @@
         var chartInstance = null;
         var isAdmin = localStorage.getItem('isAdmin') === 'true';
         var dashboardViewMode = 'all'; // 'all' = รายการจองทั้งหมด, 'revenue' = รายการที่มีการใช้ไฟ
+        
+        // ประกาศตัวแปรเก็บ Viewer ไว้ด้านนอก
+        let imageViewer = null;
         
         var firebaseLoaded = false;
         var failSafeTimer = setTimeout(function() {
@@ -1243,9 +1250,44 @@
             if(b) {
                 const defImg = 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image';
                 document.getElementById('cleanedImageBanner').classList.toggle('hidden', !b.isImageCleaned);
+                
+                // กำหนดรูปภาพ
                 document.getElementById('viewImgSlip').src = b.slipImg || defImg;
                 document.getElementById('viewImgMeter').src = b.meterImg || defImg;
+                
+                // แสดงหน้าต่าง Modal
                 document.getElementById('modalViewImages').classList.remove('hidden');
+
+                // เริ่มการทำงานของระบบซูม Viewer.js
+                const gallery = document.getElementById('galleryContainer');
+                
+                // ล้างค่าเก่าก่อนเสมอเพื่อป้องกันการเรียกทับซ้อนกัน
+                if (imageViewer) {
+                    imageViewer.destroy();
+                }
+                
+                imageViewer = new Viewer(gallery, {
+                    inline: false,
+                    button: true,
+                    navbar: false,
+                    title: false,
+                    toolbar: {
+                        zoomIn: 1,
+                        zoomOut: 1,
+                        oneToOne: 1,
+                        reset: 1,
+                        rotateLeft: 1,
+                        rotateRight: 1,
+                    },
+                    tooltip: false,
+                    movable: true,
+                    zoomable: true,
+                    rotatable: true,
+                    scalable: true,
+                    filter(image) {
+                        return image.id === 'viewImgSlip' || image.id === 'viewImgMeter';
+                    }
+                });
             }
         }
 
@@ -1264,6 +1306,10 @@
 
         window.closeImageModal = function() {
             document.getElementById('modalViewImages').classList.add('hidden');
+            if (imageViewer) {
+                imageViewer.destroy();
+                imageViewer = null;
+            }
         }
 
         window.copyAccount = function() {
