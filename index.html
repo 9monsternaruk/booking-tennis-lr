@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -10,10 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <!-- นำเข้า Viewer.js สำหรับการซูมภาพบนมือถือและทุกอุปกรณ์ -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -101,6 +98,30 @@
         .toggle-checkbox:checked + .toggle-label { background-color: #0d9488; }
         
         #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index: 100; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+
+        /* ------------------------------------------------------------------
+           Pinch-to-Zoom & Pan Image Stage Styles (รองรับทุกอุปกรณ์)
+        ------------------------------------------------------------------ */
+        .zoom-stage {
+            position: relative;
+            overflow: hidden;
+            touch-action: none; /* ป้องกันเบราว์เซอร์แย่ง Event นิ้วสัมผัส */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            background-color: #f3f4f6;
+            cursor: grab;
+        }
+        .zoom-stage:active {
+            cursor: grabbing;
+        }
+        .zoom-target-img {
+            transform-origin: center center;
+            will-change: transform;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
     </style>
 </head>
 <body class="text-gray-800 pb-20 relative">
@@ -445,20 +466,122 @@
         </div>
     </div>
 
-    <!-- Modal: View Images (รองรับ Viewer.js) -->
-    <div id="modalViewImages" class="fixed inset-0 bg-black/80 z-[60] hidden flex flex-col items-center justify-center p-4">
-        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 transition z-[70]"><i class="fa-solid fa-xmark"></i></button>
-        <div class="w-full max-w-lg bg-white rounded-xl p-4 overflow-y-auto max-h-[90vh]" id="galleryContainer">
-            <div id="cleanedImageBanner" class="hidden mb-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs p-2.5 rounded-lg text-center font-semibold">
-                <i class="fa-solid fa-clock-rotate-left mr-1"></i> รูปภาพในรายการนี้ถูกลบออกอัตโนมัติเนื่องจากเก่าเกิน 3 เดือน (เพื่อประหยัดพื้นที่ฐานข้อมูล)
+    <!-- Modal: View Images (รองรับการใช้นิ้วถ่างซูมได้ทันทีในกรอบภาพ + ปุ่มซูม + ขยายเต็มจอ) -->
+    <div id="modalViewImages" class="fixed inset-0 bg-black/80 z-[60] hidden flex flex-col items-center justify-center p-3 sm:p-4">
+        <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            <!-- ส่วนหัว Modal -->
+            <div class="bg-gray-800 text-white px-4 py-2.5 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2 text-xs sm:text-sm font-semibold">
+                    <i class="fa-solid fa-magnifying-glass-plus text-accent"></i>
+                    <span>ใช้นิ้วถ่างซูมที่ภาพได้ทันที หรือแตะเพื่อขยายเต็มจอ</span>
+                </div>
+                <button onclick="closeImageModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-lg transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <h4 class="text-center font-bold mb-2 text-gray-800">สลิปโอนเงิน (Slip)</h4>
-            <div class="mb-4 text-center">
-                <img id="viewImgSlip" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded border mx-auto cursor-pointer">
+
+            <!-- เนื้อหารูปภาพ -->
+            <div class="p-3 sm:p-4 overflow-y-auto space-y-4 grow" id="galleryContainer">
+                <div id="cleanedImageBanner" class="hidden bg-amber-50 border border-amber-200 text-amber-800 text-xs p-2.5 rounded-lg text-center font-semibold">
+                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> รูปภาพในรายการนี้ถูกลบออกอัตโนมัติเนื่องจากเก่าเกิน 3 เดือน (เพื่อประหยัดพื้นที่ฐานข้อมูล)
+                </div>
+
+                <!-- กรอบที่ 1: สลิปโอนเงิน -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 shadow-sm">
+                    <div class="flex justify-between items-center px-3 py-1.5 bg-white border-b border-gray-200">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-receipt text-primary"></i> สลิปโอนเงิน (Slip)
+                        </h4>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="zoomCardImage('slip', -0.5)" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs flex items-center justify-center" title="ซูมออก">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <span id="zoomBadgeSlip" class="text-[11px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded min-w-[42px] text-center">100%</span>
+                            <button type="button" onclick="zoomCardImage('slip', 0.5)" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs flex items-center justify-center" title="ซูมเข้า">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                            <button type="button" onclick="resetCardImage('slip')" class="px-2 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-semibold" title="รีเซ็ต">
+                                รีเซ็ต
+                            </button>
+                            <button type="button" onclick="openFullScreenZoom('slip')" class="px-2 h-7 rounded bg-primary text-white hover:bg-secondary text-[11px] font-semibold flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-expand"></i> เต็มจอ
+                            </button>
+                        </div>
+                    </div>
+                    <div id="stageSlip" class="zoom-stage w-full h-[32vh] flex items-center justify-center">
+                        <img id="viewImgSlip" class="zoom-target-img max-w-full max-h-full object-contain" alt="Slip">
+                    </div>
+                </div>
+
+                <!-- กรอบที่ 2: มิเตอร์ไฟ -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 shadow-sm">
+                    <div class="flex justify-between items-center px-3 py-1.5 bg-white border-b border-gray-200">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-gauge-high text-accent"></i> มิเตอร์ไฟ (Meter)
+                        </h4>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="zoomCardImage('meter', -0.5)" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs flex items-center justify-center" title="ซูมออก">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <span id="zoomBadgeMeter" class="text-[11px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded min-w-[42px] text-center">100%</span>
+                            <button type="button" onclick="zoomCardImage('meter', 0.5)" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs flex items-center justify-center" title="ซูมเข้า">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                            <button type="button" onclick="resetCardImage('meter')" class="px-2 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-semibold" title="รีเซ็ต">
+                                รีเซ็ต
+                            </button>
+                            <button type="button" onclick="openFullScreenZoom('meter')" class="px-2 h-7 rounded bg-primary text-white hover:bg-secondary text-[11px] font-semibold flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-expand"></i> เต็มจอ
+                            </button>
+                        </div>
+                    </div>
+                    <div id="stageMeter" class="zoom-stage w-full h-[32vh] flex items-center justify-center">
+                        <img id="viewImgMeter" class="zoom-target-img max-w-full max-h-full object-contain" alt="Meter">
+                    </div>
+                </div>
             </div>
-            <h4 class="text-center font-bold mb-2 text-gray-800">มิเตอร์ไฟ (Meter)</h4>
-            <div class="text-center">
-                <img id="viewImgMeter" class="w-full max-h-[35vh] object-contain bg-gray-100 rounded border mx-auto cursor-pointer">
+        </div>
+    </div>
+
+    <!-- Modal: Full-Screen Super Zoom (โหมดขยายเต็มจอ ถ่างนิ้วซูมและเลื่อนดูได้ทั่วทั้งจอ) -->
+    <div id="modalFullScreenZoom" class="fixed inset-0 bg-black/95 z-[90] hidden flex flex-col justify-between select-none">
+        <!-- แถบด้านบน: สลับดูรูปสลิป / มิเตอร์ไฟ และปุ่มปิด -->
+        <div class="flex justify-between items-center px-3 py-3 bg-black/70 backdrop-blur-sm z-10 border-b border-white/10">
+            <div class="flex items-center gap-2">
+                <button type="button" id="fsTabSlip" onclick="switchFullScreenTab('slip')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-primary text-white">
+                    <i class="fa-solid fa-receipt"></i> สลิปโอนเงิน
+                </button>
+                <button type="button" id="fsTabMeter" onclick="switchFullScreenTab('meter')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white/10 text-gray-300 hover:bg-white/20">
+                    <i class="fa-solid fa-gauge-high"></i> มิเตอร์ไฟ
+                </button>
+            </div>
+            <button type="button" onclick="closeFullScreenZoom()" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-xl transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- พื้นที่ซูมภาพเต็มจอ -->
+        <div id="stageFullScreen" class="zoom-stage grow w-full h-full flex items-center justify-center bg-black">
+            <img id="viewImgFullScreen" class="zoom-target-img max-w-full max-h-full object-contain" alt="Full Screen Zoom">
+        </div>
+
+        <!-- แถบเครื่องมือซูมด้านล่าง -->
+        <div class="flex flex-col items-center gap-1.5 px-4 py-3 bg-black/70 backdrop-blur-sm z-10 border-t border-white/10">
+            <p class="text-[11px] text-gray-300"><i class="fa-solid fa-hand-sparkles text-accent mr-1"></i>ใช้นิ้วถ่างเพื่อซูม • ลากนิ้วเพื่อเลื่อนดู • แตะ 2 ครั้งเพื่อซูมด่วน</p>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="zoomFullScreen(-0.6)" class="w-10 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-sm active:scale-95 transition">
+                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                </button>
+                <span id="zoomBadgeFullScreen" class="text-xs font-bold text-white bg-white/10 px-3 py-1.5 rounded-lg min-w-[64px] text-center">100%</span>
+                <button type="button" onclick="zoomFullScreen(0.6)" class="w-10 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-sm active:scale-95 transition">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+                <button type="button" onclick="rotateFullScreen()" class="w-10 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-sm active:scale-95 transition" title="หมุนภาพ">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <button type="button" onclick="resetFullScreen()" class="px-3 h-9 rounded-lg bg-accent text-white font-bold text-xs active:scale-95 transition">
+                    รีเซ็ต
+                </button>
             </div>
         </div>
     </div>
@@ -524,9 +647,6 @@
         var isAdmin = localStorage.getItem('isAdmin') === 'true';
         var dashboardViewMode = 'all'; // 'all' = รายการจองทั้งหมด, 'revenue' = รายการที่มีการใช้ไฟ
         
-        // ประกาศตัวแปรเก็บ Viewer ไว้ด้านนอก
-        let imageViewer = null;
-        
         var firebaseLoaded = false;
         var failSafeTimer = setTimeout(function() {
             if(!firebaseLoaded) {
@@ -537,10 +657,272 @@
             }
         }, 5000);
 
+        // =========================================================================
+        // ระบบ Multi-Touch Pinch-to-Zoom & Pan รองรับทุกอุปกรณ์ (iOS / Android / PC)
+        // =========================================================================
+        const zoomControllers = {};
+        let currentFullScreenType = 'slip';
+
+        function createPinchZoomController(stageId, imgId, badgeId, options = {}) {
+            const stage = document.getElementById(stageId);
+            const img = document.getElementById(imgId);
+            const badge = document.getElementById(badgeId);
+            const scrollParent = document.getElementById('galleryContainer');
+
+            let scale = 1;
+            let pointX = 0;
+            let pointY = 0;
+            let rotation = 0;
+
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            let initialPinchDistance = null;
+            let initialScale = 1;
+            let lastTapTime = 0;
+            let movedDuringTouch = false;
+            let touchStartScrollY = 0;
+            let touchStartRawY = 0;
+
+            const MIN_SCALE = 1;
+            const MAX_SCALE = 6;
+
+            function clampPan() {
+                if (scale <= 1) {
+                    pointX = 0;
+                    pointY = 0;
+                    return;
+                }
+                const rect = stage.getBoundingClientRect();
+                const maxPanX = ((rect.width * scale) - rect.width) / 2;
+                const maxPanY = ((rect.height * scale) - rect.height) / 2;
+                pointX = Math.min(Math.max(pointX, -maxPanX), maxPanX);
+                pointY = Math.min(Math.max(pointY, -maxPanY), maxPanY);
+            }
+
+            function updateTransform(animate = false) {
+                clampPan();
+                img.style.transition = animate ? 'transform 0.18s ease-out' : 'none';
+                img.style.transform = `translate3d(${pointX}px, ${pointY}px, 0) scale(${scale}) rotate(${rotation}deg)`;
+                if (badge) {
+                    badge.innerText = `${Math.round(scale * 100)}%`;
+                }
+            }
+
+            function getTouchDistance(t1, t2) {
+                const dx = t1.clientX - t2.clientX;
+                const dy = t1.clientY - t2.clientY;
+                return Math.hypot(dx, dy);
+            }
+
+            // Touch Start
+            stage.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    isDragging = false;
+                    movedDuringTouch = true;
+                    initialPinchDistance = getTouchDistance(e.touches[0], e.touches[1]);
+                    initialScale = scale;
+                } else if (e.touches.length === 1) {
+                    movedDuringTouch = false;
+                    startX = e.touches[0].clientX - pointX;
+                    startY = e.touches[0].clientY - pointY;
+                    touchStartRawY = e.touches[0].clientY;
+                    if (scrollParent) {
+                        touchStartScrollY = scrollParent.scrollTop;
+                    }
+                    isDragging = true;
+                }
+            }, { passive: false });
+
+            // Touch Move
+            stage.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 2 && initialPinchDistance) {
+                    e.preventDefault();
+                    movedDuringTouch = true;
+                    const currentDist = getTouchDistance(e.touches[0], e.touches[1]);
+                    const ratio = currentDist / initialPinchDistance;
+                    scale = Math.min(Math.max(initialScale * ratio, MIN_SCALE), MAX_SCALE);
+                    updateTransform(false);
+                } else if (e.touches.length === 1 && isDragging) {
+                    const dyRaw = e.touches[0].clientY - touchStartRawY;
+                    if (Math.abs(e.touches[0].clientX - (startX + pointX)) > 6 || Math.abs(dyRaw) > 6) {
+                        movedDuringTouch = true;
+                    }
+
+                    if (scale > 1) {
+                        // เมื่อซูมอยู่ ให้ใช้นิ้วลากดูส่วนต่างๆ ของภาพได้อิสระ
+                        e.preventDefault();
+                        pointX = e.touches[0].clientX - startX;
+                        pointY = e.touches[0].clientY - startY;
+                        updateTransform(false);
+                    } else if (!options.isFullScreen && scrollParent) {
+                        // เมื่อขนาด 100% ในหน้าต่างปกติ ให้เลื่อนขึ้น-ลงหน้าต่าง Modal ได้ตามธรรมชาติ
+                        scrollParent.scrollTop = touchStartScrollY - dyRaw;
+                    }
+                }
+            }, { passive: false });
+
+            // Touch End
+            stage.addEventListener('touchend', function(e) {
+                if (e.touches.length < 2) {
+                    initialPinchDistance = null;
+                }
+                if (e.touches.length === 1) {
+                    // สลับจาก 2 นิ้วเหลือ 1 นิ้ว ให้ลากต่อได้ไม่กระตุก
+                    startX = e.touches[0].clientX - pointX;
+                    startY = e.touches[0].clientY - pointY;
+                    isDragging = true;
+                } else if (e.touches.length === 0) {
+                    isDragging = false;
+                    if (scale < 1.02) {
+                        scale = 1;
+                        pointX = 0;
+                        pointY = 0;
+                        updateTransform(true);
+                    }
+
+                    // ตรวจจับการแตะ 2 ครั้งติดกัน (Double Tap เพื่อซูมด่วน)
+                    if (!movedDuringTouch) {
+                        const now = Date.now();
+                        if (now - lastTapTime < 300) {
+                            e.preventDefault();
+                            if (scale > 1) {
+                                scale = 1;
+                                pointX = 0;
+                                pointY = 0;
+                            } else {
+                                scale = 2.6;
+                            }
+                            updateTransform(true);
+                            lastTapTime = 0;
+                        } else {
+                            lastTapTime = now;
+                        }
+                    }
+                }
+            }, { passive: false });
+
+            // รองรับเมาส์บนคอมพิวเตอร์ (Wheel Zoom + Drag)
+            stage.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const delta = e.deltaY < 0 ? 0.35 : -0.35;
+                scale = Math.min(Math.max(scale + delta, MIN_SCALE), MAX_SCALE);
+                updateTransform(false);
+            }, { passive: false });
+
+            stage.addEventListener('mousedown', function(e) {
+                if (scale <= 1) return;
+                e.preventDefault();
+                isDragging = true;
+                startX = e.clientX - pointX;
+                startY = e.clientY - pointY;
+            });
+
+            window.addEventListener('mousemove', function(e) {
+                if (!isDragging || scale <= 1) return;
+                pointX = e.clientX - startX;
+                pointY = e.clientY - startY;
+                updateTransform(false);
+            });
+
+            window.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+
+            return {
+                zoomBy(delta) {
+                    scale = Math.min(Math.max(scale + delta, MIN_SCALE), MAX_SCALE);
+                    updateTransform(true);
+                },
+                rotateRight() {
+                    rotation = (rotation + 90) % 360;
+                    updateTransform(true);
+                },
+                reset() {
+                    scale = 1;
+                    pointX = 0;
+                    pointY = 0;
+                    rotation = 0;
+                    updateTransform(true);
+                }
+            };
+        }
+
+        function initZoomControllers() {
+            if (!zoomControllers.slip) {
+                zoomControllers.slip = createPinchZoomController('stageSlip', 'viewImgSlip', 'zoomBadgeSlip', { isFullScreen: false });
+            }
+            if (!zoomControllers.meter) {
+                zoomControllers.meter = createPinchZoomController('stageMeter', 'viewImgMeter', 'zoomBadgeMeter', { isFullScreen: false });
+            }
+            if (!zoomControllers.fullScreen) {
+                zoomControllers.fullScreen = createPinchZoomController('stageFullScreen', 'viewImgFullScreen', 'zoomBadgeFullScreen', { isFullScreen: true });
+            }
+        }
+
+        window.zoomCardImage = function(type, delta) {
+            if (zoomControllers[type]) zoomControllers[type].zoomBy(delta);
+        };
+
+        window.resetCardImage = function(type) {
+            if (zoomControllers[type]) zoomControllers[type].reset();
+        };
+
+        window.openFullScreenZoom = function(type) {
+            currentFullScreenType = type;
+            const modal = document.getElementById('modalFullScreenZoom');
+            modal.classList.remove('hidden');
+            window.switchFullScreenTab(type);
+        };
+
+        window.switchFullScreenTab = function(type) {
+            currentFullScreenType = type;
+            const slipSrc = document.getElementById('viewImgSlip').src;
+            const meterSrc = document.getElementById('viewImgMeter').src;
+            const fsImg = document.getElementById('viewImgFullScreen');
+
+            const tabSlip = document.getElementById('fsTabSlip');
+            const tabMeter = document.getElementById('fsTabMeter');
+
+            if (type === 'slip') {
+                fsImg.src = slipSrc;
+                tabSlip.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-primary text-white shadow";
+                tabMeter.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white/10 text-gray-300 hover:bg-white/20";
+            } else {
+                fsImg.src = meterSrc;
+                tabMeter.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-accent text-white shadow";
+                tabSlip.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white/10 text-gray-300 hover:bg-white/20";
+            }
+
+            if (zoomControllers.fullScreen) {
+                zoomControllers.fullScreen.reset();
+            }
+        };
+
+        window.zoomFullScreen = function(delta) {
+            if (zoomControllers.fullScreen) zoomControllers.fullScreen.zoomBy(delta);
+        };
+
+        window.rotateFullScreen = function() {
+            if (zoomControllers.fullScreen) zoomControllers.fullScreen.rotateRight();
+        };
+
+        window.resetFullScreen = function() {
+            if (zoomControllers.fullScreen) zoomControllers.fullScreen.reset();
+        };
+
+        window.closeFullScreenZoom = function() {
+            document.getElementById('modalFullScreenZoom').classList.add('hidden');
+            if (zoomControllers.fullScreen) zoomControllers.fullScreen.reset();
+        };
+        // =========================================================================
+
         window.initAppUI = function() {
             document.getElementById('monthFilter').value = getCurrentYearMonth();
             setupAdminUI();
             initCalendar();
+            initZoomControllers();
         }
 
         function toggleLightUploadSection() {
@@ -1248,6 +1630,7 @@
         window.openViewImages = function(bookingId) {
             const b = window.allBookings.find(x => x.id === bookingId);
             if(b) {
+                initZoomControllers();
                 const defImg = 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image';
                 document.getElementById('cleanedImageBanner').classList.toggle('hidden', !b.isImageCleaned);
                 
@@ -1255,39 +1638,12 @@
                 document.getElementById('viewImgSlip').src = b.slipImg || defImg;
                 document.getElementById('viewImgMeter').src = b.meterImg || defImg;
                 
+                // รีเซ็ตระดับการซูมเริ่มต้นที่ 100%
+                if (zoomControllers.slip) zoomControllers.slip.reset();
+                if (zoomControllers.meter) zoomControllers.meter.reset();
+                
                 // แสดงหน้าต่าง Modal
                 document.getElementById('modalViewImages').classList.remove('hidden');
-
-                // เริ่มการทำงานของระบบซูม Viewer.js
-                const gallery = document.getElementById('galleryContainer');
-                
-                // ล้างค่าเก่าก่อนเสมอเพื่อป้องกันการเรียกทับซ้อนกัน
-                if (imageViewer) {
-                    imageViewer.destroy();
-                }
-                
-                imageViewer = new Viewer(gallery, {
-                    inline: false,
-                    button: true,
-                    navbar: false,
-                    title: false,
-                    toolbar: {
-                        zoomIn: 1,
-                        zoomOut: 1,
-                        oneToOne: 1,
-                        reset: 1,
-                        rotateLeft: 1,
-                        rotateRight: 1,
-                    },
-                    tooltip: false,
-                    movable: true,
-                    zoomable: true,
-                    rotatable: true,
-                    scalable: true,
-                    filter(image) {
-                        return image.id === 'viewImgSlip' || image.id === 'viewImgMeter';
-                    }
-                });
             }
         }
 
@@ -1306,10 +1662,10 @@
 
         window.closeImageModal = function() {
             document.getElementById('modalViewImages').classList.add('hidden');
-            if (imageViewer) {
-                imageViewer.destroy();
-                imageViewer = null;
-            }
+            document.getElementById('modalFullScreenZoom').classList.add('hidden');
+            if (zoomControllers.slip) zoomControllers.slip.reset();
+            if (zoomControllers.meter) zoomControllers.meter.reset();
+            if (zoomControllers.fullScreen) zoomControllers.fullScreen.reset();
         }
 
         window.copyAccount = function() {
