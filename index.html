@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -35,13 +36,12 @@
         .tab-content.active { display: block; }
         
         /* ------------------------------------------------------------------
-           Extreme Calendar Optimization (เพื่อให้เห็นข้อมูลครบจบในหน้าจอเดียว) 
+           Extreme Calendar Optimization 
         ------------------------------------------------------------------ */
         #calendar { font-size: 0.85rem; }
         .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 600 !important; }
         .fc-header-toolbar { margin-bottom: 0.5rem !important; }
         
-        /* รีดพื้นที่ด้านในช่องวันที่ให้กระชับและเรียงจุดแนวนอนสวยงาม */
         .fc .fc-daygrid-day-frame {
             min-height: 36px !important;
             padding-top: 2px !important;
@@ -55,7 +55,6 @@
         .fc .fc-daygrid-day.fc-day-today { background-color: #e0f2fe !important; }
         .fc .fc-daygrid-day.selected-day-highlight { background-color: #ccfbf1 !important; box-shadow: inset 0 0 0 1.5px #0d9488; }
         
-        /* ซ่อนกรอบ Event เริ่มต้นของ FullCalendar เพื่อให้แสดงเฉพาะแถวจุดสีแนวนอน */
         .fc-daygrid-day-events { margin: 0 !important; padding: 0 !important; min-height: 10px !important; }
         .fc-daygrid-event-harness { margin: 0 !important; }
         .fc-h-event, .fc-daygrid-event {
@@ -66,10 +65,8 @@
         }
         .fc-daygrid-day-bottom { display: none !important; }
 
-        /* ปุ่มเลื่อนเดือน */
         .fc-button-primary { background-color: #0d9488 !important; border-color: #0d9488 !important; padding: 0.2rem 0.5rem !important; }
         
-        /* จุดสีแสดงจำนวนรายการจอง (สีแดงสดตัดขอบขาว เด่นชัดบนทุกพื้นหลัง เรียงแนวนอน) */
         .booking-dots-row {
             display: flex;
             justify-content: center;
@@ -84,12 +81,11 @@
             width: 7px;
             height: 7px;
             border-radius: 9999px;
-            background-color: #ef4444; /* สีแดงสดตัดกับพื้นขาว/ฟ้า/เขียวชัดเจน */
+            background-color: #ef4444; 
             border: 1px solid #ffffff;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
             flex-shrink: 0;
         }
-        /* ------------------------------------------------------------------ */
         
         .modal-enter { opacity: 0; transform: scale(0.95); }
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms, transform 200ms; }
@@ -98,9 +94,6 @@
         
         #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index: 100; display:flex; flex-direction:column; justify-content:center; align-items:center; }
 
-        /* ------------------------------------------------------------------
-           Pinch-to-Zoom & Pan Image Stage Styles (รองรับทุกอุปกรณ์)
-        ------------------------------------------------------------------ */
         .zoom-stage {
             position: relative;
             overflow: hidden;
@@ -182,7 +175,7 @@
         <section id="tab-dashboard" class="tab-content">
             <div class="bg-white rounded-xl shadow p-4 mb-4" id="pdfExportArea">
                 <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-chart-pie text-primary mr-2"></i> สรุปยอดจองสนามเทนนิส (Dashboard)</h2>
+                    <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-chart-pie text-primary mr-2"></i> สรุปยอดจองสนาม (Dashboard)</h2>
                     <button id="btnPrintPdf" onclick="exportPDF()" class="hidden bg-gray-800 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-700 transition flex items-center gap-2">
                         <i class="fa-solid fa-print"></i> PDF
                     </button>
@@ -263,44 +256,110 @@
             </div>
         </section>
 
-        <!-- TAB 3: Info -->
+        <!-- TAB 3: Info (อัปเดตภาษาอังกฤษ + ปรับ Layout สวยงาม) -->
         <section id="tab-info" class="tab-content">
-            <div class="bg-white rounded-xl shadow p-5 mb-4 space-y-6">
-                <h2 class="text-xl font-bold text-gray-700 border-b pb-2"><i class="fa-solid fa-circle-info text-primary mr-2"></i> ข้อมูล & กฎระเบียบ</h2>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-4 space-y-6">
+                <h2 class="text-xl font-bold text-gray-800 border-b border-gray-100 pb-3 flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mr-3 shadow-inner">
+                        <i class="fa-solid fa-circle-info text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="leading-tight">ข้อมูลและกฎระเบียบ</div>
+                        <div class="text-[11px] text-gray-500 font-normal uppercase tracking-wide">Information & Rules</div>
+                    </div>
+                </h2>
                 
-                <div class="bg-sky-50 p-4 rounded-lg border border-sky-100 relative overflow-hidden">
-                    <div class="absolute top-2 right-2 text-sky-200 opacity-30 text-6xl"><i class="fa-solid fa-building-columns"></i></div>
+                <!-- Payment Section -->
+                <div class="bg-gradient-to-br from-sky-50 to-blue-50 p-5 rounded-xl border border-sky-100 relative overflow-hidden shadow-sm">
+                    <div class="absolute -bottom-4 -right-4 text-sky-200 opacity-40 text-7xl"><i class="fa-solid fa-building-columns"></i></div>
                     <div class="relative z-10">
-                        <h3 class="font-bold text-sky-900 mb-2 flex items-center">
-                            <span class="bg-sky-500 text-white text-[10px] px-2 py-0.5 rounded-full mr-2">Krungthai</span>บัญชีโอนค่าไฟ
+                        <h3 class="font-bold text-sky-900 mb-4 flex items-center text-sm sm:text-base">
+                            <span class="bg-sky-500 text-white text-[10px] font-bold px-2 py-0.5 rounded mr-2 shadow-sm uppercase tracking-wide">Krungthai</span>
+                            <div>
+                                บัญชีโอนค่าไฟ <span class="text-xs font-normal text-sky-700 ml-1">(Payment Account)</span>
+                            </div>
                         </h3>
-                        <p class="text-sm text-gray-700">ธนาคาร: <strong>กรุงไทย สาขารวมโชค</strong></p>
-                        <p class="text-sm text-gray-700">ชื่อบัญชี: <strong>บัญชีนิติบุคคล</strong></p>
-                        <div class="flex items-center gap-3 mt-3">
-                            <p class="text-2xl font-bold text-sky-700 tracking-wider">663-1-87244-8</p>
-                            <button onclick="copyAccount()" class="bg-sky-200 text-sky-800 hover:bg-sky-300 px-3 py-1.5 rounded shadow-sm transition flex items-center gap-1 text-sm font-semibold">
+                        <div class="space-y-1.5 mb-4">
+                            <div class="flex justify-between items-start text-sm">
+                                <span class="text-gray-600">ธนาคาร <span class="text-xs text-gray-400 block -mt-1">Bank</span></span> 
+                                <strong class="text-right text-gray-800">กรุงไทย สาขารวมโชค<br><span class="text-xs text-gray-500 font-normal">Krungthai, Ruamchok Br.</span></strong>
+                            </div>
+                            <div class="flex justify-between items-start text-sm">
+                                <span class="text-gray-600">ชื่อบัญชี <span class="text-xs text-gray-400 block -mt-1">Name</span></span> 
+                                <strong class="text-right text-gray-800">บัญชีนิติบุคคล<br><span class="text-xs text-gray-500 font-normal">Juristic Person Account</span></strong>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-white/70 p-3 rounded-lg border border-sky-100 backdrop-blur-sm shadow-sm">
+                            <p class="text-xl sm:text-2xl font-bold text-sky-800 tracking-wider font-mono">663-1-87244-8</p>
+                            <button onclick="copyAccount()" class="bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded shadow-sm transition flex items-center gap-1.5 text-xs font-semibold active:scale-95">
                                 <i class="fa-regular fa-copy"></i> คัดลอก
                             </button>
                         </div>
                     </div>
                 </div>
 
+                <!-- Rules Section -->
                 <div>
-                    <h3 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-solid fa-clipboard-check text-primary mr-2"></i> กฎการจองสนาม (Booking Rules)</h3>
-                    <ul class="list-disc pl-5 text-sm text-gray-600 space-y-2">
-                        <li>สามารถจองสนามได้ล่วงหน้า <strong>1 สัปดาห์</strong> โดยแต่ละรอบจองได้สูงสุด <strong>1.5 ชั่วโมง</strong></li>
-                        <li>หากไม่สามารถมาเล่นได้ กรุณาแจ้งให้ทราบล่วงหน้า <strong>อย่างน้อย 1 ชั่วโมง</strong></li>
-                        <li>สามารถจองสนามได้ต่อเมื่อมีผู้เล่น <strong>อย่างน้อยหนึ่งคนเป็นผู้อยู่อาศัย</strong> ในโครงการ</li>
+                    <h3 class="font-bold text-gray-800 mb-3 flex items-center text-sm sm:text-base">
+                        <div class="w-6 h-6 rounded bg-teal-50 border border-teal-100 text-teal-600 flex items-center justify-center mr-2 shadow-sm">
+                            <i class="fa-solid fa-clipboard-list text-xs"></i>
+                        </div>
+                        <div>
+                            กฎการจองสนาม <span class="text-xs font-normal text-gray-500 ml-1">(Booking Rules)</span>
+                        </div>
+                    </h3>
+                    <ul class="space-y-2.5">
+                        <li class="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
+                            <i class="fa-solid fa-calendar-check text-teal-500 mt-1 mr-3 shrink-0 text-base"></i>
+                            <div>
+                                <p class="text-sm text-gray-800 font-medium">จองล่วงหน้าได้ <strong>1 สัปดาห์</strong> / สูงสุด <strong>1.5 ชั่วโมง</strong> ต่อรอบ</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5 leading-tight">Book up to 1 week in advance / Max 1.5 hours per session.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
+                            <i class="fa-solid fa-clock-rotate-left text-teal-500 mt-1 mr-3 shrink-0 text-base"></i>
+                            <div>
+                                <p class="text-sm text-gray-800 font-medium">หากไม่สามารถมาเล่นได้ กรุณาแจ้งล่วงหน้า <strong>อย่างน้อย 1 ชั่วโมง</strong></p>
+                                <p class="text-[11px] text-gray-500 mt-0.5 leading-tight">Cancellation requires at least 1 hour advance notice.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
+                            <i class="fa-solid fa-users text-teal-500 mt-1 mr-3 shrink-0 text-base"></i>
+                            <div>
+                                <p class="text-sm text-gray-800 font-medium">ต้องมีผู้เล่น <strong>อย่างน้อย 1 คน</strong> เป็นผู้อยู่อาศัยในโครงการ</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5 leading-tight">At least one player must be a resident of the village.</p>
+                            </div>
+                        </li>
                     </ul>
                 </div>
 
+                <!-- Fees Section -->
                 <div>
-                    <h3 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-solid fa-bolt text-accent mr-2"></i> อัตราค่าบริการไฟแสงสว่าง</h3>
-                    <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                        <li>ครึ่งชั่วโมง (30 mins) : <strong>100 บาท</strong></li>
-                        <li>หนึ่งชั่วโมง (1 Hour) : <strong>200 บาท</strong></li>
-                        <li class="text-red-500 font-semibold mt-2 list-none text-xs bg-red-50 p-2 rounded inline-block border border-red-100">* กรุณาโอนเงินและแนบสลิปผ่านระบบก่อน รปภ. ทำการเปิดสวิตช์ไฟ</li>
-                    </ul>
+                    <h3 class="font-bold text-gray-800 mb-3 flex items-center text-sm sm:text-base">
+                        <div class="w-6 h-6 rounded bg-amber-50 border border-amber-100 text-amber-500 flex items-center justify-center mr-2 shadow-sm">
+                            <i class="fa-solid fa-bolt text-xs"></i>
+                        </div>
+                        <div>
+                            อัตราค่าไฟแสงสว่าง <span class="text-xs font-normal text-gray-500 ml-1">(Lighting Fees)</span>
+                        </div>
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div class="bg-white border border-amber-200 rounded-lg p-3 text-center shadow-sm">
+                            <p class="text-xs text-gray-600 font-medium mb-1">30 นาที (30 mins)</p>
+                            <p class="text-xl font-bold text-amber-600">100 ฿</p>
+                        </div>
+                        <div class="bg-white border border-amber-200 rounded-lg p-3 text-center shadow-sm">
+                            <p class="text-xs text-gray-600 font-medium mb-1">1 ชั่วโมง (1 Hour)</p>
+                            <p class="text-xl font-bold text-amber-600">200 ฿</p>
+                        </div>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-lg border border-red-100 flex items-start gap-2 shadow-sm">
+                        <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5 shrink-0"></i>
+                        <div>
+                            <p class="text-xs text-red-700 font-semibold leading-relaxed">กรุณาโอนเงินและแนบสลิปในระบบ ก่อนให้ รปภ. เปิดไฟ</p>
+                            <p class="text-[10px] text-red-500 mt-0.5 leading-relaxed">Please transfer the fee and attach the slip via the system before asking the guard to turn on the lights.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ส่วนจัดการระบบและย้ายฐานข้อมูล (แสดงเฉพาะเมื่อ Login แอดมิน/นิติบุคคล) -->
@@ -331,11 +390,12 @@
         <button onclick="switchTab('booking')" id="nav-booking" class="nav-btn w-full h-full flex flex-col items-center justify-center text-primary font-semibold transition-colors">
             <i class="fa-solid fa-calendar-check text-lg mb-0.5"></i><span class="text-[10px] uppercase">ตารางจอง (Booking)</span>
         </button>
-        <!-- ซ่อนแท็บเหล่านี้เมื่อไม่ได้ล็อกอิน -->
+        <!-- ซ่อนแท็บสรุปยอด (Dashboard) เมื่อไม่ได้ล็อกอิน -->
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn hidden w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
             <i class="fa-solid fa-chart-simple text-lg mb-0.5"></i><span class="text-[10px] uppercase">สรุปยอด (Dashboard)</span>
         </button>
-        <button onclick="switchTab('info')" id="nav-info" class="nav-btn hidden w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
+        <!-- แท็บ Info (แสดงผลตลอด ไม่ซ่อนแล้ว) -->
+        <button onclick="switchTab('info')" id="nav-info" class="nav-btn w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
             <i class="fa-solid fa-circle-info text-lg mb-0.5"></i><span class="text-[10px] uppercase">กฎระเบียบ (Info)</span>
         </button>
     </nav>
@@ -1360,18 +1420,21 @@
             setHidden('userInfo', !window.isAdmin);
             setHidden('btnAddBooking', !window.isAdmin);
             setHidden('nav-dashboard', !window.isAdmin);
-            setHidden('nav-info', !window.isAdmin);
+            // สังเกตว่าเราไม่ได้ซ่อน nav-info อีกต่อไป ลูกบ้านจึงเห็นได้
             setHidden('btnPrintPdf', !window.isAdmin);
             setHidden('adminMigrationSection', !window.isAdmin);
             setHidden('monthFilterBox', !window.isAdmin);
             setHidden('guardFilterNote', window.isAdmin);
 
             if(!window.isAdmin) {
-                window.switchTab('booking');
+                // หากลูกบ้านบังเอิญอยู่ในหน้า Dashboard ให้เด้งกลับไปหน้า Booking
+                const currentTab = document.querySelector('.tab-content.active');
+                if (currentTab && currentTab.id === 'tab-dashboard') {
+                    window.switchTab('booking');
+                }
             }
         }
 
-        // ปรับปรุงให้รองรับทั้งตัวพิมพ์เล็กและพิมพ์ใหญ่ (แก้ปัญหามือถือพิมพ์ตัวใหญ่ตัวแรกให้อัตโนมัติ)
         window.performLogin = function() {
             const u = (document.getElementById('inpUser').value || '').trim().toLowerCase();
             const p = (document.getElementById('inpPass').value || '').trim().toLowerCase();
@@ -1598,3 +1661,4 @@
     </script>
 </body>
 </html>
+```
