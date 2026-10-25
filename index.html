@@ -398,6 +398,13 @@
                             <input type="file" id="inpInitialSlip" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer bg-white">
                             <img id="previewInitialSlip" class="mt-2 h-24 object-contain hidden border rounded p-1 bg-white mx-auto">
                         </div>
+
+                        <!-- ปุ่มสำหรับ Admin รีเซ็ตไฟล์แนบและสถานะไฟ -->
+                        <div id="adminResetLightSection" class="hidden mt-3 p-2 bg-red-50 border border-red-200 rounded-lg text-center">
+                            <button type="button" onclick="adminResetLightImages()" class="text-xs text-red-600 font-bold hover:text-red-800 transition flex items-center justify-center w-full gap-1">
+                                <i class="fa-solid fa-trash-can"></i> ลบไฟล์แนบและรีเซ็ตสถานะการใช้ไฟ (Admin)
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1060,10 +1067,52 @@
                 document.getElementById('previewInitialSlip').classList.add('hidden');
             }
 
+            // จัดการการแสดงผลปุ่ม Admin Reset Light (รีเซ็ตไฟล์แนบและสถานะไฟ)
+            const adminResetSec = document.getElementById('adminResetLightSection');
+            if (window.isAdmin && needLight) {
+                adminResetSec.classList.remove('hidden');
+            } else {
+                adminResetSec.classList.add('hidden');
+            }
+
             const md = document.getElementById('modalBooking');
             md.classList.remove('hidden');
             md.querySelector('div').classList.add('modal-enter');
             setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
+        }
+
+        // ฟังก์ชันใหม่สำหรับ Admin เคลียร์ไฟล์แนบและรีเซ็ตสถานะการใช้ไฟ 
+        window.adminResetLightImages = async function() {
+            const bookingId = document.getElementById('editingBookingId').value;
+            if (!bookingId) return;
+            
+            if (confirm("คุณต้องการ 'ลบไฟล์แนบสลิป/มิเตอร์' และรีเซ็ตสถานะการใช้ไฟสำหรับรายการนี้ใช่หรือไม่?\n\n* ข้อมูลการจองจะยังคงอยู่ แต่สถานะจะกลับไปเหมือนยังไม่ขอใช้ไฟ")) {
+                const btn = document.querySelector('#adminResetLightSection button');
+                const origHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังลบ...';
+                
+                try {
+                    const updateData = {
+                        isLightUsed: false,
+                        amountPaid: 0,
+                        slipImg: "",
+                        meterImg: "",
+                        isImageCleaned: false,
+                        updatedAt: Date.now()
+                    };
+                    const success = await window.cloudUpdateBooking(bookingId, updateData);
+                    if (success) {
+                        window.closeModals();
+                        window.showAlert('สำเร็จ', 'ลบไฟล์แนบและรีเซ็ตสถานะการใช้ไฟเรียบร้อยแล้ว', 'success');
+                    } else {
+                        throw new Error();
+                    }
+                } catch (e) {
+                    window.showAlert('ผิดพลาด', 'ไม่สามารถลบไฟล์แนบได้', 'error');
+                } finally {
+                    btn.innerHTML = origHtml;
+                }
+            }
         }
 
         window.openDeleteBookingModal = function(bookingId) {
