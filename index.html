@@ -135,7 +135,7 @@
     <!-- Header -->
     <header class="bg-primary text-white py-2 px-3 shadow-md sticky top-0 z-40 flex justify-between items-center">
         <!-- แตะที่ชื่อโปรเจคเพื่อล็อกอิน (ซ่อนปุ่มล็อกอินปกติไว้ไม่ให้ลูกบ้านเห็น) -->
-        <div class="flex items-center gap-2 cursor-pointer" onclick="if(!window.isAdmin) openLoginModal()" title="แตะเพื่อเข้าสู่ระบบนิติบุคคล">
+        <div class="flex items-center gap-2 cursor-pointer select-none" onclick="if(!window.isAdmin) openLoginModal()" title="แตะเพื่อเข้าสู่ระบบนิติบุคคล">
             <i class="fa-solid fa-tennis-ball text-xl text-accent"></i>
             <div>
                 <h1 class="text-md font-bold leading-tight">Court Booking</h1>
@@ -199,6 +199,10 @@
                         </button>
                     </div>
                     <input type="month" id="monthFilter" class="w-full p-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" onchange="onDashboardMonthChange()">
+                </div>
+
+                <div id="guardFilterNote" class="hidden text-xs text-gray-500 mb-4 bg-yellow-50 p-2 rounded border border-yellow-200 border-l-4 border-l-accent">
+                    <i class="fa-solid fa-info-circle mr-1"></i> แสดงเฉพาะข้อมูลของเดือนปัจจุบันเท่านั้น
                 </div>
 
                 <!-- การ์ดสรุปยอด คลิกสลับดูตารางและกราฟเส้นด้านล่างได้ -->
@@ -468,10 +472,9 @@
         </div>
     </div>
 
-    <!-- Modal: View Images (รองรับการใช้นิ้วถ่างซูมได้ทันทีในกรอบภาพ + ปุ่มซูม + ขยายเต็มจอ) -->
+    <!-- Modal: View Images -->
     <div id="modalViewImages" class="fixed inset-0 bg-black/80 z-[60] hidden flex flex-col items-center justify-center p-3 sm:p-4">
         <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-            <!-- ส่วนหัว Modal -->
             <div class="bg-gray-800 text-white px-4 py-2.5 flex justify-between items-center shrink-0">
                 <div class="flex items-center gap-2 text-xs sm:text-sm font-semibold">
                     <i class="fa-solid fa-magnifying-glass-plus text-accent"></i>
@@ -482,7 +485,6 @@
                 </button>
             </div>
 
-            <!-- เนื้อหารูปภาพ -->
             <div class="p-3 sm:p-4 overflow-y-auto space-y-4 grow" id="galleryContainer">
                 <div id="cleanedImageBanner" class="hidden bg-amber-50 border border-amber-200 text-amber-800 text-xs p-2.5 rounded-lg text-center font-semibold">
                     <i class="fa-solid fa-clock-rotate-left mr-1"></i> รูปภาพในรายการนี้ถูกลบออกอัตโนมัติเนื่องจากเก่าเกิน 3 เดือน (เพื่อประหยัดพื้นที่ฐานข้อมูล)
@@ -593,7 +595,7 @@
             <div class="p-5 space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
-                    <input type="text" id="inpUser" class="w-full border border-gray-300 p-2 rounded focus:outline-none transition">
+                    <input type="text" id="inpUser" autocapitalize="none" autocorrect="off" class="w-full border border-gray-300 p-2 rounded focus:outline-none transition">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
@@ -805,9 +807,10 @@
         // =========================================================================
 
         window.initAppUI = function() {
-            document.getElementById('monthFilter').value = getCurrentYearMonth();
-            setupAdminUI();
+            const mf = document.getElementById('monthFilter');
+            if(mf) mf.value = getCurrentYearMonth();
             initCalendar();
+            setupAdminUI();
             initZoomControllers();
         }
 
@@ -1112,12 +1115,18 @@
         }
 
         window.renderBookingsForDate = function(dateStr) {
-            document.getElementById('dateDetailsSection').classList.remove('hidden');
-            const dateObj = new Date(dateStr);
-            document.getElementById('selectedDateTitle').innerText = dateObj.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const sec = document.getElementById('dateDetailsSection');
+            if(sec) sec.classList.remove('hidden');
             
-            const container = document.getElementById('bookingsList'); container.innerHTML = '';
-            const dailyBookings = window.allBookings.filter(b => b.date === dateStr);
+            const dateObj = new Date(dateStr);
+            const titleEl = document.getElementById('selectedDateTitle');
+            if(titleEl) titleEl.innerText = dateObj.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const container = document.getElementById('bookingsList'); 
+            if(!container) return;
+            container.innerHTML = '';
+            
+            const dailyBookings = (window.allBookings || []).filter(b => b.date === dateStr);
             dailyBookings.sort((a,b) => a.startTime.localeCompare(b.startTime));
 
             if(dailyBookings.length === 0) {
@@ -1130,7 +1139,7 @@
                 const hasMeter = !!b.meterImg || !!b.isImageCleaned;
                 let actionHtml = '';
                 
-                // ถ้าระบบรู้ว่าเป็น Admin ล็อกอินอยู่ ถึงจะโชว์ปุ่มแนบไฟต่างๆ
+                // โชว์แถบจัดการไฟเฉพาะตอนที่ Admin ล็อกอินเท่านั้น
                 if (window.isAdmin) {
                     if (isPaid && hasMeter) {
                         const cleanBadge = b.isImageCleaned ? `<span class="text-[10px] text-gray-400">(ลบรูปตามรอบ 3 เดือนแล้ว)</span>` : `<button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 px-3 py-1 rounded-lg shadow-sm font-semibold"><i class="fa-solid fa-image mr-1 text-primary"></i>ดูรูปสลิป/มิเตอร์</button>`;
@@ -1142,7 +1151,7 @@
                     }
                 }
 
-                // ปุ่มลบ/แก้ไข จะโชว์เฉพาะตอน Admin ล็อกอินเช่นกัน
+                // ปุ่มลบ/แก้ไข โชว์เฉพาะตอน Admin ล็อกอินเท่านั้น
                 const editDeleteBtns = window.isAdmin ? `
                     <div class="flex items-center gap-1.5 shrink-0">
                         <button onclick="openEditBookingModal('${b.id}')" title="แก้ไขรายการ" class="w-7 h-7 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 flex items-center justify-center transition">
@@ -1155,7 +1164,7 @@
                 ` : '';
 
                 container.innerHTML += `
-                    <div class="border rounded-xl p-3 bg-white shadow-sm hover:shadow-md transition ${isPaid ? 'border-green-200 border-l-4 border-l-green-500' : 'border-gray-200 border-l-4 border-l-primary'}">
+                    <div class="border rounded-xl p-3 bg-white shadow-sm hover:shadow-md transition ${window.isAdmin && isPaid ? 'border-green-200 border-l-4 border-l-green-500' : 'border-gray-200 border-l-4 border-l-primary'}">
                         <div class="flex justify-between items-start gap-2">
                             <div>
                                 <h4 class="font-bold text-gray-800 text-sm">บ้านเลขที่: ${b.houseNo}</h4>
@@ -1328,40 +1337,46 @@
         window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => { el.classList.remove('text-primary'); el.classList.add('text-gray-400'); });
-            document.getElementById('tab-' + tabId).classList.add('active');
-            const aBtn = document.getElementById('nav-' + tabId); aBtn.classList.remove('text-gray-400'); aBtn.classList.add('text-primary');
+            
+            const targetTab = document.getElementById('tab-' + tabId);
+            if(targetTab) targetTab.classList.add('active');
+            
+            const aBtn = document.getElementById('nav-' + tabId); 
+            if(aBtn) { aBtn.classList.remove('text-gray-400'); aBtn.classList.add('text-primary'); }
             
             if(tabId === 'booking' && window.calendar) {
-                window.calendar.updateSize(); window.renderBookingsForDate(window.selectedDate);
+                setTimeout(() => { window.calendar.updateSize(); }, 50);
+                window.renderBookingsForDate(window.selectedDate);
             }
             if(tabId === 'dashboard') window.setDashboardView('all');
         }
 
         function setupAdminUI() {
-            // โชว์ข้อมูลผู้ใช้และปุ่มออกเฉพาะตอนเป็น Admin
-            document.getElementById('userInfo').classList.toggle('hidden', !window.isAdmin);
-            
-            // โชว์ปุ่ม + เพิ่มรายการ เฉพาะ Admin
-            const btnAdd = document.getElementById('btnAddBooking');
-            if(btnAdd) btnAdd.classList.toggle('hidden', !window.isAdmin);
+            const setHidden = (id, hidden) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', hidden);
+            };
 
-            // โชว์เมนู Dashboard และ Info ด้านล่างเฉพาะ Admin
-            document.getElementById('nav-dashboard').classList.toggle('hidden', !window.isAdmin);
-            document.getElementById('nav-info').classList.toggle('hidden', !window.isAdmin);
+            setHidden('userInfo', !window.isAdmin);
+            setHidden('btnAddBooking', !window.isAdmin);
+            setHidden('nav-dashboard', !window.isAdmin);
+            setHidden('nav-info', !window.isAdmin);
+            setHidden('btnPrintPdf', !window.isAdmin);
+            setHidden('adminMigrationSection', !window.isAdmin);
+            setHidden('monthFilterBox', !window.isAdmin);
+            setHidden('guardFilterNote', window.isAdmin);
 
-            document.getElementById('btnPrintPdf').classList.toggle('hidden', !window.isAdmin);
-            document.getElementById('adminMigrationSection').classList.toggle('hidden', !window.isAdmin);
-            document.getElementById('monthFilterBox').classList.toggle('hidden', !window.isAdmin);
-            document.getElementById('guardFilterNote').classList.toggle('hidden', window.isAdmin);
-
-            // บังคับให้ลูกบ้าน (Guest) อยู่ในหน้า "ตารางจอง" เท่านั้น หากโหลดหน้ามาติดหน้าอื่น
             if(!window.isAdmin) {
                 window.switchTab('booking');
             }
         }
 
+        // ปรับปรุงให้รองรับทั้งตัวพิมพ์เล็กและพิมพ์ใหญ่ (แก้ปัญหามือถือพิมพ์ตัวใหญ่ตัวแรกให้อัตโนมัติ)
         window.performLogin = function() {
-            if(document.getElementById('inpUser').value === 'admin' && document.getElementById('inpPass').value === 'admin') {
+            const u = (document.getElementById('inpUser').value || '').trim().toLowerCase();
+            const p = (document.getElementById('inpPass').value || '').trim().toLowerCase();
+
+            if(u === 'admin' && p === 'admin') {
                 localStorage.setItem('isAdmin', 'true');
                 window.isAdmin = true;
                 setupAdminUI();
