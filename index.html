@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Laddarom Elegance - Court Booking</title>
+    <title>Laddarom Elegance- Court Booking</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,11 +34,21 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
+        /* ------------------------------------------------------------------
+           Extreme Calendar Optimization 
+        ------------------------------------------------------------------ */
         #calendar { font-size: 0.85rem; }
         .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 600 !important; }
         .fc-header-toolbar { margin-bottom: 0.5rem !important; }
         
-        .fc .fc-daygrid-day-frame { min-height: 36px !important; padding-top: 2px !important; padding-bottom: 2px !important; display: flex; flex-direction: column; justify-content: space-between; }
+        .fc .fc-daygrid-day-frame {
+            min-height: 36px !important;
+            padding-top: 2px !important;
+            padding-bottom: 2px !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
         .fc .fc-daygrid-day-top { flex-direction: row; justify-content: center; }
         .fc-daygrid-day-number { color: #1f2937; font-weight: 600; font-size: 0.82rem; padding: 1px 4px !important; line-height: 1.1; }
         .fc .fc-daygrid-day.fc-day-today { background-color: #e0f2fe !important; }
@@ -46,12 +56,35 @@
         
         .fc-daygrid-day-events { margin: 0 !important; padding: 0 !important; min-height: 10px !important; }
         .fc-daygrid-event-harness { margin: 0 !important; }
-        .fc-h-event, .fc-daygrid-event { background: transparent !important; border: none !important; margin: 0 !important; padding: 0 !important; }
+        .fc-h-event, .fc-daygrid-event {
+            background: transparent !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
         .fc-daygrid-day-bottom { display: none !important; }
+
         .fc-button-primary { background-color: #0d9488 !important; border-color: #0d9488 !important; padding: 0.2rem 0.5rem !important; }
         
-        .booking-dots-row { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 2.5px; padding: 1px 2px 2px 2px; line-height: 1; }
-        .booking-dot { display: inline-block; width: 7px; height: 7px; border-radius: 9999px; background-color: #ef4444; border: 1px solid #ffffff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); flex-shrink: 0; }
+        .booking-dots-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2.5px;
+            padding: 1px 2px 2px 2px;
+            line-height: 1;
+        }
+        .booking-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 9999px;
+            background-color: #ef4444; 
+            border: 1px solid #ffffff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+            flex-shrink: 0;
+        }
         
         .modal-enter { opacity: 0; transform: scale(0.95); }
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms, transform 200ms; }
@@ -60,9 +93,26 @@
         
         #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index: 100; display:flex; flex-direction:column; justify-content:center; align-items:center; }
 
-        .zoom-stage { position: relative; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; background-color: #f3f4f6; cursor: grab; }
-        .zoom-stage:active { cursor: grabbing; }
-        .zoom-target-img { transform-origin: center center; will-change: transform; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+        .zoom-stage {
+            position: relative;
+            overflow: hidden;
+            touch-action: none; 
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            background-color: #f3f4f6;
+            cursor: grab;
+        }
+        .zoom-stage:active {
+            cursor: grabbing;
+        }
+        .zoom-target-img {
+            transform-origin: center center;
+            will-change: transform;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
     </style>
 </head>
 <body class="text-gray-800 pb-20 relative">
@@ -76,6 +126,7 @@
 
     <!-- Header -->
     <header class="bg-primary text-white py-2 px-3 shadow-md sticky top-0 z-40 flex justify-between items-center">
+        <!-- แตะที่ชื่อโปรเจคเพื่อล็อกอิน (ซ่อนปุ่มล็อกอินปกติไว้ไม่ให้ลูกบ้านเห็น) -->
         <div class="flex items-center gap-2 cursor-pointer select-none" onclick="if(!window.isAdmin) openLoginModal()" title="แตะเพื่อเข้าสู่ระบบนิติบุคคล">
             <i class="fa-solid fa-tennis-ball text-xl text-accent"></i>
             <div>
@@ -86,10 +137,9 @@
         <div class="flex items-center gap-2">
             <span id="activeMonthBadge" class="text-[10px] bg-teal-800/60 text-teal-100 px-2 py-0.5 rounded-full hidden sm:inline-block"></span>
             
-            <!-- อัปเดต UI ให้แสดงชื่อ User ที่ดึงจาก Central Users -->
             <div id="userInfo" class="hidden text-sm font-semibold text-accent flex items-center gap-2">
-                <span id="userDisplayName"><i class="fa-solid fa-shield-halved mr-1"></i>กำลังโหลด...</span>
-                <button onclick="window.performLogout()" class="text-xs bg-white text-primary px-2 py-1 rounded shadow-sm hover:bg-gray-100 transition">ออก</button>
+                <span><i class="fa-solid fa-shield-halved mr-1"></i>นิติบุคคล</span>
+                <button onclick="logout()" class="text-xs bg-white text-primary px-2 py-1 rounded shadow-sm hover:bg-gray-100 transition">ออก</button>
             </div>
         </div>
     </header>
@@ -99,6 +149,7 @@
 
         <!-- TAB 1: Booking -->
         <section id="tab-booking" class="tab-content active">
+            <!-- ปฏิทิน -->
             <div class="bg-white rounded-xl shadow p-2 mb-2">
                 <div id="calendar"></div>
                 <div class="flex items-center justify-between mt-1 px-1 text-[10px] text-gray-500">
@@ -107,6 +158,7 @@
                 </div>
             </div>
 
+            <!-- ส่วนแสดงรายละเอียดการจองรายวัน -->
             <div id="dateDetailsSection" class="hidden mt-1">
                 <div class="flex justify-between items-center mb-2 px-1">
                     <h2 id="selectedDateTitle" class="text-sm sm:text-md font-bold text-gray-800 tracking-tight">รายการวันที่...</h2>
@@ -128,7 +180,8 @@
                     </button>
                 </div>
 
-                <div id="monthFilterBox" class="mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200 hidden">
+                <!-- ช่องเลือกค้นหาย้อนหลังแบบรายเดือน -->
+                <div id="monthFilterBox" class="mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
                     <div class="flex justify-between items-center mb-1.5">
                         <label for="monthFilter" class="text-xs font-bold text-gray-600 flex items-center gap-1">
                             <i class="fa-regular fa-calendar-days text-primary"></i> เลือกเดือนที่ต้องการดู (ดึงข้อมูลเฉพาะเดือนที่เลือก)
@@ -140,45 +193,61 @@
                     <input type="month" id="monthFilter" class="w-full p-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" onchange="onDashboardMonthChange()">
                 </div>
 
-                <div id="guardFilterNote" class="text-xs text-gray-500 mb-4 bg-yellow-50 p-2 rounded border border-yellow-200 border-l-4 border-l-accent hidden">
+                <div id="guardFilterNote" class="hidden text-xs text-gray-500 mb-4 bg-yellow-50 p-2 rounded border border-yellow-200 border-l-4 border-l-accent">
                     <i class="fa-solid fa-info-circle mr-1"></i> แสดงเฉพาะข้อมูลของเดือนปัจจุบันเท่านั้น
                 </div>
 
+                <!-- การ์ดสรุปยอด คลิกสลับดูตารางและกราฟเส้นด้านล่างได้ -->
                 <p class="text-[11px] text-gray-500 mb-1.5"><i class="fa-solid fa-hand-pointer text-primary mr-1"></i>แตะที่กล่องเพื่อสลับดู <strong>จำนวนจอง</strong> หรือ <strong>รายได้ค่าไฟ</strong> (กราฟและตารางจะเปลี่ยนตาม)</p>
                 <div class="grid grid-cols-2 gap-3 mb-5">
+                    <!-- กล่องจำนวนจองทั้งหมด -->
                     <div id="cardBookings" onclick="setDashboardView('all')" class="bg-teal-50 p-3.5 rounded-xl border-2 border-primary ring-2 ring-teal-200 cursor-pointer transition-all select-none relative">
                         <div class="flex justify-between items-start">
-                            <p class="text-xs text-teal-800 font-bold">จำนวนจอง</p>
+                            <p class="text-xs text-teal-800 font-bold">จำนวนจอง (Bookings)</p>
                             <i class="fa-solid fa-list-check text-teal-600 text-xs"></i>
                         </div>
                         <p id="dashTotalBookings" class="text-3xl font-bold text-primary mt-1">0</p>
+                        <p class="text-[10px] text-teal-700 mt-1 flex items-center gap-1"><i class="fa-solid fa-eye"></i> แสดงแนวโน้มและรายการจอง</p>
                     </div>
+
+                    <!-- กล่องรายได้ค่าไฟ -->
                     <div id="cardRevenue" onclick="setDashboardView('revenue')" class="bg-amber-50 p-3.5 rounded-xl border border-amber-200 opacity-80 hover:opacity-100 cursor-pointer transition-all select-none relative">
                         <div class="flex justify-between items-start">
-                            <p class="text-xs text-amber-800 font-bold">รายได้ค่าไฟ</p>
+                            <p class="text-xs text-amber-800 font-bold">รายได้ค่าไฟ (Revenue)</p>
                             <i class="fa-solid fa-bolt text-amber-500 text-xs"></i>
                         </div>
                         <p id="dashTotalRevenue" class="text-3xl font-bold text-accent mt-1">฿0</p>
+                        <p class="text-[10px] text-amber-700 mt-1 flex items-center gap-1"><i class="fa-solid fa-eye"></i> แสดงแนวโน้มและรายการค่าไฟ</p>
                     </div>
                 </div>
 
+                <!-- กราฟเส้นแนวโน้ม (Dynamic Line Chart สลับข้อมูลตามกล่องที่เลือก) -->
                 <div class="mb-5 bg-gray-50 p-3 rounded-xl border border-gray-200">
                     <div class="flex items-center justify-between mb-2">
                         <h3 id="chartTitle" class="text-xs font-bold text-gray-700 flex items-center gap-1">
-                            <i class="fa-solid fa-chart-line text-primary"></i> แนวโน้ม
+                            <i class="fa-solid fa-chart-line text-primary"></i> แนวโน้มจำนวนการจองรายสัปดาห์ (ครั้ง)
                         </h3>
                     </div>
                     <div style="height: 180px;"><canvas id="revenueChart"></canvas></div>
                 </div>
 
+                <!-- ส่วนหัวตารางรายละเอียดด้านล่าง -->
                 <div class="flex justify-between items-center mb-2 border-b pb-2">
-                    <h3 id="dashboardTableTitle" class="text-sm font-bold text-gray-700">รายการ</h3>
+                    <h3 id="dashboardTableTitle" class="text-sm font-bold text-gray-700">
+                        <i class="fa-solid fa-list-check text-primary mr-1"></i> รายการจองทั้งหมดในเดือนนี้
+                    </h3>
                     <span id="dashboardTableCount" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">0 รายการ</span>
                 </div>
+
+                <!-- ตารางแสดงข้อมูลรายเดือน -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm text-left text-gray-600">
                         <thead id="dashboardTableHead" class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
-                            <tr><th class="px-3 py-2 w-16">วันที่</th><th class="px-3 py-2">รายละเอียด</th><th class="px-3 py-2 text-right">สถานะ</th></tr>
+                            <tr>
+                                <th class="px-3 py-2 w-16">วันที่</th>
+                                <th class="px-3 py-2">บ้านเลขที่ / เวลา</th>
+                                <th class="px-3 py-2 text-right">สถานะไฟ</th>
+                            </tr>
                         </thead>
                         <tbody id="dashboardTableBody"></tbody>
                     </table>
@@ -186,25 +255,125 @@
             </div>
         </section>
 
-        <!-- TAB 3: Info -->
+        <!-- TAB 3: Info (อัปเดตภาษาอังกฤษ + ปรับ Layout สวยงาม) -->
         <section id="tab-info" class="tab-content">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-4 space-y-6">
-                <!-- เนื้อหากฎระเบียบ (ย่อไว้เพื่อให้โค้ดกระชับ โครงสร้างเดิม) -->
                 <h2 class="text-xl font-bold text-gray-800 border-b border-gray-100 pb-3 flex items-center">
                     <div class="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mr-3 shadow-inner">
                         <i class="fa-solid fa-circle-info text-lg"></i>
                     </div>
                     <div>
                         <div class="leading-tight">ข้อมูลและกฎระเบียบ</div>
+                        <div class="text-[11px] text-gray-500 font-normal uppercase tracking-wide">Information & Rules</div>
                     </div>
                 </h2>
                 
+                <!-- Payment Section -->
+                <div class="bg-gradient-to-br from-sky-50 to-blue-50 p-5 rounded-xl border border-sky-100 relative overflow-hidden shadow-sm">
+                    <div class="absolute -bottom-4 -right-4 text-sky-200 opacity-40 text-7xl"><i class="fa-solid fa-building-columns"></i></div>
+                    <div class="relative z-10">
+                        <h3 class="font-bold text-sky-900 mb-4 flex items-center text-sm sm:text-base">
+                            <span class="bg-sky-500 text-white text-[10px] font-bold px-2 py-0.5 rounded mr-2 shadow-sm uppercase tracking-wide">Krungthai</span>
+                            <div>
+                                บัญชีโอนค่าไฟ <span class="text-xs font-normal text-sky-700 ml-1">(Payment Account)</span>
+                            </div>
+                        </h3>
+                        <div class="space-y-1.5 mb-4">
+                            <div class="flex justify-between items-start text-sm">
+                                <span class="text-gray-600">ธนาคาร <span class="text-xs text-gray-400 block -mt-1">Bank</span></span> 
+                                <strong class="text-right text-gray-800">กรุงไทย สาขารวมโชค<br><span class="text-xs text-gray-500 font-normal">Krungthai, Ruamchok Br.</span></strong>
+                            </div>
+                            <div class="flex justify-between items-start text-sm">
+                                <span class="text-gray-600">ชื่อบัญชี <span class="text-xs text-gray-400 block -mt-1">Name</span></span> 
+                                <strong class="text-right text-gray-800">บัญชีนิติบุคคล<br><span class="text-xs text-gray-500 font-normal">Juristic Person Account</span></strong>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-white/70 p-3 rounded-lg border border-sky-100 backdrop-blur-sm shadow-sm">
+                            <p class="text-xl sm:text-2xl font-bold text-sky-800 tracking-wider font-mono">663-1-87244-8</p>
+                            <button onclick="copyAccount()" class="bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded shadow-sm transition flex items-center gap-1.5 text-xs font-semibold active:scale-95">
+                                <i class="fa-regular fa-copy"></i> คัดลอก
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rules Section -->
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3 flex items-center text-sm sm:text-base">
+                        <div class="w-6 h-6 rounded bg-teal-50 border border-teal-100 text-teal-600 flex items-center justify-center mr-2 shadow-sm">
+                            <i class="fa-solid fa-clipboard-list text-xs"></i>
+                        </div>
+                        <div>
+                            กฎการจองสนาม <span class="text-xs font-normal text-gray-500 ml-1">(Booking Rules)</span>
+                        </div>
+                    </h3>
+                    <ul class="space-y-2.5">
+                        <li class="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
+                            <i class="fa-solid fa-calendar-check text-teal-500 mt-1 mr-3 shrink-0 text-base"></i>
+                            <div>
+                                <p class="text-sm text-gray-800 font-medium">จองล่วงหน้าได้ <strong>1 สัปดาห์</strong> / สูงสุด <strong>1.5 ชั่วโมง</strong> ต่อรอบ</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5 leading-tight">Book up to 1 week in advance / Max 1.5 hours per session.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
+                            <i class="fa-solid fa-clock-rotate-left text-teal-500 mt-1 mr-3 shrink-0 text-base"></i>
+                            <div>
+                                <p class="text-sm text-gray-800 font-medium">หากไม่สามารถมาเล่นได้ กรุณาแจ้งล่วงหน้า <strong>อย่างน้อย 1 ชั่วโมง</strong></p>
+                                <p class="text-[11px] text-gray-500 mt-0.5 leading-tight">Cancellation requires at least 1 hour advance notice.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
+                            <i class="fa-solid fa-users text-teal-500 mt-1 mr-3 shrink-0 text-base"></i>
+                            <div>
+                                <p class="text-sm text-gray-800 font-medium">ต้องมีผู้เล่น <strong>อย่างน้อย 1 คน</strong> เป็นผู้อยู่อาศัยในโครงการ</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5 leading-tight">At least one player must be a resident of the village.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Fees Section -->
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3 flex items-center text-sm sm:text-base">
+                        <div class="w-6 h-6 rounded bg-amber-50 border border-amber-100 text-amber-500 flex items-center justify-center mr-2 shadow-sm">
+                            <i class="fa-solid fa-bolt text-xs"></i>
+                        </div>
+                        <div>
+                            อัตราค่าไฟแสงสว่าง <span class="text-xs font-normal text-gray-500 ml-1">(Lighting Fees)</span>
+                        </div>
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div class="bg-white border border-amber-200 rounded-lg p-3 text-center shadow-sm">
+                            <p class="text-xs text-gray-600 font-medium mb-1">30 นาที (30 mins)</p>
+                            <p class="text-xl font-bold text-amber-600">100 ฿</p>
+                        </div>
+                        <div class="bg-white border border-amber-200 rounded-lg p-3 text-center shadow-sm">
+                            <p class="text-xs text-gray-600 font-medium mb-1">1 ชั่วโมง (1 Hour)</p>
+                            <p class="text-xl font-bold text-amber-600">200 ฿</p>
+                        </div>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-lg border border-red-100 flex items-start gap-2 shadow-sm">
+                        <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5 shrink-0"></i>
+                        <div>
+                            <p class="text-xs text-red-700 font-semibold leading-relaxed">กรุณาโอนเงินและแนบสลิปในระบบ ก่อนให้ รปภ. เปิดไฟ</p>
+                            <p class="text-[10px] text-red-500 mt-0.5 leading-relaxed">Please transfer the fee and attach the slip via the system before asking the guard to turn on the lights.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ส่วนจัดการระบบและย้ายฐานข้อมูล (แสดงเฉพาะเมื่อ Login แอดมิน/นิติบุคคล) -->
                 <div id="adminMigrationSection" class="hidden pt-4 border-t border-gray-200">
                     <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
                         <h3 class="font-bold text-amber-900 text-sm mb-1 flex items-center gap-1.5">
-                            <i class="fa-solid fa-database text-amber-600"></i> จัดการระบบฐานข้อมูล
+                            <i class="fa-solid fa-database text-amber-600"></i> จัดการระบบฐานข้อมูล (สำหรับผู้ดูแลระบบ)
                         </h3>
-                        <div class="flex flex-wrap gap-2 mt-2">
+                        <p class="text-xs text-amber-800 mb-3 leading-relaxed">
+                            ใช้สำหรับย้ายข้อมูลการจองจากฐานข้อมูลเดิม (<code>bookings</code>) มายังฐานข้อมูลใหม่ (<code>ten_bookings</code>) พร้อมเติมรหัสเดือน (<code>monthKey</code>) ให้อัตโนมัติ และเคลียร์รูปภาพที่เก่าเกิน 3 เดือนเพื่อประหยัดพื้นที่
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="btnMigrateData" onclick="migrateOldBookings()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-import"></i> ดึงข้อมูลเก่าเข้าสู่ระบบใหม่ (Migrate)
+                            </button>
                             <button id="btnManualCleanImg" onclick="manualCleanupOldImages()" class="bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
                                 <i class="fa-solid fa-broom text-primary"></i> ล้างรูปเก่าเกิน 3 เดือนทันที
                             </button>
@@ -218,83 +387,1029 @@
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 w-full bg-white border-t flex justify-around items-center h-14 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-40">
         <button onclick="switchTab('booking')" id="nav-booking" class="nav-btn w-full h-full flex flex-col items-center justify-center text-primary font-semibold transition-colors">
-            <i class="fa-solid fa-calendar-check text-lg mb-0.5"></i><span class="text-[10px] uppercase">ตารางจอง</span>
+            <i class="fa-solid fa-calendar-check text-lg mb-0.5"></i><span class="text-[10px] uppercase">ตารางจอง (Booking)</span>
         </button>
+        <!-- ซ่อนแท็บสรุปยอด (Dashboard) เมื่อไม่ได้ล็อกอิน -->
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn hidden w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
-            <i class="fa-solid fa-chart-simple text-lg mb-0.5"></i><span class="text-[10px] uppercase">สรุปยอด</span>
+            <i class="fa-solid fa-chart-simple text-lg mb-0.5"></i><span class="text-[10px] uppercase">สรุปยอด (Dashboard)</span>
         </button>
+        <!-- แท็บ Info (แสดงผลตลอด ไม่ซ่อนแล้ว) -->
         <button onclick="switchTab('info')" id="nav-info" class="nav-btn w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
-            <i class="fa-solid fa-circle-info text-lg mb-0.5"></i><span class="text-[10px] uppercase">กฎระเบียบ</span>
+            <i class="fa-solid fa-circle-info text-lg mb-0.5"></i><span class="text-[10px] uppercase">กฎระเบียบ (Info)</span>
         </button>
     </nav>
 
-    <!-- Modal: Login (อัปเดตเป็น Central Login) -->
-    <div id="modalLogin" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
-            <div class="bg-gray-800 p-4 text-white text-center">
-                <i class="fa-solid fa-fingerprint text-3xl mb-2 text-accent"></i>
-                <h3 class="font-bold">เข้าสู่ระบบ (Central Login)</h3>
-            </div>
-            <div class="p-5 space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
-                    <input type="text" id="inpUser" autocapitalize="none" autocorrect="off" placeholder="กรอกชื่อผู้ใช้งาน" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary transition">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                    <input type="password" id="inpPass" placeholder="รหัสผ่าน" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary transition">
-                </div>
-                <p id="loginError" class="text-xs text-red-500 hidden text-center font-semibold">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
-            </div>
-            <div class="p-4 border-t bg-gray-50 flex gap-2">
-                <button onclick="closeModals()" class="w-1/2 bg-gray-200 text-gray-800 p-2 rounded font-semibold hover:bg-gray-300 transition">ปิด</button>
-                <button id="btnPerformLogin" onclick="window.triggerLogin()" class="w-1/2 bg-gray-800 text-white p-2 rounded font-semibold hover:bg-black transition">Login</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modals อื่นๆ คงเดิม (Add Booking, View Image, Alert) ... 
-         (เพื่อความกะทัดรัด ผมใส่โครงสร้างเดิมที่สำคัญไว้ให้ครับ) -->
+    <!-- Modal: Add / Edit Booking -->
     <div id="modalBooking" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-primary p-4 text-white flex justify-between items-center shrink-0">
-                <h3 id="modalBookingTitle" class="font-bold">บันทึกการจองสนาม</h3>
-                <button onclick="closeModals()" class="text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <h3 id="modalBookingTitle" class="font-bold">บันทึกการจองสนาม (New Booking)</h3>
+                <button onclick="closeModals()" class="text-white hover:text-gray-200 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-5 overflow-y-auto grow">
                 <input type="hidden" id="editingBookingId" value="">
                 <div class="space-y-4">
-                    <div><label class="block text-sm font-semibold text-gray-700 mb-1">วันที่ต้องการจอง (Date) *</label><input type="date" id="inpDate" class="w-full border p-2 rounded"></div>
-                    <div><label class="block text-sm font-semibold text-gray-700 mb-1">บ้านเลขที่ *</label><input type="text" id="inpHouseNo" class="w-full border p-2 rounded"></div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">วันที่ต้องการจอง (Date) *</label>
+                        <input type="date" id="inpDate" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">บ้านเลขที่ (House No.) *</label>
+                        <input type="text" id="inpHouseNo" placeholder="เช่น 123/45" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-semibold text-gray-700 mb-1">เวลาเริ่ม *</label><input type="time" id="inpStartTime" class="w-full border p-2 rounded"></div>
-                        <div><label class="block text-sm font-semibold text-gray-700 mb-1">เวลาสิ้นสุด *</label><input type="time" id="inpEndTime" class="w-full border p-2 rounded"></div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">เวลาเริ่ม (Start) *</label>
+                            <input type="time" id="inpStartTime" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">เวลาสิ้นสุด (End) *</label>
+                            <input type="time" id="inpEndTime" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">หมายเหตุเพิ่มเติม (Note)</label>
+                        <input type="text" id="inpNote" placeholder="ระบุเพิ่มเติมถ้ามี..." class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-primary">
+                    </div>
+                    <hr class="my-2 border-gray-200">
+                    <div class="flex items-center justify-between bg-amber-50 p-3 rounded-lg border border-amber-100">
+                        <div>
+                            <p class="font-semibold text-gray-800 text-sm"><i class="fa-solid fa-lightbulb text-accent mr-1"></i> ต้องการใช้ไฟแสงสว่าง</p>
+                            <p class="text-xs text-gray-500">จองหลัง 18:00 น. หรือช่วงค่ำ</p>
+                        </div>
+                        <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" id="toggleNeedLight" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="toggleLightUploadSection()"/>
+                            <label for="toggleNeedLight" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                    </div>
+                    <div id="lightUploadSection" class="hidden bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">จำนวนเงินค่าไฟที่โอน (บาท) *</label>
+                            <select id="inpInitialAmount" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-accent bg-white">
+                                <option value="100">100 บาท (ครึ่งชั่วโมง)</option>
+                                <option value="200" selected>200 บาท (1 ชั่วโมง)</option>
+                                <option value="300">300 บาท (1.5 ชั่วโมง)</option>
+                                <option value="400">400 บาท (2 ชั่วโมง)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">อัปโหลดสลิปโอนเงิน (Transfer Slip) *</label>
+                            <input type="file" id="inpInitialSlip" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer bg-white">
+                            <img id="previewInitialSlip" class="mt-2 h-24 object-contain hidden border rounded p-1 bg-white mx-auto">
+                        </div>
+
+                        <!-- ปุ่มสำหรับ Admin รีเซ็ตไฟล์แนบและสถานะไฟ -->
+                        <div id="adminResetLightSection" class="hidden mt-3 p-2 bg-red-50 border border-red-200 rounded-lg text-center">
+                            <button type="button" onclick="adminResetLightImages()" class="text-xs text-red-600 font-bold hover:text-red-800 transition flex items-center justify-center w-full gap-1">
+                                <i class="fa-solid fa-trash-can"></i> ลบไฟล์แนบและรีเซ็ตสถานะการใช้ไฟ (Admin)
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="p-4 border-t bg-gray-50 flex gap-2">
-                <button onclick="closeModals()" class="w-1/3 bg-gray-200 p-2 rounded font-semibold">ยกเลิก</button>
-                <button onclick="saveBooking()" id="btnSaveBooking" class="w-2/3 bg-primary text-white p-2 rounded font-semibold">บันทึกการจอง</button>
+            <div class="p-4 border-t bg-gray-50 flex gap-2 shrink-0">
+                <button onclick="closeModals()" class="w-1/3 bg-gray-200 text-gray-800 p-2 rounded font-semibold hover:bg-gray-300 transition">ยกเลิก</button>
+                <button onclick="saveBooking()" id="btnSaveBooking" class="w-2/3 bg-primary text-white p-2 rounded font-semibold hover:bg-secondary transition shadow-sm">บันทึกการจอง</button>
             </div>
         </div>
     </div>
 
-    <!-- Alert Modal -->
+    <!-- Modal: Upload Meter & Light -->
+    <div id="modalLight" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-full">
+            <div class="bg-accent p-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-white shadow-sm">อัปเดตการใช้ไฟ (Upload Meter)</h3>
+                <button onclick="closeModals()" class="text-white hover:text-gray-200 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-5 overflow-y-auto">
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded mb-4 text-sm text-amber-800">
+                    <p class="font-semibold">บ้านเลขที่: <span id="lightHouseNo"></span></p>
+                    <p>เวลาที่จอง: <span id="lightTime"></span></p>
+                </div>
+                <div class="space-y-4">
+                    <div id="delayedSlipSection">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">จำนวนเงินค่าไฟที่โอน (บาท)</label>
+                        <select id="inpAmount" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-accent bg-white">
+                            <option value="100">100 บาท (ครึ่งชั่วโมง)</option>
+                            <option value="200" selected>200 บาท (1 ชั่วโมง)</option>
+                            <option value="300">300 บาท (1.5 ชั่วโมง)</option>
+                            <option value="400">400 บาท (2 ชั่วโมง)</option>
+                        </select>
+                        <label class="block text-sm font-semibold text-gray-700 mt-3 mb-1">อัปโหลดสลิปโอนเงิน (หากยังไม่แนบ)</label>
+                        <input type="file" id="inpSlipImg" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer bg-white">
+                        <img id="previewSlip" class="mt-2 h-32 object-contain hidden border rounded p-1 bg-gray-50 mx-auto">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">อัปโหลดภาพมิเตอร์ไฟ (ถ่ายภาพ หรือ เลือกไฟล์) *</label>
+                        <input type="file" id="inpMeterImg" accept="image/*" class="w-full text-sm border p-1 rounded transition cursor-pointer bg-white">
+                        <p class="text-[11px] text-gray-400 mt-1"><i class="fa-solid fa-camera mr-1"></i>ระบบจะบีบอัดขนาดภาพอัตโนมัติเพื่อประหยัดพื้นที่</p>
+                        <img id="previewMeter" class="mt-2 h-32 object-contain hidden border rounded p-1 bg-gray-50 mx-auto">
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t bg-gray-50 flex gap-2">
+                <input type="hidden" id="currentLightBookingId">
+                <button onclick="closeModals()" class="w-1/3 bg-gray-200 text-gray-800 p-2 rounded font-semibold hover:bg-gray-300 transition">ยกเลิก</button>
+                <button onclick="saveLightUsage()" id="btnSaveLight" class="w-2/3 bg-accent text-white p-2 rounded font-semibold hover:bg-amber-600 transition shadow-md">บันทึกข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirm Delete Booking -->
+    <div id="modalConfirmDelete" class="fixed inset-0 bg-black/50 z-[65] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm text-center">
+            <div class="w-14 h-14 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-1">ยืนยันการลบรายการจอง?</h3>
+            <p id="deleteConfirmDetail" class="text-sm text-gray-600 mb-5"></p>
+            <input type="hidden" id="deletingBookingId">
+            <div class="flex gap-2">
+                <button onclick="closeModals()" class="w-1/2 bg-gray-200 text-gray-800 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">ยกเลิก</button>
+                <button onclick="confirmDeleteBooking()" id="btnConfirmDelete" class="w-1/2 bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition shadow">ยืนยันลบ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: View Images -->
+    <div id="modalViewImages" class="fixed inset-0 bg-black/80 z-[60] hidden flex flex-col items-center justify-center p-3 sm:p-4">
+        <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            <div class="bg-gray-800 text-white px-4 py-2.5 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2 text-xs sm:text-sm font-semibold">
+                    <i class="fa-solid fa-magnifying-glass-plus text-accent"></i>
+                    <span>ใช้นิ้วถ่างซูมที่ภาพได้ทันที หรือแตะเพื่อขยายเต็มจอ</span>
+                </div>
+                <button onclick="closeImageModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-lg transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-3 sm:p-4 overflow-y-auto space-y-4 grow" id="galleryContainer">
+                <div id="cleanedImageBanner" class="hidden bg-amber-50 border border-amber-200 text-amber-800 text-xs p-2.5 rounded-lg text-center font-semibold">
+                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> รูปภาพในรายการนี้ถูกลบออกอัตโนมัติเนื่องจากเก่าเกิน 3 เดือน (เพื่อประหยัดพื้นที่ฐานข้อมูล)
+                </div>
+
+                <!-- กรอบที่ 1: สลิปโอนเงิน -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 shadow-sm">
+                    <div class="flex justify-between items-center px-3 py-1.5 bg-white border-b border-gray-200">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-receipt text-primary"></i> สลิปโอนเงิน (Slip)
+                        </h4>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="zoomCardImage('slip', -0.5)" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs flex items-center justify-center" title="ซูมออก">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <span id="zoomBadgeSlip" class="text-[11px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded min-w-[42px] text-center">100%</span>
+                            <button type="button" onclick="zoomCardImage('slip', 0.5)" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs flex items-center justify-center" title="ซูมเข้า">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                            <button type="button" onclick="resetCardImage('slip')" class="px-2 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-semibold" title="รีเซ็ต">
+                                รีเซ็ต
+                            </button>
+                            <button type="button" onclick="openFullScreenZoom('slip')" class="px-2 h-7 rounded bg-primary text-white hover:bg-secondary text-[11px] font-semibold flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-expand"></i> เต็มจอ
+                            </button>
+                        </div>
+                    </div>
+                    <div id="stageSlip" class="zoom-stage w-full h-[32vh] flex items-center justify-center">
+                        <img id="viewImgSlip" class="zoom-target-img max-w-full max-h-full object-contain" alt="Slip">
+                    </div>
+                </div>
+
+                <!-- กรอบที่ 2: มิเตอร์ไฟ -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 shadow-sm">
+                    <div class="flex justify-between items-center px-3 py-1.5 bg-white border-b border-gray-200">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-gauge-high text-accent"></i> มิเตอร์ไฟ (Meter)
+                        </h4>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="zoomCardImage('meter', -0.5)" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs flex items-center justify-center" title="ซูมออก">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <span id="zoomBadgeMeter" class="text-[11px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded min-w-[42px] text-center">100%</span>
+                            <button type="button" onclick="zoomCardImage('meter', 0.5)" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs flex items-center justify-center" title="ซูมเข้า">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                            <button type="button" onclick="resetCardImage('meter')" class="px-2 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-semibold" title="รีเซ็ต">
+                                รีเซ็ต
+                            </button>
+                            <button type="button" onclick="openFullScreenZoom('meter')" class="px-2 h-7 rounded bg-primary text-white hover:bg-secondary text-[11px] font-semibold flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-expand"></i> เต็มจอ
+                            </button>
+                        </div>
+                    </div>
+                    <div id="stageMeter" class="zoom-stage w-full h-[32vh] flex items-center justify-center">
+                        <img id="viewImgMeter" class="zoom-target-img max-w-full max-h-full object-contain" alt="Meter">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Full-Screen Super Zoom -->
+    <div id="modalFullScreenZoom" class="fixed inset-0 bg-black/95 z-[90] hidden flex flex-col justify-between select-none">
+        <div class="flex justify-between items-center px-3 py-3 bg-black/70 backdrop-blur-sm z-10 border-b border-white/10">
+            <div class="flex items-center gap-2">
+                <button type="button" id="fsTabSlip" onclick="switchFullScreenTab('slip')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-primary text-white">
+                    <i class="fa-solid fa-receipt"></i> สลิปโอนเงิน
+                </button>
+                <button type="button" id="fsTabMeter" onclick="switchFullScreenTab('meter')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white/10 text-gray-300 hover:bg-white/20">
+                    <i class="fa-solid fa-gauge-high"></i> มิเตอร์ไฟ
+                </button>
+            </div>
+            <button type="button" onclick="closeFullScreenZoom()" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-xl transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div id="stageFullScreen" class="zoom-stage grow w-full h-full flex items-center justify-center bg-black">
+            <img id="viewImgFullScreen" class="zoom-target-img max-w-full max-h-full object-contain" alt="Full Screen Zoom">
+        </div>
+        <div class="flex flex-col items-center gap-1.5 px-4 py-3 bg-black/70 backdrop-blur-sm z-10 border-t border-white/10">
+            <p class="text-[11px] text-gray-300"><i class="fa-solid fa-hand-sparkles text-accent mr-1"></i>ใช้นิ้วถ่างเพื่อซูม • ลากนิ้วเพื่อเลื่อนดู • แตะ 2 ครั้งเพื่อซูมด่วน</p>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="zoomFullScreen(-0.6)" class="w-10 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-sm active:scale-95 transition">
+                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                </button>
+                <span id="zoomBadgeFullScreen" class="text-xs font-bold text-white bg-white/10 px-3 py-1.5 rounded-lg min-w-[64px] text-center">100%</span>
+                <button type="button" onclick="zoomFullScreen(0.6)" class="w-10 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-sm active:scale-95 transition">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+                <button type="button" onclick="rotateFullScreen()" class="w-10 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-sm active:scale-95 transition" title="หมุนภาพ">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <button type="button" onclick="resetFullScreen()" class="px-3 h-9 rounded-lg bg-accent text-white font-bold text-xs active:scale-95 transition">
+                    รีเซ็ต
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Login -->
+    <div id="modalLogin" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div class="bg-gray-800 p-4 text-white text-center">
+                <i class="fa-solid fa-user-shield text-3xl mb-2 text-accent"></i>
+                <h3 class="font-bold">เข้าสู่ระบบสำหรับนิติบุคคล</h3>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+                    <input type="text" id="inpUser" autocapitalize="none" autocorrect="off" class="w-full border border-gray-300 p-2 rounded focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                    <input type="password" id="inpPass" class="w-full border border-gray-300 p-2 rounded focus:outline-none transition">
+                </div>
+                <p id="loginError" class="text-xs text-red-500 hidden text-center font-semibold">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
+            </div>
+            <div class="p-4 border-t bg-gray-50 flex gap-2">
+                <button onclick="closeModals()" class="w-1/2 bg-gray-200 text-gray-800 p-2 rounded font-semibold transition">ปิด</button>
+                <button onclick="performLogin()" class="w-1/2 bg-gray-800 text-white p-2 rounded font-semibold transition">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert -->
     <div id="customAlert" class="fixed inset-0 bg-black/40 z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-sm text-center transform scale-95 transition-transform duration-300" id="customAlertBox">
             <div id="alertIcon" class="text-4xl mb-3"></div>
             <h3 id="alertTitle" class="text-lg font-bold text-gray-800 mb-2"></h3>
             <p id="alertMessage" class="text-gray-600 mb-5 text-sm"></p>
-            <button onclick="closeAlert()" class="bg-primary text-white px-6 py-2 rounded-lg font-semibold w-full">ตกลง (OK)</button>
+            <button onclick="closeAlert()" class="bg-primary text-white px-6 py-2 rounded-lg font-semibold w-full hover:bg-secondary transition shadow-sm">ตกลง (OK)</button>
         </div>
     </div>
 
-    <!-- UI & Logic Scripts (ส่วนพื้นฐานที่ถูกตัดทอนให้กระชับ โค้ดเดิมที่คุณมีทำงานได้ปกติ) -->
+    <!-- UI & Logic Scripts -->
     <script>
-        // โค้ด UI เดิม ...
-        var isAdmin = false; 
-        var currentUserProfile = null; // ตัวแปรเก็บข้อมูล User จาก Central
+        function getLocalISODate(d) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function getCurrentYearMonth() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        var selectedDate = getLocalISODate(new Date()); 
+        var calendar = null;
+        var chartInstance = null;
+        var isAdmin = localStorage.getItem('isAdmin') === 'true';
+        var dashboardViewMode = 'all'; 
         
+        var firebaseLoaded = false;
+        var failSafeTimer = setTimeout(function() {
+            if(!firebaseLoaded) {
+                const overlay = document.getElementById('loadingOverlay');
+                if(overlay) overlay.style.display = 'none';
+                window.initAppUI(); 
+                window.showAlert('ทำงานแบบออฟไลน์', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ โปรดรีเฟรชหน้าจอ', 'error');
+            }
+        }, 5000);
+
+        // =========================================================================
+        // ระบบ Multi-Touch Pinch-to-Zoom & Pan
+        // =========================================================================
+        const zoomControllers = {};
+        let currentFullScreenType = 'slip';
+
+        function createPinchZoomController(stageId, imgId, badgeId, options = {}) {
+            const stage = document.getElementById(stageId);
+            const img = document.getElementById(imgId);
+            const badge = document.getElementById(badgeId);
+            const scrollParent = document.getElementById('galleryContainer');
+
+            let scale = 1, pointX = 0, pointY = 0, rotation = 0;
+            let isDragging = false, startX = 0, startY = 0;
+            let initialPinchDistance = null, initialScale = 1;
+            let lastTapTime = 0, movedDuringTouch = false;
+            let touchStartScrollY = 0, touchStartRawY = 0;
+            const MIN_SCALE = 1, MAX_SCALE = 6;
+
+            function clampPan() {
+                if (scale <= 1) { pointX = 0; pointY = 0; return; }
+                const rect = stage.getBoundingClientRect();
+                const maxPanX = ((rect.width * scale) - rect.width) / 2;
+                const maxPanY = ((rect.height * scale) - rect.height) / 2;
+                pointX = Math.min(Math.max(pointX, -maxPanX), maxPanX);
+                pointY = Math.min(Math.max(pointY, -maxPanY), maxPanY);
+            }
+
+            function updateTransform(animate = false) {
+                clampPan();
+                img.style.transition = animate ? 'transform 0.18s ease-out' : 'none';
+                img.style.transform = `translate3d(${pointX}px, ${pointY}px, 0) scale(${scale}) rotate(${rotation}deg)`;
+                if (badge) badge.innerText = `${Math.round(scale * 100)}%`;
+            }
+
+            function getTouchDistance(t1, t2) {
+                return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+            }
+
+            stage.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 2) {
+                    e.preventDefault(); isDragging = false; movedDuringTouch = true;
+                    initialPinchDistance = getTouchDistance(e.touches[0], e.touches[1]);
+                    initialScale = scale;
+                } else if (e.touches.length === 1) {
+                    movedDuringTouch = false;
+                    startX = e.touches[0].clientX - pointX; startY = e.touches[0].clientY - pointY;
+                    touchStartRawY = e.touches[0].clientY;
+                    if (scrollParent) touchStartScrollY = scrollParent.scrollTop;
+                    isDragging = true;
+                }
+            }, { passive: false });
+
+            stage.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 2 && initialPinchDistance) {
+                    e.preventDefault(); movedDuringTouch = true;
+                    const ratio = getTouchDistance(e.touches[0], e.touches[1]) / initialPinchDistance;
+                    scale = Math.min(Math.max(initialScale * ratio, MIN_SCALE), MAX_SCALE);
+                    updateTransform(false);
+                } else if (e.touches.length === 1 && isDragging) {
+                    const dyRaw = e.touches[0].clientY - touchStartRawY;
+                    if (Math.abs(e.touches[0].clientX - (startX + pointX)) > 6 || Math.abs(dyRaw) > 6) movedDuringTouch = true;
+                    if (scale > 1) {
+                        e.preventDefault(); pointX = e.touches[0].clientX - startX; pointY = e.touches[0].clientY - startY;
+                        updateTransform(false);
+                    } else if (!options.isFullScreen && scrollParent) {
+                        scrollParent.scrollTop = touchStartScrollY - dyRaw;
+                    }
+                }
+            }, { passive: false });
+
+            stage.addEventListener('touchend', function(e) {
+                if (e.touches.length < 2) initialPinchDistance = null;
+                if (e.touches.length === 1) {
+                    startX = e.touches[0].clientX - pointX; startY = e.touches[0].clientY - pointY; isDragging = true;
+                } else if (e.touches.length === 0) {
+                    isDragging = false;
+                    if (scale < 1.02) { scale = 1; pointX = 0; pointY = 0; updateTransform(true); }
+                    if (!movedDuringTouch) {
+                        const now = Date.now();
+                        if (now - lastTapTime < 300) {
+                            e.preventDefault(); scale = scale > 1 ? 1 : 2.6; pointX = 0; pointY = 0; updateTransform(true);
+                            lastTapTime = 0;
+                        } else lastTapTime = now;
+                    }
+                }
+            }, { passive: false });
+
+            stage.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                scale = Math.min(Math.max(scale + (e.deltaY < 0 ? 0.35 : -0.35), MIN_SCALE), MAX_SCALE);
+                updateTransform(false);
+            }, { passive: false });
+
+            stage.addEventListener('mousedown', function(e) {
+                if (scale <= 1) return;
+                e.preventDefault(); isDragging = true; startX = e.clientX - pointX; startY = e.clientY - pointY;
+            });
+
+            window.addEventListener('mousemove', function(e) {
+                if (!isDragging || scale <= 1) return;
+                pointX = e.clientX - startX; pointY = e.clientY - startY; updateTransform(false);
+            });
+
+            window.addEventListener('mouseup', function() { isDragging = false; });
+
+            return {
+                zoomBy(delta) { scale = Math.min(Math.max(scale + delta, MIN_SCALE), MAX_SCALE); updateTransform(true); },
+                rotateRight() { rotation = (rotation + 90) % 360; updateTransform(true); },
+                reset() { scale = 1; pointX = 0; pointY = 0; rotation = 0; updateTransform(true); }
+            };
+        }
+
+        function initZoomControllers() {
+            if (!zoomControllers.slip) zoomControllers.slip = createPinchZoomController('stageSlip', 'viewImgSlip', 'zoomBadgeSlip', { isFullScreen: false });
+            if (!zoomControllers.meter) zoomControllers.meter = createPinchZoomController('stageMeter', 'viewImgMeter', 'zoomBadgeMeter', { isFullScreen: false });
+            if (!zoomControllers.fullScreen) zoomControllers.fullScreen = createPinchZoomController('stageFullScreen', 'viewImgFullScreen', 'zoomBadgeFullScreen', { isFullScreen: true });
+        }
+
+        window.zoomCardImage = function(type, delta) { if (zoomControllers[type]) zoomControllers[type].zoomBy(delta); };
+        window.resetCardImage = function(type) { if (zoomControllers[type]) zoomControllers[type].reset(); };
+        window.openFullScreenZoom = function(type) {
+            currentFullScreenType = type;
+            document.getElementById('modalFullScreenZoom').classList.remove('hidden');
+            window.switchFullScreenTab(type);
+        };
+
+        window.switchFullScreenTab = function(type) {
+            currentFullScreenType = type;
+            const slipSrc = document.getElementById('viewImgSlip').src;
+            const meterSrc = document.getElementById('viewImgMeter').src;
+            const fsImg = document.getElementById('viewImgFullScreen');
+            const tabSlip = document.getElementById('fsTabSlip');
+            const tabMeter = document.getElementById('fsTabMeter');
+
+            if (type === 'slip') {
+                fsImg.src = slipSrc;
+                tabSlip.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-primary text-white shadow";
+                tabMeter.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white/10 text-gray-300 hover:bg-white/20";
+            } else {
+                fsImg.src = meterSrc;
+                tabMeter.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-accent text-white shadow";
+                tabSlip.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white/10 text-gray-300 hover:bg-white/20";
+            }
+            if (zoomControllers.fullScreen) zoomControllers.fullScreen.reset();
+        };
+
+        window.zoomFullScreen = function(delta) { if (zoomControllers.fullScreen) zoomControllers.fullScreen.zoomBy(delta); };
+        window.rotateFullScreen = function() { if (zoomControllers.fullScreen) zoomControllers.fullScreen.rotateRight(); };
+        window.resetFullScreen = function() { if (zoomControllers.fullScreen) zoomControllers.fullScreen.reset(); };
+        window.closeFullScreenZoom = function() {
+            document.getElementById('modalFullScreenZoom').classList.add('hidden');
+            if (zoomControllers.fullScreen) zoomControllers.fullScreen.reset();
+        };
+        // =========================================================================
+
+        window.initAppUI = function() {
+            const mf = document.getElementById('monthFilter');
+            if(mf) mf.value = getCurrentYearMonth();
+            initCalendar();
+            setupAdminUI();
+            initZoomControllers();
+        }
+
+        function toggleLightUploadSection() {
+            const isChecked = document.getElementById('toggleNeedLight').checked;
+            document.getElementById('lightUploadSection').classList.toggle('hidden', !isChecked);
+        }
+
+        window.saveBooking = async function() {
+            const editingId = document.getElementById('editingBookingId').value;
+            const bookDate = document.getElementById('inpDate').value; 
+            const houseNo = document.getElementById('inpHouseNo').value.trim();
+            const startTime = document.getElementById('inpStartTime').value;
+            const endTime = document.getElementById('inpEndTime').value;
+            const note = document.getElementById('inpNote').value.trim();
+            const needLights = document.getElementById('toggleNeedLight').checked;
+            const initialSlipFile = document.getElementById('inpInitialSlip').files[0];
+            const initialAmount = document.getElementById('inpInitialAmount').value;
+
+            if(!bookDate || !houseNo || !startTime || !endTime) {
+                return window.showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+            }
+            if(startTime >= endTime) {
+                return window.showAlert('เวลาผิดพลาด', 'เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น', 'warning');
+            }
+
+            const existingBooking = editingId ? window.allBookings.find(x => x.id === editingId) : null;
+            const hasExistingSlip = existingBooking && (existingBooking.slipImg || existingBooking.isImageCleaned);
+
+            if(needLights && !initialSlipFile && !hasExistingSlip) {
+                return window.showAlert('ข้อมูลไม่ครบ', 'กรุณาแนบภาพสลิปโอนเงินค่าไฟด้วยครับ', 'warning');
+            }
+
+            const btn = document.getElementById('btnSaveBooking');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+            btn.disabled = true;
+
+            try {
+                let slipBase64 = existingBooking ? (existingBooking.slipImg || "") : "";
+                if(needLights && initialSlipFile) {
+                    slipBase64 = await new Promise(resolve => compressImage(initialSlipFile, resolve));
+                } else if(!needLights) {
+                    slipBase64 = "";
+                }
+
+                const targetMonthKey = bookDate.substring(0, 7);
+
+                const bookingData = {
+                    date: bookDate,
+                    monthKey: targetMonthKey,
+                    houseNo: houseNo,
+                    startTime: startTime,
+                    endTime: endTime,
+                    note: note,
+                    isLightUsed: needLights,
+                    amountPaid: needLights ? parseInt(initialAmount) : 0,
+                    slipImg: slipBase64,
+                    meterImg: needLights && existingBooking ? (existingBooking.meterImg || "") : "",
+                    updatedAt: Date.now()
+                };
+
+                let success = false;
+                if (editingId) {
+                    success = await window.cloudUpdateBooking(editingId, bookingData);
+                } else {
+                    bookingData.createdAt = Date.now();
+                    success = await window.cloudSaveBooking(bookingData);
+                }
+
+                if (success) {
+                    window.closeModals();
+                    window.showAlert('สำเร็จ', editingId ? 'แก้ไขข้อมูลการจองเรียบร้อยแล้ว' : 'บันทึกการจองเรียบร้อยแล้ว', 'success');
+                    resetBookingForm();
+                    window.selectedDate = bookDate;
+                    
+                    if (window.subscribeToMonth) window.subscribeToMonth(targetMonthKey);
+                    if(window.calendar) window.calendar.gotoDate(bookDate);
+                    highlightSelectedDayOnCalendar(bookDate);
+                } else {
+                    throw new Error();
+                }
+            } catch (error) {
+                window.showAlert('ผิดพลาด', 'ไม่สามารถบันทึกได้ กรุณาเชื่อมต่ออินเทอร์เน็ต', 'error');
+            } finally {
+                btn.innerHTML = 'บันทึกการจอง';
+                btn.disabled = false;
+            }
+        }
+
+        function resetBookingForm() {
+            document.getElementById('editingBookingId').value = '';
+            document.getElementById('inpHouseNo').value = '';
+            document.getElementById('inpStartTime').value = '';
+            document.getElementById('inpEndTime').value = '';
+            document.getElementById('inpNote').value = '';
+            document.getElementById('toggleNeedLight').checked = false;
+            toggleLightUploadSection();
+            document.getElementById('inpInitialSlip').value = '';
+            document.getElementById('previewInitialSlip').src = '';
+            document.getElementById('previewInitialSlip').classList.add('hidden');
+        }
+
+        window.openEditBookingModal = function(bookingId) {
+            const b = window.allBookings.find(x => x.id === bookingId);
+            if (!b) return;
+
+            document.getElementById('editingBookingId').value = b.id;
+            document.getElementById('modalBookingTitle').innerText = 'แก้ไขข้อมูลการจอง (Edit Booking)';
+            document.getElementById('btnSaveBooking').innerText = 'บันทึกการแก้ไข';
+
+            const di = document.getElementById('inpDate');
+            di.removeAttribute('min');
+            di.removeAttribute('max');
+            di.value = b.date;
+
+            document.getElementById('inpHouseNo').value = b.houseNo || '';
+            document.getElementById('inpStartTime').value = b.startTime || '';
+            document.getElementById('inpEndTime').value = b.endTime || '';
+            document.getElementById('inpNote').value = b.note || '';
+
+            const needLight = !!b.isLightUsed;
+            document.getElementById('toggleNeedLight').checked = needLight;
+            toggleLightUploadSection();
+
+            if (needLight) {
+                document.getElementById('inpInitialAmount').value = String(b.amountPaid || 200);
+                if (b.slipImg) {
+                    const prev = document.getElementById('previewInitialSlip');
+                    prev.src = b.slipImg;
+                    prev.classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('previewInitialSlip').classList.add('hidden');
+            }
+
+            const adminResetSec = document.getElementById('adminResetLightSection');
+            if (window.isAdmin && needLight) {
+                adminResetSec.classList.remove('hidden');
+            } else {
+                adminResetSec.classList.add('hidden');
+            }
+
+            const md = document.getElementById('modalBooking');
+            md.classList.remove('hidden');
+            md.querySelector('div').classList.add('modal-enter');
+            setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
+        }
+
+        window.adminResetLightImages = async function() {
+            const bookingId = document.getElementById('editingBookingId').value;
+            if (!bookingId) return;
+            
+            if (confirm("คุณต้องการ 'ลบไฟล์แนบสลิป/มิเตอร์' และรีเซ็ตสถานะการใช้ไฟสำหรับรายการนี้ใช่หรือไม่?\n\n* ข้อมูลการจองจะยังคงอยู่ แต่สถานะจะกลับไปเหมือนยังไม่ขอใช้ไฟ")) {
+                const btn = document.querySelector('#adminResetLightSection button');
+                const origHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังลบ...';
+                
+                try {
+                    const updateData = {
+                        isLightUsed: false, amountPaid: 0, slipImg: "", meterImg: "", isImageCleaned: false, updatedAt: Date.now()
+                    };
+                    const success = await window.cloudUpdateBooking(bookingId, updateData);
+                    if (success) {
+                        window.closeModals();
+                        window.showAlert('สำเร็จ', 'ลบไฟล์แนบและรีเซ็ตสถานะการใช้ไฟเรียบร้อยแล้ว', 'success');
+                    } else throw new Error();
+                } catch (e) {
+                    window.showAlert('ผิดพลาด', 'ไม่สามารถลบไฟล์แนบได้', 'error');
+                } finally {
+                    btn.innerHTML = origHtml;
+                }
+            }
+        }
+
+        window.openDeleteBookingModal = function(bookingId) {
+            const b = window.allBookings.find(x => x.id === bookingId);
+            if (!b) return;
+            document.getElementById('deletingBookingId').value = b.id;
+            document.getElementById('deleteConfirmDetail').innerHTML = `บ้านเลขที่ <strong>${b.houseNo}</strong><br>วันที่ ${b.date} เวลา ${b.startTime} - ${b.endTime}`;
+            document.getElementById('modalConfirmDelete').classList.remove('hidden');
+        }
+
+        window.confirmDeleteBooking = async function() {
+            const bookingId = document.getElementById('deletingBookingId').value;
+            if (!bookingId) return;
+            const btn = document.getElementById('btnConfirmDelete');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังลบ...'; btn.disabled = true;
+
+            try {
+                const success = await window.cloudDeleteBooking(bookingId);
+                if (success) {
+                    window.closeModals(); window.showAlert('ลบสำเร็จ', 'ลบรายการจองเรียบร้อยแล้ว', 'success');
+                } else throw new Error();
+            } catch (e) {
+                window.showAlert('ผิดพลาด', 'ไม่สามารถลบรายการได้', 'error');
+            } finally {
+                btn.innerHTML = 'ยืนยันลบ'; btn.disabled = false;
+            }
+        }
+
+        function compressImage(file, callback) {
+            if(!file) { callback(""); return; }
+            const reader = new FileReader(); 
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image(); 
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600, MAX_HEIGHT = 600;
+                    let width = img.width, height = img.height;
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d'); 
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/jpeg', 0.5));
+                }
+            }
+        }
+
+        function handleImageInput(inputId, previewId) {
+            document.getElementById(inputId).addEventListener('change', function() {
+                if(this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = e => { document.getElementById(previewId).src = e.target.result; document.getElementById(previewId).classList.remove('hidden'); }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+        handleImageInput('inpInitialSlip', 'previewInitialSlip');
+        handleImageInput('inpSlipImg', 'previewSlip');
+        handleImageInput('inpMeterImg', 'previewMeter');
+
+        window.saveLightUsage = async function() {
+            const bookingId = document.getElementById('currentLightBookingId').value;
+            const amount = parseInt(document.getElementById('inpAmount').value);
+            const slipFile = document.getElementById('inpSlipImg').files[0];
+            const meterFile = document.getElementById('inpMeterImg').files[0];
+
+            if(!meterFile) return window.showAlert('ข้อมูลไม่ครบ', 'กรุณาแนบภาพหน้าปัดมิเตอร์ไฟ', 'warning');
+            const btn = document.getElementById('btnSaveLight');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังอัปโหลด...'; btn.disabled = true;
+
+            try {
+                const slipBase64 = slipFile ? await new Promise(r => compressImage(slipFile, r)) : "";
+                const meterBase64 = await new Promise(r => compressImage(meterFile, r));
+
+                const updateData = { meterImg: meterBase64, isImageCleaned: false, updatedAt: Date.now() };
+                if (slipBase64) { updateData.slipImg = slipBase64; updateData.amountPaid = amount; updateData.isLightUsed = true; }
+
+                const success = await window.cloudUpdateLight(bookingId, updateData);
+                if (success) {
+                    window.closeModals(); window.showAlert('สำเร็จ', 'อัปโหลดข้อมูลมิเตอร์ไฟเรียบร้อยแล้ว', 'success');
+                    document.getElementById('inpSlipImg').value = ''; document.getElementById('inpMeterImg').value = '';
+                    document.getElementById('previewSlip').classList.add('hidden'); document.getElementById('previewMeter').classList.add('hidden');
+                } else throw new Error();
+            } catch(error) { window.showAlert('ผิดพลาด', 'อัปโหลดไม่สำเร็จ', 'error'); } 
+            finally { btn.innerHTML = 'บันทึกข้อมูล'; btn.disabled = false; }
+        }
+
+        function highlightSelectedDayOnCalendar(dateStr) {
+            document.querySelectorAll('.fc-daygrid-day').forEach(el => el.classList.remove('selected-day-highlight'));
+            const targetEl = document.querySelector(`.fc-daygrid-day[data-date="${dateStr}"]`);
+            if (targetEl) targetEl.classList.add('selected-day-highlight');
+        }
+
+        function initCalendar() {
+            if(window.calendar) return;
+            window.calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                initialView: 'dayGridMonth', height: 'auto', aspectRatio: 1.75,
+                headerToolbar: { left: 'prev', center: 'title', right: 'next' }, locale: 'th', selectable: true,
+                dayHeaderContent: function(arg) {
+                    const enDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; return enDays[arg.date.getDay()];
+                },
+                dateClick: function(info) {
+                    window.selectedDate = info.dateStr; highlightSelectedDayOnCalendar(window.selectedDate); window.renderBookingsForDate(window.selectedDate);
+                },
+                datesSet: function(info) {
+                    const viewDate = info.view.currentStart;
+                    const ym = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}`;
+                    const filterEl = document.getElementById('monthFilter');
+                    if (filterEl && window.isAdmin) filterEl.value = ym;
+                    if (window.subscribeToMonth) window.subscribeToMonth(ym);
+                    highlightSelectedDayOnCalendar(window.selectedDate);
+                },
+                eventContent: function(arg) {
+                    const count = arg.event.extendedProps.count || 1;
+                    let dotsHtml = ''; for (let i = 0; i < count; i++) dotsHtml += `<span class="booking-dot"></span>`;
+                    return { html: `<div class="booking-dots-row">${dotsHtml}</div>` };
+                }
+            });
+            window.calendar.render();
+            setTimeout(() => { highlightSelectedDayOnCalendar(window.selectedDate); window.renderBookingsForDate(window.selectedDate); }, 200);
+        }
+
+        window.refreshCalendarEvents = function() {
+            if(!window.calendar) return;
+            const counts = {}; window.allBookings.forEach(b => { if (b.date) counts[b.date] = (counts[b.date] || 0) + 1; });
+            const events = Object.keys(counts).map(date => ({ start: date, allDay: true, extendedProps: { count: counts[date] } }));
+            window.calendar.removeAllEvents(); window.calendar.addEventSource(events);
+        }
+
+        window.renderBookingsForDate = function(dateStr) {
+            const sec = document.getElementById('dateDetailsSection');
+            if(sec) sec.classList.remove('hidden');
+            
+            const dateObj = new Date(dateStr);
+            const titleEl = document.getElementById('selectedDateTitle');
+            if(titleEl) titleEl.innerText = dateObj.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const container = document.getElementById('bookingsList'); 
+            if(!container) return;
+            container.innerHTML = '';
+            
+            const dailyBookings = (window.allBookings || []).filter(b => b.date === dateStr);
+            dailyBookings.sort((a,b) => a.startTime.localeCompare(b.startTime));
+
+            if(dailyBookings.length === 0) {
+                container.innerHTML = `<div class="text-center py-4 text-gray-400 bg-gray-50 rounded-lg border border-dashed"><i class="fa-regular fa-calendar-xmark text-2xl mb-1"></i><p class="mt-1 text-[11px]">ยังไม่มีรายการจองในวันนี้</p></div>`;
+                return;
+            }
+
+            dailyBookings.forEach(b => {
+                const isPaid = b.isLightUsed;
+                const hasMeter = !!b.meterImg || !!b.isImageCleaned;
+                let actionHtml = '';
+                
+                // โชว์แถบจัดการไฟเฉพาะตอนที่ Admin ล็อกอินเท่านั้น
+                if (window.isAdmin) {
+                    if (isPaid && hasMeter) {
+                        const cleanBadge = b.isImageCleaned ? `<span class="text-[10px] text-gray-400">(ลบรูปตามรอบ 3 เดือนแล้ว)</span>` : `<button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 px-3 py-1 rounded-lg shadow-sm font-semibold"><i class="fa-solid fa-image mr-1 text-primary"></i>ดูรูปสลิป/มิเตอร์</button>`;
+                        actionHtml = `<div class="mt-2 flex items-center justify-between gap-2"><span class="bg-green-100 text-green-700 text-[11px] px-2.5 py-1 rounded-full font-semibold"><i class="fa-solid fa-check-circle mr-1"></i> เรียบร้อย (฿${b.amountPaid})</span>${cleanBadge}</div>`;
+                    } else if (isPaid && !hasMeter) {
+                        actionHtml = `<div class="mt-2 flex flex-col gap-1.5"><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded font-semibold inline-block w-fit"><i class="fa-solid fa-file-invoice mr-1"></i> แนบสลิปแล้ว (รออัปโหลดมิเตอร์)</span><div class="flex gap-2"><button onclick="openLightModal('${b.id}', '${b.houseNo}', '${b.startTime}-${b.endTime}', true)" class="w-full bg-accent text-white text-xs py-1.5 rounded-lg font-bold hover:bg-amber-600 shadow flex justify-center items-center gap-1.5"><i class="fa-solid fa-camera"></i> แนบรูปมิเตอร์ไฟ</button><button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-lg shadow-sm"><i class="fa-solid fa-image"></i></button></div></div>`;
+                    } else {
+                        actionHtml = `<div class="mt-2"><button onclick="openLightModal('${b.id}', '${b.houseNo}', '${b.startTime}-${b.endTime}', false)" class="w-full bg-gray-100 text-gray-700 border border-gray-300 text-xs py-1.5 rounded-lg font-semibold hover:bg-gray-200 shadow-sm flex justify-center items-center gap-1.5"><i class="fa-regular fa-lightbulb text-sm text-accent"></i> ขอเปิดไฟเพิ่ม (แนบสลิป+มิเตอร์)</button></div>`;
+                    }
+                }
+
+                // ปุ่มลบ/แก้ไข โชว์เฉพาะตอน Admin ล็อกอินเท่านั้น
+                const editDeleteBtns = window.isAdmin ? `
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="openEditBookingModal('${b.id}')" title="แก้ไขรายการ" class="w-7 h-7 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 flex items-center justify-center transition">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button onclick="openDeleteBookingModal('${b.id}')" title="ลบรายการ" class="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 flex items-center justify-center transition">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                ` : '';
+
+                container.innerHTML += `
+                    <div class="border rounded-xl p-3 bg-white shadow-sm hover:shadow-md transition ${window.isAdmin && isPaid ? 'border-green-200 border-l-4 border-l-green-500' : 'border-gray-200 border-l-4 border-l-primary'}">
+                        <div class="flex justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm">บ้านเลขที่: ${b.houseNo}</h4>
+                                <p class="text-xs text-gray-600 mt-0.5"><i class="fa-regular fa-clock mr-1 text-primary"></i> ${b.startTime} - ${b.endTime}</p>
+                                ${b.note ? `<p class="text-[11px] text-gray-500 mt-0.5"><i class="fa-solid fa-note-sticky mr-1"></i> ${b.note}</p>` : ''}
+                            </div>
+                            ${editDeleteBtns}
+                        </div>
+                        ${actionHtml}
+                    </div>
+                `;
+            });
+        }
+
+        window.setDashboardView = function(mode) {
+            window.dashboardViewMode = mode;
+            const cardBookings = document.getElementById('cardBookings');
+            const cardRevenue = document.getElementById('cardRevenue');
+
+            if (mode === 'all') {
+                cardBookings.className = "bg-teal-50 p-3.5 rounded-xl border-2 border-primary ring-2 ring-teal-200 cursor-pointer transition-all select-none relative";
+                cardRevenue.className = "bg-amber-50 p-3.5 rounded-xl border border-amber-200 opacity-80 hover:opacity-100 cursor-pointer transition-all select-none relative";
+            } else {
+                cardBookings.className = "bg-teal-50 p-3.5 rounded-xl border border-teal-200 opacity-80 hover:opacity-100 cursor-pointer transition-all select-none relative";
+                cardRevenue.className = "bg-amber-50 p-3.5 rounded-xl border-2 border-accent ring-2 ring-amber-200 cursor-pointer transition-all select-none relative";
+            }
+            window.renderDashboard();
+        }
+
+        window.onDashboardMonthChange = function() {
+            const filterEl = document.getElementById('monthFilter');
+            const selectedYM = filterEl.value || getCurrentYearMonth();
+            if (window.subscribeToMonth) window.subscribeToMonth(selectedYM);
+            if (window.calendar) window.calendar.gotoDate(selectedYM + '-01');
+            window.renderDashboard();
+        }
+
+        window.resetToCurrentMonth = function() {
+            const currentYM = getCurrentYearMonth();
+            document.getElementById('monthFilter').value = currentYM;
+            window.onDashboardMonthChange();
+        }
+
+        window.renderDashboard = function() {
+            const currentYM = getCurrentYearMonth();
+            const filterEl = document.getElementById('monthFilter');
+            if (!filterEl.value || !window.isAdmin) filterEl.value = currentYM;
+            const selectedYM = filterEl.value;
+            if (window.subscribeToMonth && window.currentSubscribedMonth !== selectedYM) window.subscribeToMonth(selectedYM);
+
+            const monthData = window.allBookings.filter(b => (b.monthKey === selectedYM) || (b.date && b.date.startsWith(selectedYM)));
+            const paidBookings = monthData.filter(b => b.isLightUsed);
+            const totalRevenue = paidBookings.reduce((sum, b) => sum + (Number(b.amountPaid) || 0), 0);
+
+            document.getElementById('dashTotalBookings').innerText = monthData.length;
+            document.getElementById('dashTotalRevenue').innerText = `฿${totalRevenue.toLocaleString()}`;
+
+            const thead = document.getElementById('dashboardTableHead');
+            const tbody = document.getElementById('dashboardTableBody');
+            const tableTitle = document.getElementById('dashboardTableTitle');
+            const tableCount = document.getElementById('dashboardTableCount');
+            const chartTitle = document.getElementById('chartTitle');
+            tbody.innerHTML = '';
+
+            const [selYear, selMonth] = selectedYM.split('-');
+            const thaiMonthName = new Date(Number(selYear), Number(selMonth) - 1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+
+            if (window.dashboardViewMode === 'all') {
+                chartTitle.innerHTML = `<i class="fa-solid fa-chart-line text-primary"></i> แนวโน้มจำนวนการจองรายสัปดาห์ (ครั้ง) - ${thaiMonthName}`;
+                tableTitle.innerHTML = `<i class="fa-solid fa-list-check text-primary mr-1"></i> รายการจองทั้งหมด (${thaiMonthName})`;
+                tableCount.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200";
+                tableCount.innerText = `${monthData.length} รายการ`;
+                thead.innerHTML = `<tr><th class="px-3 py-2 w-16">วันที่</th><th class="px-3 py-2">บ้านเลขที่ / เวลา</th><th class="px-3 py-2 text-right">สถานะไฟ</th></tr>`;
+
+                if (monthData.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-400">ไม่มีรายการจองในเดือนนี้</td></tr>`;
+                } else {
+                    const sortedAll = [...monthData].sort((a, b) => b.date.localeCompare(a.date) || a.startTime.localeCompare(b.startTime));
+                    sortedAll.forEach(b => {
+                        const [y, m, d] = b.date.split('-');
+                        let lightStatusHtml = '';
+
+                        if (b.isLightUsed) {
+                            const imgBtn = b.isImageCleaned ? `<span class="text-[10px] text-gray-400 block">ลบรูปตามรอบ 3 เดือน</span>` : `<button onclick="openViewImages('${b.id}')" class="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded shadow-sm block ml-auto font-semibold hover:bg-blue-100"><i class="fa-solid fa-image mr-1"></i>ดูรูป</button>`;
+                            lightStatusHtml = `<span class="bg-amber-100 text-amber-800 text-[11px] px-2 py-0.5 rounded-full font-semibold inline-block mb-1"><i class="fa-solid fa-bolt text-accent mr-0.5"></i>ใช้ไฟ (฿${b.amountPaid})</span>${imgBtn}`;
+                        } else {
+                            lightStatusHtml = `<span class="bg-gray-100 text-gray-500 text-[11px] px-2 py-0.5 rounded-full font-medium inline-block">ไม่ใช้ไฟ</span>`;
+                        }
+
+                        tbody.innerHTML += `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-3 py-3 align-top font-semibold text-gray-700">${d}/${m}</td>
+                                <td class="px-3 py-3 align-top">
+                                    <div class="font-bold text-gray-800">บ้านเลขที่ ${b.houseNo}</div>
+                                    <div class="text-xs text-gray-500 mt-0.5"><i class="fa-regular fa-clock mr-1 text-primary"></i>${b.startTime} - ${b.endTime}</div>
+                                    ${b.note ? `<div class="text-[11px] text-gray-400 mt-0.5"><i class="fa-solid fa-note-sticky mr-1"></i>${b.note}</div>` : ''}
+                                </td>
+                                <td class="px-3 py-3 align-top text-right">${lightStatusHtml}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } else {
+                chartTitle.innerHTML = `<i class="fa-solid fa-chart-line text-accent"></i> แนวโน้มรายได้ค่าไฟรายสัปดาห์ (บาท) - ${thaiMonthName}`;
+                tableTitle.innerHTML = `<i class="fa-solid fa-bolt text-accent mr-1"></i> รายการที่มีการใช้ไฟ (${thaiMonthName})`;
+                tableCount.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200";
+                tableCount.innerText = `${paidBookings.length} รายการ`;
+                thead.innerHTML = `<tr><th class="px-3 py-2 w-16">วันที่</th><th class="px-3 py-2">บ้านเลขที่ / เวลา</th><th class="px-3 py-2 text-right">ยอดเงิน / สลิป</th></tr>`;
+
+                if (paidBookings.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-400">ไม่มีรายการใช้ไฟในเดือนนี้</td></tr>`;
+                } else {
+                    const sortedPaid = [...paidBookings].sort((a, b) => b.date.localeCompare(a.date) || a.startTime.localeCompare(b.startTime));
+                    sortedPaid.forEach(b => {
+                        const [y, m, d] = b.date.split('-');
+                        const imgBtn = b.isImageCleaned ? `<span class="text-[10px] text-gray-400 block">ลบรูปตามรอบ 3 เดือน</span>` : `<button onclick="openViewImages('${b.id}')" class="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded shadow-sm block ml-auto font-semibold hover:bg-blue-100"><i class="fa-solid fa-image mr-1"></i>ดูสลิป/มิเตอร์</button>`;
+                        tbody.innerHTML += `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-3 py-3 align-top font-semibold text-gray-700">${d}/${m}</td>
+                                <td class="px-3 py-3 align-top">
+                                    <div class="font-bold text-gray-800">บ้านเลขที่ ${b.houseNo}</div>
+                                    <div class="text-xs text-gray-500 mt-0.5"><i class="fa-regular fa-clock mr-1 text-amber-500"></i>${b.startTime} - ${b.endTime}</div>
+                                    ${b.note ? `<div class="text-[11px] text-gray-400 mt-0.5"><i class="fa-solid fa-note-sticky mr-1"></i>${b.note}</div>` : ''}
+                                </td>
+                                <td class="px-3 py-3 align-top text-right"><span class="text-green-600 font-bold block mb-1">฿${b.amountPaid}</span>${imgBtn}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+            renderDynamicChart(monthData);
+        }
+
+        function renderDynamicChart(monthData) {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            const wBookings = [0, 0, 0, 0, 0];
+            const wRevenue = [0, 0, 0, 0, 0];
+
+            monthData.forEach(b => {
+                if (b.date) {
+                    const day = parseInt(b.date.split('-')[2]);
+                    const weekIdx = Math.floor((day - 1) / 7);
+                    if (weekIdx < 5) { wBookings[weekIdx] += 1; if (b.isLightUsed) wRevenue[weekIdx] += Number(b.amountPaid) || 0; }
+                }
+            });
+
+            const isRevenue = window.dashboardViewMode === 'revenue';
+            const chartData = isRevenue ? wRevenue : wBookings;
+            const chartLabel = isRevenue ? 'รายได้ค่าไฟ (บาท)' : 'จำนวนการจอง (ครั้ง)';
+            const lineColor = isRevenue ? '#f59e0b' : '#0d9488';
+            const fillColor = isRevenue ? 'rgba(245, 158, 11, 0.1)' : 'rgba(13, 148, 136, 0.1)';
+
+            if(window.chartInstance) window.chartInstance.destroy();
+            window.chartInstance = new Chart(ctx, { 
+                type: 'line', 
+                data: { labels: ['W1', 'W2', 'W3', 'W4', 'W5'], datasets: [{ label: chartLabel, data: chartData, borderColor: lineColor, backgroundColor: fillColor, borderWidth: 2.5, pointBackgroundColor: lineColor, pointRadius: 4, tension: 0.35, fill: true }] }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } 
+            });
+        }
+
+        window.exportPDF = function() {
+            document.getElementById('btnPrintPdf').classList.add('hidden');
+            document.getElementById('monthFilterBox').classList.add('hidden');
+            html2pdf().set({ margin: 10, filename: `Report_${document.getElementById('monthFilter').value}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(document.getElementById('pdfExportArea')).save().then(() => {
+                document.getElementById('btnPrintPdf').classList.remove('hidden'); setupAdminUI();
+            });
+        }
+
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => { el.classList.remove('text-primary'); el.classList.add('text-gray-400'); });
+            
+            const targetTab = document.getElementById('tab-' + tabId);
+            if(targetTab) targetTab.classList.add('active');
+            
+            const aBtn = document.getElementById('nav-' + tabId); 
+            if(aBtn) { aBtn.classList.remove('text-gray-400'); aBtn.classList.add('text-primary'); }
+            
+            if(tabId === 'booking' && window.calendar) {
+                setTimeout(() => { window.calendar.updateSize(); }, 50);
+                window.renderBookingsForDate(window.selectedDate);
+            }
+            if(tabId === 'dashboard') window.setDashboardView('all');
+        }
+
         function setupAdminUI() {
             const setHidden = (id, hidden) => {
                 const el = document.getElementById(id);
@@ -304,41 +1419,115 @@
             setHidden('userInfo', !window.isAdmin);
             setHidden('btnAddBooking', !window.isAdmin);
             setHidden('nav-dashboard', !window.isAdmin);
+            // สังเกตว่าเราไม่ได้ซ่อน nav-info อีกต่อไป ลูกบ้านจึงเห็นได้
             setHidden('btnPrintPdf', !window.isAdmin);
             setHidden('adminMigrationSection', !window.isAdmin);
             setHidden('monthFilterBox', !window.isAdmin);
             setHidden('guardFilterNote', window.isAdmin);
 
-            // แสดงชื่อผู้ใช้
-            if(window.isAdmin && window.currentUserProfile) {
-                const badge = document.getElementById('userDisplayName');
-                badge.innerHTML = `<i class="fa-solid fa-user-check mr-1"></i>${window.currentUserProfile.username} <span class="text-[10px] text-gray-300">(${window.currentUserProfile.role})</span>`;
-            }
-
             if(!window.isAdmin) {
+                // หากลูกบ้านบังเอิญอยู่ในหน้า Dashboard ให้เด้งกลับไปหน้า Booking
                 const currentTab = document.querySelector('.tab-content.active');
-                if (currentTab && currentTab.id === 'tab-dashboard') window.switchTab('booking');
+                if (currentTab && currentTab.id === 'tab-dashboard') {
+                    window.switchTab('booking');
+                }
+            }
+        }
+
+        window.performLogin = function() {
+            const u = (document.getElementById('inpUser').value || '').trim().toLowerCase();
+            const p = (document.getElementById('inpPass').value || '').trim().toLowerCase();
+
+            if(u === 'admin' && p === 'admin') {
+                localStorage.setItem('isAdmin', 'true');
+                window.isAdmin = true;
+                setupAdminUI();
+                window.closeModals();
+                window.showAlert('สำเร็จ', 'เข้าสู่ระบบนิติบุคคลเรียบร้อย', 'success');
+                window.renderBookingsForDate(window.selectedDate);
+                if(document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        window.logout = function() {
+            localStorage.setItem('isAdmin', 'false');
+            window.isAdmin = false;
+            setupAdminUI();
+            window.renderBookingsForDate(window.selectedDate);
+            if(document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
+        }
+
+        window.openBookingModal = function() {
+            resetBookingForm();
+            document.getElementById('modalBookingTitle').innerText = 'บันทึกการจองสนาม (New Booking)';
+            document.getElementById('btnSaveBooking').innerText = 'บันทึกการจอง';
+            const di = document.getElementById('inpDate');
+            const t = new Date(); const m = new Date(); m.setDate(t.getDate() + 7);
+            di.min = getLocalISODate(t); di.max = getLocalISODate(m); di.value = window.selectedDate;
+            const md = document.getElementById('modalBooking'); md.classList.remove('hidden');
+            md.querySelector('div').classList.add('modal-enter'); setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
+        }
+
+        window.openLightModal = function(bookingId, houseNo, timeStr, hasSlip) {
+            document.getElementById('currentLightBookingId').value = bookingId;
+            document.getElementById('lightHouseNo').innerText = houseNo;
+            document.getElementById('lightTime').innerText = timeStr;
+            document.getElementById('delayedSlipSection').classList.toggle('hidden', hasSlip);
+            const md = document.getElementById('modalLight'); md.classList.remove('hidden');
+            md.querySelector('div').classList.add('modal-enter'); setTimeout(() => md.querySelector('div').classList.add('modal-enter-active'), 10);
+        }
+
+        window.openViewImages = function(bookingId) {
+            const b = window.allBookings.find(x => x.id === bookingId);
+            if(b) {
+                initZoomControllers();
+                const defImg = 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image';
+                document.getElementById('cleanedImageBanner').classList.toggle('hidden', !b.isImageCleaned);
+                document.getElementById('viewImgSlip').src = b.slipImg || defImg; document.getElementById('viewImgMeter').src = b.meterImg || defImg;
+                if (zoomControllers.slip) zoomControllers.slip.reset(); if (zoomControllers.meter) zoomControllers.meter.reset();
+                document.getElementById('modalViewImages').classList.remove('hidden');
             }
         }
 
         window.openLoginModal = function() {
-            document.getElementById('inpUser').value = ''; 
-            document.getElementById('inpPass').value = ''; 
-            document.getElementById('loginError').classList.add('hidden'); 
-            document.getElementById('modalLogin').classList.remove('hidden');
+            document.getElementById('inpUser').value = ''; document.getElementById('inpPass').value = ''; document.getElementById('loginError').classList.add('hidden'); document.getElementById('modalLogin').classList.remove('hidden');
         }
 
-        window.closeModals = function() { document.querySelectorAll('.fixed.inset-0:not(#loadingOverlay)').forEach(el => el.classList.add('hidden')); }
-        window.showAlert = function(title, msg, type='info') { /* โค้ด Alert เดิม */ document.getElementById('customAlert').classList.remove('hidden'); document.getElementById('customAlert').classList.remove('opacity-0'); }
-        window.closeAlert = function() { document.getElementById('customAlert').classList.add('hidden'); }
+        window.closeModals = function() {
+            document.querySelectorAll('.fixed.inset-0').forEach(el => { if(el.id !== 'customAlert' && el.id !== 'loadingOverlay') el.classList.add('hidden'); });
+        }
+
+        window.closeImageModal = function() {
+            document.getElementById('modalViewImages').classList.add('hidden'); document.getElementById('modalFullScreenZoom').classList.add('hidden');
+            if (zoomControllers.slip) zoomControllers.slip.reset(); if (zoomControllers.meter) zoomControllers.meter.reset(); if (zoomControllers.fullScreen) zoomControllers.fullScreen.reset();
+        }
+
+        window.copyAccount = function() { fallbackCopy("6631872448"); }
+        function fallbackCopy(text) {
+            const el = document.createElement('textarea'); el.value = text; el.style.position = 'fixed'; el.style.left = '-9999px'; document.body.appendChild(el); el.select();
+            try { document.execCommand('copy'); window.showAlert('คัดลอกแล้ว', 'คัดลอกเลขที่บัญชีเรียบร้อยแล้ว', 'success'); } catch (err) { window.showAlert('แจ้งเตือน', 'กรุณาคัดลอกเลขบัญชีด้วยตนเอง', 'warning'); }
+            document.body.removeChild(el);
+        }
+
+        window.showAlert = function(title, msg, type='info') {
+            const box = document.getElementById('customAlertBox'); const el = document.getElementById('customAlert'); const ic = document.getElementById('alertIcon');
+            document.getElementById('alertTitle').innerText = title; document.getElementById('alertMessage').innerText = msg;
+            if(type === 'success') ic.innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i>'; else if (type === 'error') ic.innerHTML = '<i class="fa-solid fa-circle-xmark text-red-500"></i>'; else if (type === 'warning') ic.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>'; else ic.innerHTML = '<i class="fa-solid fa-circle-info text-blue-500"></i>';
+            el.classList.remove('hidden'); setTimeout(() => { el.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
+        }
+
+        window.closeAlert = function() {
+            const box = document.getElementById('customAlertBox'); const el = document.getElementById('customAlert'); el.classList.add('opacity-0'); box.classList.add('scale-95'); setTimeout(() => { el.classList.add('hidden'); }, 300);
+        }
     </script>
 
-    <!-- Firebase Authentication & Firestore (Central Users Injection) -->
+    <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // นำเข้าโมดูล Auth สำหรับ Login ด้วย Username/Password และระบบรับฟังสถานะ
-        import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, updateDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const myNetlifyFirebaseConfig = {
             apiKey: "AIzaSyCXuj7Pl1JnBn2Y7BtyzkHHQm4MQH-isrM",
@@ -350,113 +1539,124 @@
         };
         
         let db, auth;
-        const APP_IDENTIFIER = 'court_booking'; // รหัสอ้างอิงสิทธิ์แอปนี้
+        let currentUnsubscribe = null;
+        window.currentSubscribedMonth = null;
+
+        const COURT_APP_ID = 'laddarom-court-app'; 
+        const COLLECTION_NAME = 'ten_bookings'; 
+        const OLD_COLLECTION_NAME = 'bookings';
+
+        window.allBookings = [];
+
+        function getBookingsCollectionRef() { return collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', COLLECTION_NAME); }
+        function getBookingDocRef(docId) { return doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', COLLECTION_NAME, docId); }
+
+        window.subscribeToMonth = function(monthKey) {
+            if (!db || !monthKey) return;
+            if (window.currentSubscribedMonth === monthKey && currentUnsubscribe) return;
+            if (currentUnsubscribe) { currentUnsubscribe(); currentUnsubscribe = null; }
+
+            window.currentSubscribedMonth = monthKey;
+            const badge = document.getElementById('activeMonthBadge'); if (badge) badge.innerText = `เดือน: ${monthKey}`;
+            const statusEl = document.getElementById('calendarQueryStatus'); if (statusEl) statusEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>กำลังโหลดเดือน ${monthKey}...`;
+
+            const q = query(getBookingsCollectionRef(), where('monthKey', '==', monthKey));
+            currentUnsubscribe = onSnapshot(q, (snapshot) => {
+                window.allBookings = []; snapshot.forEach(docSnap => { let data = docSnap.data(); data.id = docSnap.id; window.allBookings.push(data); });
+                if (statusEl) statusEl.innerHTML = `<i class="fa-solid fa-database mr-1"></i>ข้อมูลเดือน ${monthKey} (${window.allBookings.length} รายการ)`;
+                window.refreshCalendarEvents();
+                if(document.getElementById('tab-booking').classList.contains('active')) window.renderBookingsForDate(window.selectedDate);
+                else if(document.getElementById('tab-dashboard').classList.contains('active')) window.renderDashboard();
+            }, (error) => {
+                console.error("Firestore Listener Error:", error);
+                if (statusEl) statusEl.innerHTML = `<span class="text-red-500">โหลดข้อมูลไม่สำเร็จ</span>`;
+            });
+        };
+
+        async function autoCleanupOldImages(forceRun = false) {
+            try {
+                const now = new Date();
+                const currentYM = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                const lastCleanYM = localStorage.getItem('ten_last_img_cleanup_ym');
+                if (!forceRun && lastCleanYM === currentYM) return 0;
+
+                const cutoffDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+                const cutoffYM = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, '0')}`;
+                const qOld = query(getBookingsCollectionRef(), where('monthKey', '<=', cutoffYM));
+                const snap = await getDocs(qOld); let cleanedCount = 0;
+
+                for (const docSnap of snap.docs) {
+                    const data = docSnap.data();
+                    if ((data.slipImg && data.slipImg !== "") || (data.meterImg && data.meterImg !== "")) {
+                        await updateDoc(getBookingDocRef(docSnap.id), { slipImg: "", meterImg: "", isImageCleaned: true, cleanedAt: Date.now() });
+                        cleanedCount++;
+                    }
+                }
+                localStorage.setItem('ten_last_img_cleanup_ym', currentYM);
+                return cleanedCount;
+            } catch (err) { console.error("Auto cleanup error:", err); throw err; }
+        }
+
+        window.manualCleanupOldImages = async function() {
+            const btn = document.getElementById('btnManualCleanImg'); const origHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ...'; btn.disabled = true;
+            try { const count = await autoCleanupOldImages(true); window.showAlert('เสร็จสิ้น', `ตรวจสอบและลบรูปภาพที่เก่าเกิน 3 เดือนเรียบร้อยแล้ว จำนวน ${count} รายการ`, 'success'); } 
+            catch (e) { window.showAlert('ผิดพลาด', 'ไม่สามารถล้างรูปภาพเก่าได้', 'error'); } 
+            finally { btn.innerHTML = origHtml; btn.disabled = false; }
+        };
+
+        window.migrateOldBookings = async function() {
+            const btn = document.getElementById('btnMigrateData'); const origHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังดึงและย้ายข้อมูล...'; btn.disabled = true;
+            try {
+                const oldColRef = collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', OLD_COLLECTION_NAME);
+                const snap = await getDocs(oldColRef);
+                if (snap.empty) return window.showAlert('ไม่พบข้อมูลเก่า', 'ไม่พบข้อมูลใน Collection เดิม (bookings) หรือย้ายข้อมูลครบแล้ว', 'info');
+
+                let migratedCount = 0;
+                const now = new Date(); const cutoffDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+                const cutoffYM = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, '0')}`;
+
+                for (const docSnap of snap.docs) {
+                    const data = docSnap.data(); const dateStr = data.date || getLocalISODate(new Date()); const monthKey = dateStr.substring(0, 7);
+                    const newPayload = { ...data, monthKey: monthKey, migratedAt: Date.now() };
+                    if (monthKey <= cutoffYM && (newPayload.slipImg || newPayload.meterImg)) { newPayload.slipImg = ""; newPayload.meterImg = ""; newPayload.isImageCleaned = true; }
+                    await setDoc(getBookingDocRef(docSnap.id), newPayload, { merge: true });
+                    migratedCount++;
+                }
+
+                const activeYM = window.currentSubscribedMonth || getCurrentYearMonth();
+                window.currentSubscribedMonth = null; window.subscribeToMonth(activeYM);
+                window.showAlert('ย้ายข้อมูลสำเร็จ!', `คัดลอกข้อมูลจากระบบเก่าเข้าสู่ ten_bookings พร้อมเติม monthKey เรียบร้อยจำนวน ${migratedCount} รายการ`, 'success');
+            } catch (error) { window.showAlert('เกิดข้อผิดพลาด', `ไม่สามารถย้ายข้อมูลได้: ${error.message}`, 'error'); } 
+            finally { btn.innerHTML = origHtml; btn.disabled = false; }
+        };
 
         async function initFirebase() {
             try {
-                const app = initializeApp(myNetlifyFirebaseConfig); 
-                db = getFirestore(app); 
-                auth = getAuth(app);
-
-                // 🔥 1. ระบบดักจับสถานะ Central User
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        if (user.isAnonymous) {
-                            // กรณีเป็นลูกบ้านทั่วไป
-                            window.isAdmin = false;
-                            window.currentUserProfile = null;
-                            setupAdminUI();
-                            const overlay = document.getElementById('loadingOverlay'); if(overlay) overlay.style.display = 'none';
-                        } else {
-                            // กรณี Login ด้วย Central User (มีอีเมลเสมือน)
-                            try {
-                                // ไปอ่านข้อมูลจาก Central Collection (ชื่อ collection: users)
-                                const userDocRef = doc(db, 'users', user.uid);
-                                const userDoc = await getDoc(userDocRef);
-                                
-                                if (userDoc.exists()) {
-                                    const profile = userDoc.data();
-                                    
-                                    // ตรวจสอบสิทธิ์ว่า Active และมีสิทธิ์ในแอปนี้หรือไม่
-                                    if (profile.status === 'active' && profile.apps_access && profile.apps_access[APP_IDENTIFIER] === true) {
-                                        window.currentUserProfile = profile;
-                                        // กำหนดให้เป็น admin ถ้า Role เป็น admin หรือ supervisor (ปรับได้ตามต้องการ)
-                                        window.isAdmin = (profile.role === 'admin' || profile.role === 'supervisor');
-                                        setupAdminUI();
-                                        window.closeModals();
-                                        
-                                        // ปิด Loading
-                                        const overlay = document.getElementById('loadingOverlay'); if(overlay) overlay.style.display = 'none';
-                                        // window.showAlert('เข้าสู่ระบบสำเร็จ', `ยินดีต้อนรับ ${profile.username}`, 'success');
-                                    } else {
-                                        throw new Error("บัญชีถูกระงับ หรือไม่มีสิทธิ์เข้าใช้แอปพลิเคชันนี้");
-                                    }
-                                } else {
-                                    throw new Error("ไม่พบโปรไฟล์ Central User ในฐานข้อมูล");
-                                }
-                            } catch (err) {
-                                console.error("Central Auth Error:", err);
-                                document.getElementById('loginError').innerText = err.message;
-                                document.getElementById('loginError').classList.remove('hidden');
-                                // บังคับเตะออกแล้วกลับไปเป็น Guest
-                                await signOut(auth);
-                                await signInAnonymously(auth);
-                            }
-                        }
-                    } else {
-                        // ถ้าไม่มี User เลย (โหลดครั้งแรกหรือกดออก) ให้ล็อกอินเป็น Guest ทันที
-                        await signInAnonymously(auth);
-                    }
-                });
-
+                const finalConfig = (typeof __firebase_config !== 'undefined' && Object.keys(myNetlifyFirebaseConfig).length === 0) ? JSON.parse(__firebase_config) : myNetlifyFirebaseConfig;
+                if (Object.keys(finalConfig).length === 0) throw new Error("Missing Firebase Configuration");
+                const app = initializeApp(finalConfig); db = getFirestore(app); auth = getAuth(app);
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token); else await signInAnonymously(auth);
+                
+                firebaseLoaded = true; clearTimeout(failSafeTimer);
+                const overlay = document.getElementById('loadingOverlay'); if(overlay) overlay.style.display = 'none';
+                
+                window.initAppUI(); 
+                window.subscribeToMonth(getCurrentYearMonth());
+                setTimeout(() => { autoCleanupOldImages(false).catch(() => {}); }, 3000);
             } catch (error) {
-                console.error("Firebase Init Error:", error);
+                console.error("Firebase Error:", error); const overlay = document.getElementById('loadingOverlay');
+                if(overlay) { overlay.querySelector('i').className = 'fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-3'; const errEl = document.getElementById('loadingErrorText'); errEl.innerHTML = `ตั้งค่าไม่ถูกต้อง: ${error.message}`; errEl.classList.remove('hidden'); }
             }
         }
 
-        // 🔥 2. ผูกฟังก์ชัน Login ให้เชื่อมต่อกับ Central Auth
-        window.triggerLogin = async function() {
-            const u = (document.getElementById('inpUser').value || '').trim().toLowerCase();
-            const p = (document.getElementById('inpPass').value || '').trim();
-            const errEl = document.getElementById('loginError');
-            const btn = document.getElementById('btnPerformLogin');
-
-            if(!u || !p) {
-                errEl.innerText = "กรุณากรอกข้อมูลให้ครบ";
-                errEl.classList.remove('hidden'); return;
-            }
-
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
-            btn.disabled = true;
-
-            try {
-                // แปลง Username เป็น Virtual Email หลังบ้าน
-                const virtualEmail = `${u}@central.local`; 
-                // ใช้ Firebase Auth ยืนยันตัวตน (หลังจากนี้ onAuthStateChanged จะทำงานต่อเอง)
-                await signInWithEmailAndPassword(auth, virtualEmail, p);
-            } catch (error) {
-                console.error(error);
-                errEl.innerText = "ชื่อผู้ใช้ หรือ รหัสผ่านไม่ถูกต้อง";
-                errEl.classList.remove('hidden');
-            } finally {
-                btn.innerHTML = 'Login';
-                btn.disabled = false;
-            }
-        }
-
-        // 🔥 3. ผูกฟังก์ชัน Logout
-        window.performLogout = async function() {
-            try {
-                await signOut(auth); // SignOut ออกจากระบบ Central
-                // onAuthStateChanged จะรับรู้ว่าไม่มี User และจะทำการ signInAnonymously ให้อัตโนมัติ เพื่อให้ระบบไม่ล่ม
-                window.showAlert('ออกจากระบบ', 'คุณกลับเข้าสู่โหมดลูกบ้านทั่วไป', 'info');
-            } catch (err) {
-                console.error("Logout Error:", err);
-            }
-        }
+        window.cloudSaveBooking = async function(bookingData) { try { const docId = `B_${Date.now()}_${bookingData.houseNo.replace(/\//g,'-')}`; await setDoc(getBookingDocRef(docId), bookingData); return true; } catch (e) { return false; } };
+        window.cloudUpdateBooking = async function(bookingId, bookingData) { try { await updateDoc(getBookingDocRef(bookingId), bookingData); return true; } catch (e) { return false; } };
+        window.cloudDeleteBooking = async function(bookingId) { try { await deleteDoc(getBookingDocRef(bookingId)); return true; } catch (e) { return false; } };
+        window.cloudUpdateLight = async function(bookingId, updateData) { try { await updateDoc(getBookingDocRef(bookingId), updateData); return true; } catch (e) { return false; } };
 
         initFirebase();
     </script>
 </body>
 </html>
-
