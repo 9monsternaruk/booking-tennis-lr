@@ -154,7 +154,7 @@
                 <div id="calendar"></div>
                 <div class="flex items-center justify-between mt-1 px-1 text-[10px] text-gray-500">
                     <span id="calendarQueryStatus" class="text-teal-700 font-medium"><i class="fa-solid fa-database mr-1"></i>ดึงข้อมูลรายเดือน</span>
-                    <span class="inline-flex items-center gap-1"><span class="booking-dot"></span> 1 จุด = 1 รายการจอง</span>
+                    <span id="lastUpdateText" class="inline-flex items-center gap-1 font-medium text-[9px] sm:text-[10px]">last update : -</span>
                 </div>
             </div>
 
@@ -1562,7 +1562,44 @@
 
             const q = query(getBookingsCollectionRef(), where('monthKey', '==', monthKey));
             currentUnsubscribe = onSnapshot(q, (snapshot) => {
-                window.allBookings = []; snapshot.forEach(docSnap => { let data = docSnap.data(); data.id = docSnap.id; window.allBookings.push(data); });
+                window.allBookings = [];
+                let latestTime = 0; // ตัวแปรเก็บเวลาล่าสุด
+
+                snapshot.forEach(docSnap => { 
+                    let data = docSnap.data(); 
+                    data.id = docSnap.id; 
+                    window.allBookings.push(data); 
+
+                    // หาเวลาที่มีการบันทึกหรืออัปเดตล่าสุด
+                    const timeCheck = data.updatedAt || data.createdAt || 0;
+                    if (timeCheck > latestTime) {
+                        latestTime = timeCheck;
+                    }
+                });
+
+                // อัปเดตข้อความ last update ตรงจุดที่ขีดสีส้ม
+                const lastUpdateEl = document.getElementById('lastUpdateText');
+                if (lastUpdateEl) {
+                    if (latestTime > 0) {
+                        const d = new Date(latestTime);
+                        const day = String(d.getDate()).padStart(2, '0');
+                        const month = String(d.getMonth() + 1).padStart(2, '0');
+                        const year = String(d.getFullYear() + 543).slice(-2); // ปี พ.ศ. 2 หลัก
+                        
+                        let hours = d.getHours();
+                        const ampm = hours >= 12 ? 'pm' : 'am';
+                        hours = hours % 12;
+                        hours = hours ? hours : 12; // จัดการเวลาเที่ยงคืนและเที่ยงวันให้เป็นเลข 12
+                        
+                        const strHours = String(hours).padStart(2, '0');
+                        const strMins = String(d.getMinutes()).padStart(2, '0');
+                        
+                        lastUpdateEl.innerText = `last update : ${day}/${month}/${year} : ${strHours}:${strMins} ${ampm}`;
+                    } else {
+                        lastUpdateEl.innerText = `last update : -`;
+                    }
+                }
+
                 if (statusEl) statusEl.innerHTML = `<i class="fa-solid fa-database mr-1"></i>ข้อมูลเดือน ${monthKey} (${window.allBookings.length} รายการ)`;
                 window.refreshCalendarEvents();
                 if(document.getElementById('tab-booking').classList.contains('active')) window.renderBookingsForDate(window.selectedDate);
