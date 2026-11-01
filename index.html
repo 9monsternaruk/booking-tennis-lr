@@ -132,7 +132,7 @@
     <!-- Header -->
     <header class="bg-primary text-white py-2 px-3 shadow-md sticky top-0 z-40 flex justify-between items-center">
         <!-- แตะที่ชื่อโปรเจคเพื่อล็อกอิน -->
-        <div class="flex items-center gap-2 cursor-pointer select-none" onclick="if(!window.isAdmin) openLoginModal()" title="แตะเพื่อเข้าสู่ระบบนิติบุคคล">
+        <div class="flex items-center gap-2 cursor-pointer select-none" onclick="if(!window.isLoggedIn) openLoginModal()" title="แตะเพื่อเข้าสู่ระบบนิติบุคคล">
             <i class="fa-solid fa-tennis-ball text-xl text-accent"></i>
             <div>
                 <h1 class="text-md font-bold leading-tight">Court Booking</h1>
@@ -143,6 +143,7 @@
             <span id="activeMonthBadge" class="text-[10px] bg-teal-800/60 text-teal-100 px-2 py-0.5 rounded-full hidden sm:inline-block"></span>
             
             <div id="userInfo" class="hidden text-sm font-semibold text-accent flex items-center gap-2">
+                <!-- ข้อมูลชื่อจะอัปเดตผ่าน JS -->
                 <span><i class="fa-solid fa-shield-halved mr-1"></i>นิติบุคคล</span>
                 <button onclick="logout()" class="text-xs bg-white text-primary px-2 py-1 rounded shadow-sm hover:bg-gray-100 transition">ออก</button>
             </div>
@@ -413,6 +414,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-1">สิทธิ์ (Role)</label>
                             <select id="empRole" class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50 focus:bg-white">
                                 <option value="พนักงาน" selected>พนักงาน</option>
+                                <option value="รปภ">รปภ</option>
                                 <option value="Admin">Admin</option>
                             </select>
                         </div>
@@ -468,7 +470,7 @@
         <button onclick="switchTab('booking')" id="nav-booking" class="nav-btn w-full h-full flex flex-col items-center justify-center text-primary font-semibold transition-colors">
             <i class="fa-solid fa-calendar-check text-lg mb-0.5"></i><span class="text-[10px] uppercase">ตารางจอง (Booking)</span>
         </button>
-        <!-- ซ่อนแท็บสรุปยอด (Dashboard) เมื่อไม่ได้ล็อกอิน -->
+        <!-- ซ่อนแท็บสรุปยอด (Dashboard) เมื่อไม่ได้ล็อกอิน หรือเป็น รปภ. -->
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn hidden w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
             <i class="fa-solid fa-chart-simple text-lg mb-0.5"></i><span class="text-[10px] uppercase">สรุปยอด (Dashboard)</span>
         </button>
@@ -544,7 +546,7 @@
                         <!-- ปุ่มสำหรับ Admin รีเซ็ตไฟล์แนบและสถานะไฟ -->
                         <div id="adminResetLightSection" class="hidden mt-3 p-2 bg-red-50 border border-red-200 rounded-lg text-center">
                             <button type="button" onclick="adminResetLightImages()" class="text-xs text-red-600 font-bold hover:text-red-800 transition flex items-center justify-center w-full gap-1">
-                                <i class="fa-solid fa-trash-can"></i> ลบไฟล์แนบและรีเซ็ตสถานะการใช้ไฟ (Admin)
+                                <i class="fa-solid fa-trash-can"></i> ลบไฟล์แนบและรีเซ็ตสถานะการใช้ไฟ
                             </button>
                         </div>
                     </div>
@@ -734,7 +736,7 @@
             </div>
             <div class="p-5 space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Username (รหัสพนักงาน)</label>
                     <input type="text" id="inpUser" autocapitalize="none" autocorrect="off" class="w-full border border-gray-300 p-2 rounded focus:outline-none transition">
                 </div>
                 <div>
@@ -744,8 +746,8 @@
                 <p id="loginError" class="text-xs text-red-500 hidden text-center font-semibold">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
             </div>
             <div class="p-4 border-t bg-gray-50 flex gap-2">
-                <button onclick="closeModals()" class="w-1/2 bg-gray-200 text-gray-800 p-2 rounded font-semibold transition">ปิด</button>
-                <button onclick="performLogin()" class="w-1/2 bg-gray-800 text-white p-2 rounded font-semibold transition">Login</button>
+                <button onclick="closeModals()" class="w-1/2 bg-gray-200 text-gray-800 p-2 rounded font-semibold transition hover:bg-gray-300">ปิด</button>
+                <button onclick="performLogin()" class="w-1/2 bg-gray-800 text-white p-2 rounded font-semibold transition hover:bg-gray-700">Login</button>
             </div>
         </div>
     </div>
@@ -777,7 +779,12 @@
         var selectedDate = getLocalISODate(new Date()); 
         var calendar = null;
         var chartInstance = null;
-        var isAdmin = localStorage.getItem('isAdmin') === 'true';
+        
+        // --- เปลี่ยนแปลงระบบสิทธิ์ (Role-based state) ---
+        var isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || localStorage.getItem('isAdmin') === 'true'; // รองรับ session เก่า
+        var userRole = localStorage.getItem('userRole') || (localStorage.getItem('isAdmin') === 'true' ? 'Admin' : '');
+        var isAdmin = userRole === 'Admin';
+        
         var dashboardViewMode = 'all'; 
         
         var firebaseLoaded = false;
@@ -1090,7 +1097,8 @@
             }
 
             const adminResetSec = document.getElementById('adminResetLightSection');
-            if (window.isAdmin && needLight) {
+            // ให้สิทธิ์พนักงานที่ล็อกอิน "และไม่ใช่ รปภ." สามารถลบและรีเซ็ตไฟได้
+            if (window.isLoggedIn && needLight && window.userRole !== 'รปภ') {
                 adminResetSec.classList.remove('hidden');
             } else {
                 adminResetSec.classList.add('hidden');
@@ -1236,7 +1244,8 @@
                     const viewDate = info.view.currentStart;
                     const ym = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}`;
                     const filterEl = document.getElementById('monthFilter');
-                    if (filterEl && window.isAdmin) filterEl.value = ym;
+                    // ถ้าเข้าสู่ระบบแล้ว ให้ filter ทำงานตรงกับปฏิทิน
+                    if (filterEl && window.isLoggedIn) filterEl.value = ym;
                     if (window.subscribeToMonth) window.subscribeToMonth(ym);
                     highlightSelectedDayOnCalendar(window.selectedDate);
                 },
@@ -1282,7 +1291,8 @@
                 const hasMeter = !!b.meterImg || !!b.isImageCleaned;
                 let actionHtml = '';
                 
-                if (window.isAdmin) {
+                // เจ้าหน้าที่ (isLoggedIn) สามารถมองเห็นปุ่มจัดการไฟได้
+                if (window.isLoggedIn) {
                     if (isPaid && hasMeter) {
                         const cleanBadge = b.isImageCleaned ? `<span class="text-[10px] text-gray-400">(ลบรูปตามรอบ 3 เดือนแล้ว)</span>` : `<button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 px-3 py-1 rounded-lg shadow-sm font-semibold"><i class="fa-solid fa-image mr-1 text-primary"></i>ดูรูปสลิป/มิเตอร์</button>`;
                         actionHtml = `<div class="mt-2 flex items-center justify-between gap-2"><span class="bg-green-100 text-green-700 text-[11px] px-2.5 py-1 rounded-full font-semibold"><i class="fa-solid fa-check-circle mr-1"></i> เรียบร้อย (฿${b.amountPaid})</span>${cleanBadge}</div>`;
@@ -1293,19 +1303,24 @@
                     }
                 }
 
-                const editDeleteBtns = window.isAdmin ? `
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <button onclick="openEditBookingModal('${b.id}')" title="แก้ไขรายการ" class="w-7 h-7 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 flex items-center justify-center transition">
-                            <i class="fa-solid fa-pen text-xs"></i>
-                        </button>
-                        <button onclick="openDeleteBookingModal('${b.id}')" title="ลบรายการ" class="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 flex items-center justify-center transition">
-                            <i class="fa-solid fa-trash-can text-xs"></i>
-                        </button>
-                    </div>
+                // ปุ่มแก้ไข (ทุกคนที่ล็อกอิน) 
+                const editBtn = window.isLoggedIn ? `
+                    <button onclick="openEditBookingModal('${b.id}')" title="แก้ไขรายการ" class="w-7 h-7 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 flex items-center justify-center transition">
+                        <i class="fa-solid fa-pen text-xs"></i>
+                    </button>
                 ` : '';
+                
+                // ปุ่มลบ (สำหรับคนที่ไม่ใช่ รปภ)
+                const deleteBtn = (window.isLoggedIn && window.userRole !== 'รปภ') ? `
+                    <button onclick="openDeleteBookingModal('${b.id}')" title="ลบรายการ" class="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 flex items-center justify-center transition">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                ` : '';
+                
+                const editDeleteBtns = window.isLoggedIn ? `<div class="flex items-center gap-1.5 shrink-0">${editBtn}${deleteBtn}</div>` : '';
 
                 container.innerHTML += `
-                    <div class="border rounded-xl p-3 bg-white shadow-sm hover:shadow-md transition ${window.isAdmin && isPaid ? 'border-green-200 border-l-4 border-l-green-500' : 'border-gray-200 border-l-4 border-l-primary'}">
+                    <div class="border rounded-xl p-3 bg-white shadow-sm hover:shadow-md transition ${window.isLoggedIn && isPaid ? 'border-green-200 border-l-4 border-l-green-500' : 'border-gray-200 border-l-4 border-l-primary'}">
                         <div class="flex justify-between items-start gap-2">
                             <div>
                                 <h4 class="font-bold text-gray-800 text-sm">บ้านเลขที่: ${b.houseNo}</h4>
@@ -1352,7 +1367,7 @@
         window.renderDashboard = function() {
             const currentYM = getCurrentYearMonth();
             const filterEl = document.getElementById('monthFilter');
-            if (!filterEl.value || !window.isAdmin) filterEl.value = currentYM;
+            if (!filterEl.value || !window.isLoggedIn) filterEl.value = currentYM;
             const selectedYM = filterEl.value;
             if (window.subscribeToMonth && window.currentSubscribedMonth !== selectedYM) window.subscribeToMonth(selectedYM);
 
@@ -1492,56 +1507,139 @@
             if(tabId === 'dashboard') window.setDashboardView('all');
         }
 
+        // --- อัปเดตฟังก์ชันเช็ค UI ตามสิทธิ์การล็อกอิน ---
         function setupAdminUI() {
+            // อัปเดตข้อมูลบน Header
+            const userInfoEl = document.getElementById('userInfo');
+            if (window.isLoggedIn) {
+                const dispName = localStorage.getItem('userName') || (window.isAdmin ? 'ผู้ดูแลระบบ' : 'พนักงาน');
+                userInfoEl.innerHTML = `<span><i class="fa-solid fa-shield-halved mr-1"></i>${dispName}</span>
+                <button onclick="logout()" class="text-xs bg-white text-primary px-2 py-1 rounded shadow-sm hover:bg-gray-100 transition">ออก</button>`;
+            }
+
             const setHidden = (id, hidden) => {
                 const el = document.getElementById(id);
                 if (el) el.classList.toggle('hidden', hidden);
             };
 
-            setHidden('userInfo', !window.isAdmin);
-            setHidden('btnAddBooking', !window.isAdmin);
-            setHidden('nav-dashboard', !window.isAdmin);
-            setHidden('nav-employee', !window.isAdmin); // เปิดปิดปุ่มจัดการพนักงาน
-            setHidden('btnPrintPdf', !window.isAdmin);
+            const isGuard = window.userRole === 'รปภ';
+
+            // สิ่งที่ เจ้าหน้าที่เห็นได้ (และ รปภ. จะถูกซ่อนบางอย่าง)
+            setHidden('userInfo', !window.isLoggedIn);
+            setHidden('btnAddBooking', !window.isLoggedIn);
+            
+            // รปภ. จะมองไม่เห็น Dashboard และสิ่งที่อยู่ในนั้น
+            setHidden('nav-dashboard', !window.isLoggedIn || isGuard);
+            setHidden('btnPrintPdf', !window.isLoggedIn || isGuard);
+            setHidden('monthFilterBox', !window.isLoggedIn || isGuard);
+            setHidden('guardFilterNote', window.isLoggedIn && !isGuard);
+
+            // สิ่งที่ต้องเป็น Admin เท่านั้นถึงจะเห็น
+            setHidden('nav-employee', !window.isAdmin); 
             setHidden('adminMigrationSection', !window.isAdmin);
-            setHidden('monthFilterBox', !window.isAdmin);
-            setHidden('guardFilterNote', window.isAdmin);
 
             if(window.isAdmin) {
                 if(window.subscribeToEmployees) window.subscribeToEmployees();
             } else {
                 if(window.unsubscribeEmployees) { window.unsubscribeEmployees(); window.unsubscribeEmployees = null; }
                 const currentTab = document.querySelector('.tab-content.active');
-                // หากลูกบ้านบังเอิญอยู่ในหน้า Dashboard หรือ Employee ให้เด้งกลับไปหน้า Booking
-                if (currentTab && (currentTab.id === 'tab-dashboard' || currentTab.id === 'tab-employee')) {
+                
+                // หากพนักงานทั่วไป/รปภ. พยายามเข้าหน้าพนักงาน ให้เด้งกลับ
+                if (window.isLoggedIn && currentTab && currentTab.id === 'tab-employee') {
+                    window.switchTab('booking');
+                }
+
+                // หากเป็น รปภ. แล้วพยายามเข้าหน้าแดชบอร์ด ให้เด้งกลับ
+                if (isGuard && currentTab && currentTab.id === 'tab-dashboard') {
+                    window.switchTab('booking');
+                }
+                
+                // หากลูกบ้านทั่วไปอยู่ในหน้าต้องห้าม ให้เด้งกลับ
+                if (!window.isLoggedIn && currentTab && (currentTab.id === 'tab-dashboard' || currentTab.id === 'tab-employee')) {
                     window.switchTab('booking');
                 }
             }
         }
 
-        window.performLogin = function() {
-            const u = (document.getElementById('inpUser').value || '').trim().toLowerCase();
-            const p = (document.getElementById('inpPass').value || '').trim().toLowerCase();
+        // --- อัปเดตฟังก์ชัน Login ให้เช็คจาก Firebase ---
+        window.performLogin = async function() {
+            const u = (document.getElementById('inpUser').value || '').trim();
+            const p = (document.getElementById('inpPass').value || '').trim();
+            const errEl = document.getElementById('loginError');
+            const btn = document.querySelector('#modalLogin button:nth-child(2)');
+            const origHtml = btn.innerHTML;
 
-            if(u === 'admin' && p === 'admin') {
-                localStorage.setItem('isAdmin', 'true');
-                window.isAdmin = true;
-                setupAdminUI();
-                window.closeModals();
-                window.showAlert('สำเร็จ', 'เข้าสู่ระบบนิติบุคคลเรียบร้อย', 'success');
-                window.renderBookingsForDate(window.selectedDate);
-                if(document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
-            } else {
-                document.getElementById('loginError').classList.remove('hidden');
+            if(!u || !p) {
+                errEl.innerText = 'กรุณากรอกรหัสพนักงานและรหัสผ่าน';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            errEl.classList.add('hidden');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; 
+            btn.disabled = true;
+
+            try {
+                // 1. เช็ครหัสผ่าน Admin สำรอง (Master Password)
+                if(u.toLowerCase() === 'admin' && p === 'admin') {
+                    handleSuccessfulLogin('Admin', 'Super Admin');
+                    return;
+                }
+
+                // 2. เช็คจาก Firebase Collection 'users'
+                if(window.cloudCheckLogin) {
+                    const user = await window.cloudCheckLogin(u, p);
+                    if(user) {
+                        if(user.status !== 'ปกติ') {
+                            errEl.innerText = 'บัญชีพนักงานนี้ถูกระงับการใช้งาน';
+                            errEl.classList.remove('hidden');
+                        } else {
+                            handleSuccessfulLogin(user.role, user.name);
+                        }
+                    } else {
+                        errEl.innerText = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+                        errEl.classList.remove('hidden');
+                    }
+                } else {
+                    errEl.innerText = 'ระบบเชื่อมต่อฐานข้อมูลยังไม่พร้อม';
+                    errEl.classList.remove('hidden');
+                }
+            } catch(e) {
+                console.error(e);
+                errEl.innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย';
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = origHtml; 
+                btn.disabled = false;
             }
         }
 
+        function handleSuccessfulLogin(role, name) {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('userRole', role);
+            localStorage.setItem('userName', name);
+            window.isLoggedIn = true;
+            window.userRole = role;
+            window.isAdmin = (role === 'Admin');
+
+            setupAdminUI();
+            window.closeModals();
+            window.showAlert('สำเร็จ', `ยินดีต้อนรับคุณ ${name}`, 'success');
+            window.renderBookingsForDate(window.selectedDate);
+            if(document.getElementById('tab-dashboard').classList.contains('active')) window.renderDashboard();
+        }
+
         window.logout = function() {
-            localStorage.setItem('isAdmin', 'false');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('isAdmin'); // เคลียร์ session เก่าด้วย
+            window.isLoggedIn = false;
+            window.userRole = '';
             window.isAdmin = false;
             setupAdminUI();
             window.renderBookingsForDate(window.selectedDate);
-            if(document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
+            if(document.getElementById('tab-dashboard').classList.contains('active')) window.renderDashboard();
         }
 
         window.openBookingModal = function() {
@@ -1577,7 +1675,10 @@
         }
 
         window.openLoginModal = function() {
-            document.getElementById('inpUser').value = ''; document.getElementById('inpPass').value = ''; document.getElementById('loginError').classList.add('hidden'); document.getElementById('modalLogin').classList.remove('hidden');
+            document.getElementById('inpUser').value = ''; 
+            document.getElementById('inpPass').value = ''; 
+            document.getElementById('loginError').classList.add('hidden'); 
+            document.getElementById('modalLogin').classList.remove('hidden');
         }
 
         window.closeModals = function() {
@@ -1841,7 +1942,7 @@
         };
 
         // =========================================================================
-        // Employee Database Listeners (ใหม่)
+        // Employee Database Listeners
         // =========================================================================
         window.subscribeToEmployees = function() {
             if (!db || !window.isAdmin) return;
@@ -1859,6 +1960,29 @@
             }, (error) => {
                 console.error("Employee Fetch Error:", error);
             });
+        };
+
+        // =========================================================================
+        // Functions สำหรับเช็ค Login เข้าสู่ระบบ (เปิดให้ Vanilla JS เรียกใช้)
+        // =========================================================================
+        window.cloudCheckLogin = async function(username, password) {
+            try {
+                const q = query(getEmployeesCollectionRef(), where('empId', '==', username));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                    let foundUser = null;
+                    snap.forEach(doc => {
+                        if (doc.data().password === password) {
+                            foundUser = doc.data();
+                        }
+                    });
+                    return foundUser; // เจอและรหัสตรง
+                }
+                return null; // ไม่เจอผู้ใช้
+            } catch(e) {
+                console.error(e);
+                throw e;
+            }
         };
 
         // =========================================================================
