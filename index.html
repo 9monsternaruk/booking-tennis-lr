@@ -113,6 +113,11 @@
             user-select: none;
             -webkit-user-drag: none;
         }
+        
+        /* สไตล์ตารางพนักงาน */
+        .emp-table th, .emp-table td { padding: 0.75rem 0.5rem; text-align: left; }
+        .emp-table th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 0.75rem; border-bottom: 2px solid #e2e8f0; }
+        .emp-table td { font-size: 0.8rem; color: #334155; border-bottom: 1px solid #e2e8f0; }
     </style>
 </head>
 <body class="text-gray-800 pb-20 relative">
@@ -126,7 +131,7 @@
 
     <!-- Header -->
     <header class="bg-primary text-white py-2 px-3 shadow-md sticky top-0 z-40 flex justify-between items-center">
-        <!-- แตะที่ชื่อโปรเจคเพื่อล็อกอิน (ซ่อนปุ่มล็อกอินปกติไว้ไม่ให้ลูกบ้านเห็น) -->
+        <!-- แตะที่ชื่อโปรเจคเพื่อล็อกอิน -->
         <div class="flex items-center gap-2 cursor-pointer select-none" onclick="if(!window.isAdmin) openLoginModal()" title="แตะเพื่อเข้าสู่ระบบนิติบุคคล">
             <i class="fa-solid fa-tennis-ball text-xl text-accent"></i>
             <div>
@@ -180,7 +185,6 @@
                     </button>
                 </div>
 
-                <!-- ช่องเลือกค้นหาย้อนหลังแบบรายเดือน -->
                 <div id="monthFilterBox" class="mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
                     <div class="flex justify-between items-center mb-1.5">
                         <label for="monthFilter" class="text-xs font-bold text-gray-600 flex items-center gap-1">
@@ -197,10 +201,8 @@
                     <i class="fa-solid fa-info-circle mr-1"></i> แสดงเฉพาะข้อมูลของเดือนปัจจุบันเท่านั้น
                 </div>
 
-                <!-- การ์ดสรุปยอด คลิกสลับดูตารางและกราฟเส้นด้านล่างได้ -->
                 <p class="text-[11px] text-gray-500 mb-1.5"><i class="fa-solid fa-hand-pointer text-primary mr-1"></i>แตะที่กล่องเพื่อสลับดู <strong>จำนวนจอง</strong> หรือ <strong>รายได้ค่าไฟ</strong> (กราฟและตารางจะเปลี่ยนตาม)</p>
                 <div class="grid grid-cols-2 gap-3 mb-5">
-                    <!-- กล่องจำนวนจองทั้งหมด -->
                     <div id="cardBookings" onclick="setDashboardView('all')" class="bg-teal-50 p-3.5 rounded-xl border-2 border-primary ring-2 ring-teal-200 cursor-pointer transition-all select-none relative">
                         <div class="flex justify-between items-start">
                             <p class="text-xs text-teal-800 font-bold">จำนวนจอง (Bookings)</p>
@@ -210,7 +212,6 @@
                         <p class="text-[10px] text-teal-700 mt-1 flex items-center gap-1"><i class="fa-solid fa-eye"></i> แสดงแนวโน้มและรายการจอง</p>
                     </div>
 
-                    <!-- กล่องรายได้ค่าไฟ -->
                     <div id="cardRevenue" onclick="setDashboardView('revenue')" class="bg-amber-50 p-3.5 rounded-xl border border-amber-200 opacity-80 hover:opacity-100 cursor-pointer transition-all select-none relative">
                         <div class="flex justify-between items-start">
                             <p class="text-xs text-amber-800 font-bold">รายได้ค่าไฟ (Revenue)</p>
@@ -221,7 +222,6 @@
                     </div>
                 </div>
 
-                <!-- กราฟเส้นแนวโน้ม (Dynamic Line Chart สลับข้อมูลตามกล่องที่เลือก) -->
                 <div class="mb-5 bg-gray-50 p-3 rounded-xl border border-gray-200">
                     <div class="flex items-center justify-between mb-2">
                         <h3 id="chartTitle" class="text-xs font-bold text-gray-700 flex items-center gap-1">
@@ -231,7 +231,6 @@
                     <div style="height: 180px;"><canvas id="revenueChart"></canvas></div>
                 </div>
 
-                <!-- ส่วนหัวตารางรายละเอียดด้านล่าง -->
                 <div class="flex justify-between items-center mb-2 border-b pb-2">
                     <h3 id="dashboardTableTitle" class="text-sm font-bold text-gray-700">
                         <i class="fa-solid fa-list-check text-primary mr-1"></i> รายการจองทั้งหมดในเดือนนี้
@@ -239,7 +238,6 @@
                     <span id="dashboardTableCount" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">0 รายการ</span>
                 </div>
 
-                <!-- ตารางแสดงข้อมูลรายเดือน -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm text-left text-gray-600">
                         <thead id="dashboardTableHead" class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
@@ -255,7 +253,7 @@
             </div>
         </section>
 
-        <!-- TAB 3: Info (อัปเดตภาษาอังกฤษ + ปรับ Layout สวยงาม) -->
+        <!-- TAB 3: Info -->
         <section id="tab-info" class="tab-content">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-4 space-y-6">
                 <h2 class="text-xl font-bold text-gray-800 border-b border-gray-100 pb-3 flex items-center">
@@ -268,7 +266,6 @@
                     </div>
                 </h2>
                 
-                <!-- Payment Section -->
                 <div class="bg-gradient-to-br from-sky-50 to-blue-50 p-5 rounded-xl border border-sky-100 relative overflow-hidden shadow-sm">
                     <div class="absolute -bottom-4 -right-4 text-sky-200 opacity-40 text-7xl"><i class="fa-solid fa-building-columns"></i></div>
                     <div class="relative z-10">
@@ -297,7 +294,6 @@
                     </div>
                 </div>
 
-                <!-- Rules Section -->
                 <div>
                     <h3 class="font-bold text-gray-800 mb-3 flex items-center text-sm sm:text-base">
                         <div class="w-6 h-6 rounded bg-teal-50 border border-teal-100 text-teal-600 flex items-center justify-center mr-2 shadow-sm">
@@ -332,7 +328,6 @@
                     </ul>
                 </div>
 
-                <!-- Fees Section -->
                 <div>
                     <h3 class="font-bold text-gray-800 mb-3 flex items-center text-sm sm:text-base">
                         <div class="w-6 h-6 rounded bg-amber-50 border border-amber-100 text-amber-500 flex items-center justify-center mr-2 shadow-sm">
@@ -361,7 +356,6 @@
                     </div>
                 </div>
 
-                <!-- ส่วนจัดการระบบและย้ายฐานข้อมูล (แสดงเฉพาะเมื่อ Login แอดมิน/นิติบุคคล) -->
                 <div id="adminMigrationSection" class="hidden pt-4 border-t border-gray-200">
                     <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
                         <h3 class="font-bold text-amber-900 text-sm mb-1 flex items-center gap-1.5">
@@ -382,6 +376,91 @@
                 </div>
             </div>
         </section>
+
+        <!-- TAB 4: Employee (เพิ่มใหม่สำหรับ Admin จัดการ Users) -->
+        <section id="tab-employee" class="tab-content">
+            <div class="bg-white rounded-xl shadow p-4 mb-4">
+                
+                <!-- ส่วนที่ 1: ฟอร์มเพิ่ม/แก้ไข ข้อมูลพนักงาน -->
+                <h2 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">เพิ่ม / แก้ไข ข้อมูลพนักงานในระบบ</h2>
+                
+                <input type="hidden" id="editingEmployeeId" value="">
+                
+                <div class="space-y-4 mb-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">รหัสพนักงาน</label>
+                        <input type="text" id="empId" placeholder="เช่น A03306" class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm transition bg-gray-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">ชื่อ-นามสกุล</label>
+                        <input type="text" id="empName" placeholder="เช่น ธงเดชณรงค์ ลูณสาคร" class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm transition bg-gray-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">ตำแหน่ง</label>
+                        <input type="text" id="empPosition" placeholder="เช่น เจ้าหน้าที่รักษาความปลอดภัย" class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm transition bg-gray-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">รหัสผ่าน (Password)</label>
+                        <input type="text" id="empPassword" placeholder="เช่น 123" class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm transition bg-gray-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">เลขบัญชีธนาคาร</label>
+                        <input type="text" id="empBankAccount" placeholder="เช่น 00404572163615" class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm transition bg-gray-50 focus:bg-white">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">สิทธิ์ (Role)</label>
+                            <select id="empRole" class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50 focus:bg-white">
+                                <option value="พนักงาน" selected>พนักงาน</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">สถานะ</label>
+                            <select id="empStatus" class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50 focus:bg-white">
+                                <option value="ปกติ" selected>🟢 ปกติ</option>
+                                <option value="ระงับ">🔴 ระงับ/ลาออก</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-2">
+                        <button id="btnSaveEmployee" onclick="saveEmployee()" class="w-full bg-[#14b8a6] hover:bg-[#0d9488] text-white py-3 rounded-lg font-bold transition shadow flex items-center justify-center gap-2">
+                            <span>+ บันทึกข้อมูลพนักงาน</span>
+                        </button>
+                        <button id="btnCancelEditEmp" onclick="resetEmployeeForm()" class="hidden w-full mt-2 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-lg font-bold transition shadow-sm">
+                            ยกเลิกการแก้ไข
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ส่วนที่ 2: ตารางแสดงรายชื่อพนักงาน -->
+                <h2 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2 mb-3 mt-6">รายชื่อพนักงานในระบบ</h2>
+                <div class="overflow-x-auto bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <table class="w-full min-w-[500px] emp-table">
+                        <thead>
+                            <tr>
+                                <th class="w-16">รหัส</th>
+                                <th>ชื่อ-นามสกุล</th>
+                                <th>ตำแหน่ง</th>
+                                <th>รหัสผ่าน</th>
+                                <th class="text-center w-16">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center py-6 text-gray-400 text-sm">
+                                    <i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลดข้อมูล...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+
     </main>
 
     <!-- Bottom Navigation -->
@@ -393,9 +472,13 @@
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn hidden w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
             <i class="fa-solid fa-chart-simple text-lg mb-0.5"></i><span class="text-[10px] uppercase">สรุปยอด (Dashboard)</span>
         </button>
-        <!-- แท็บ Info (แสดงผลตลอด ไม่ซ่อนแล้ว) -->
+        <!-- แท็บ Info (แสดงผลตลอด) -->
         <button onclick="switchTab('info')" id="nav-info" class="nav-btn w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
             <i class="fa-solid fa-circle-info text-lg mb-0.5"></i><span class="text-[10px] uppercase">กฎระเบียบ (Info)</span>
+        </button>
+        <!-- แท็บจัดการพนักงาน (แสดงผลเฉพาะ Admin) -->
+        <button onclick="switchTab('employee')" id="nav-employee" class="nav-btn hidden w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-colors">
+            <i class="fa-solid fa-users text-lg mb-0.5"></i><span class="text-[10px] uppercase">พนักงาน (Staff)</span>
         </button>
     </nav>
 
@@ -549,7 +632,6 @@
                     <i class="fa-solid fa-clock-rotate-left mr-1"></i> รูปภาพในรายการนี้ถูกลบออกอัตโนมัติเนื่องจากเก่าเกิน 3 เดือน (เพื่อประหยัดพื้นที่ฐานข้อมูล)
                 </div>
 
-                <!-- กรอบที่ 1: สลิปโอนเงิน -->
                 <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 shadow-sm">
                     <div class="flex justify-between items-center px-3 py-1.5 bg-white border-b border-gray-200">
                         <h4 class="font-bold text-xs sm:text-sm text-gray-800 flex items-center gap-1.5">
@@ -576,7 +658,6 @@
                     </div>
                 </div>
 
-                <!-- กรอบที่ 2: มิเตอร์ไฟ -->
                 <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 shadow-sm">
                     <div class="flex justify-between items-center px-3 py-1.5 bg-white border-b border-gray-200">
                         <h4 class="font-bold text-xs sm:text-sm text-gray-800 flex items-center gap-1.5">
@@ -710,7 +791,7 @@
         }, 5000);
 
         // =========================================================================
-        // ระบบ Multi-Touch Pinch-to-Zoom & Pan
+        // ระบบ Multi-Touch Pinch-to-Zoom & Pan (คงเดิม)
         // =========================================================================
         const zoomControllers = {};
         let currentFullScreenType = 'slip';
@@ -863,7 +944,6 @@
             document.getElementById('modalFullScreenZoom').classList.add('hidden');
             if (zoomControllers.fullScreen) zoomControllers.fullScreen.reset();
         };
-        // =========================================================================
 
         window.initAppUI = function() {
             const mf = document.getElementById('monthFilter');
@@ -873,6 +953,10 @@
             initZoomControllers();
         }
 
+        // =========================================================================
+        // สคริปต์สำหรับส่วนระบบจองสนามและแดชบอร์ด
+        // =========================================================================
+        
         function toggleLightUploadSection() {
             const isChecked = document.getElementById('toggleNeedLight').checked;
             document.getElementById('lightUploadSection').classList.toggle('hidden', !isChecked);
@@ -1198,7 +1282,6 @@
                 const hasMeter = !!b.meterImg || !!b.isImageCleaned;
                 let actionHtml = '';
                 
-                // โชว์แถบจัดการไฟเฉพาะตอนที่ Admin ล็อกอินเท่านั้น
                 if (window.isAdmin) {
                     if (isPaid && hasMeter) {
                         const cleanBadge = b.isImageCleaned ? `<span class="text-[10px] text-gray-400">(ลบรูปตามรอบ 3 เดือนแล้ว)</span>` : `<button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 px-3 py-1 rounded-lg shadow-sm font-semibold"><i class="fa-solid fa-image mr-1 text-primary"></i>ดูรูปสลิป/มิเตอร์</button>`;
@@ -1210,7 +1293,6 @@
                     }
                 }
 
-                // ปุ่มลบ/แก้ไข โชว์เฉพาะตอน Admin ล็อกอินเท่านั้น
                 const editDeleteBtns = window.isAdmin ? `
                     <div class="flex items-center gap-1.5 shrink-0">
                         <button onclick="openEditBookingModal('${b.id}')" title="แก้ไขรายการ" class="w-7 h-7 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 flex items-center justify-center transition">
@@ -1419,16 +1501,19 @@
             setHidden('userInfo', !window.isAdmin);
             setHidden('btnAddBooking', !window.isAdmin);
             setHidden('nav-dashboard', !window.isAdmin);
-            // สังเกตว่าเราไม่ได้ซ่อน nav-info อีกต่อไป ลูกบ้านจึงเห็นได้
+            setHidden('nav-employee', !window.isAdmin); // เปิดปิดปุ่มจัดการพนักงาน
             setHidden('btnPrintPdf', !window.isAdmin);
             setHidden('adminMigrationSection', !window.isAdmin);
             setHidden('monthFilterBox', !window.isAdmin);
             setHidden('guardFilterNote', window.isAdmin);
 
-            if(!window.isAdmin) {
-                // หากลูกบ้านบังเอิญอยู่ในหน้า Dashboard ให้เด้งกลับไปหน้า Booking
+            if(window.isAdmin) {
+                if(window.subscribeToEmployees) window.subscribeToEmployees();
+            } else {
+                if(window.unsubscribeEmployees) { window.unsubscribeEmployees(); window.unsubscribeEmployees = null; }
                 const currentTab = document.querySelector('.tab-content.active');
-                if (currentTab && currentTab.id === 'tab-dashboard') {
+                // หากลูกบ้านบังเอิญอยู่ในหน้า Dashboard หรือ Employee ให้เด้งกลับไปหน้า Booking
+                if (currentTab && (currentTab.id === 'tab-dashboard' || currentTab.id === 'tab-employee')) {
                     window.switchTab('booking');
                 }
             }
@@ -1521,6 +1606,148 @@
         window.closeAlert = function() {
             const box = document.getElementById('customAlertBox'); const el = document.getElementById('customAlert'); el.classList.add('opacity-0'); box.classList.add('scale-95'); setTimeout(() => { el.classList.add('hidden'); }, 300);
         }
+
+        // =========================================================================
+        // สคริปต์สำหรับระบบจัดการพนักงาน (UI Logic)
+        // =========================================================================
+        
+        window.allEmployees = [];
+
+        window.saveEmployee = async function() {
+            const empId = document.getElementById('empId').value.trim();
+            const name = document.getElementById('empName').value.trim();
+            const position = document.getElementById('empPosition').value.trim();
+            const password = document.getElementById('empPassword').value.trim();
+            const bankAccount = document.getElementById('empBankAccount').value.trim();
+            const role = document.getElementById('empRole').value;
+            const status = document.getElementById('empStatus').value;
+            const editingId = document.getElementById('editingEmployeeId').value;
+
+            if(!empId || !name || !position || !password) {
+                return window.showAlert('ข้อมูลไม่ครบ', 'กรุณากรอก รหัสพนักงาน, ชื่อ-นามสกุล, ตำแหน่ง และ รหัสผ่าน', 'warning');
+            }
+
+            const btn = document.getElementById('btnSaveEmployee');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+            btn.disabled = true;
+
+            const payload = { empId, name, position, password, bankAccount, role, status, updatedAt: Date.now() };
+
+            try {
+                let success = false;
+                if(editingId) {
+                    success = await window.cloudUpdateEmployee(editingId, payload);
+                } else {
+                    payload.createdAt = Date.now();
+                    success = await window.cloudSaveEmployee(payload);
+                }
+
+                if(success) {
+                    window.showAlert('สำเร็จ', editingId ? 'แก้ไขข้อมูลพนักงานเรียบร้อย' : 'เพิ่มพนักงานเข้าสู่ระบบเรียบร้อย', 'success');
+                    resetEmployeeForm();
+                } else {
+                    throw new Error("Save Error");
+                }
+            } catch(e) {
+                window.showAlert('ผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่', 'error');
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        window.editEmployee = function(docId) {
+            const emp = window.allEmployees.find(x => x.id === docId);
+            if(!emp) return;
+
+            document.getElementById('editingEmployeeId').value = emp.id;
+            document.getElementById('empId').value = emp.empId || '';
+            document.getElementById('empName').value = emp.name || '';
+            document.getElementById('empPosition').value = emp.position || '';
+            document.getElementById('empPassword').value = emp.password || '';
+            document.getElementById('empBankAccount').value = emp.bankAccount || '';
+            document.getElementById('empRole').value = emp.role || 'พนักงาน';
+            document.getElementById('empStatus').value = emp.status || 'ปกติ';
+
+            const btnSave = document.getElementById('btnSaveEmployee');
+            btnSave.innerHTML = '<span>บันทึกการแก้ไขข้อมูล</span>';
+            btnSave.className = "w-full bg-[#0ea5e9] hover:bg-[#0284c7] text-white py-3 rounded-lg font-bold transition shadow flex items-center justify-center gap-2";
+            
+            document.getElementById('btnCancelEditEmp').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.resetEmployeeForm = function() {
+            document.getElementById('editingEmployeeId').value = '';
+            document.getElementById('empId').value = '';
+            document.getElementById('empName').value = '';
+            document.getElementById('empPosition').value = '';
+            document.getElementById('empPassword').value = '';
+            document.getElementById('empBankAccount').value = '';
+            document.getElementById('empRole').value = 'พนักงาน';
+            document.getElementById('empStatus').value = 'ปกติ';
+
+            const btnSave = document.getElementById('btnSaveEmployee');
+            btnSave.innerHTML = '<span>+ บันทึกข้อมูลพนักงาน</span>';
+            btnSave.className = "w-full bg-[#14b8a6] hover:bg-[#0d9488] text-white py-3 rounded-lg font-bold transition shadow flex items-center justify-center gap-2";
+
+            document.getElementById('btnCancelEditEmp').classList.add('hidden');
+        }
+
+        window.deleteEmployee = async function(docId, empName) {
+            if(confirm(`คุณต้องการลบข้อมูลพนักงาน\n"${empName}"\nออกจากระบบใช่หรือไม่?`)) {
+                try {
+                    const success = await window.cloudDeleteEmployee(docId);
+                    if(success) {
+                        window.showAlert('ลบสำเร็จ', 'ลบข้อมูลพนักงานเรียบร้อยแล้ว', 'success');
+                        if (document.getElementById('editingEmployeeId').value === docId) resetEmployeeForm();
+                    } else throw new Error();
+                } catch(e) {
+                    window.showAlert('ผิดพลาด', 'ไม่สามารถลบข้อมูลพนักงานได้', 'error');
+                }
+            }
+        }
+
+        window.renderEmployeeTable = function() {
+            const tbody = document.getElementById('employeeTableBody');
+            tbody.innerHTML = '';
+            
+            if(window.allEmployees.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400 text-sm">ไม่มีข้อมูลพนักงานในระบบ</td></tr>`;
+                return;
+            }
+
+            // เรียงตามเวลาที่สร้าง (ใหม่ไปเก่า) หรือเรียงตามรหัส
+            const sortedEmp = [...window.allEmployees].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            sortedEmp.forEach(emp => {
+                const statusDot = emp.status === 'ปกติ' ? '<span class="w-2 h-2 rounded-full bg-green-500 inline-block mr-1"></span>' : '<span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-1"></span>';
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="font-mono text-primary font-semibold">${emp.empId || '-'}</td>
+                        <td>
+                            <div class="font-bold text-gray-700">${emp.name || '-'}</div>
+                            <div class="text-[10px] text-gray-400 mt-0.5">${statusDot}${emp.status || 'ปกติ'}</div>
+                        </td>
+                        <td>${emp.position || '-'}</td>
+                        <td><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs tracking-widest font-mono">${emp.password || '-'}</span></td>
+                        <td class="text-center">
+                            <div class="flex justify-center items-center gap-1.5">
+                                <button onclick="editEmployee('${emp.id}')" class="w-7 h-7 rounded bg-sky-50 text-sky-600 hover:bg-sky-100 border border-sky-100 flex items-center justify-center transition" title="แก้ไข">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </button>
+                                <button onclick="deleteEmployee('${emp.id}', '${emp.name}')" class="w-7 h-7 rounded bg-red-50 text-red-500 hover:bg-red-100 border border-red-100 flex items-center justify-center transition" title="ลบ">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
     </script>
 
     <!-- Firebase Scripts -->
@@ -1541,16 +1768,24 @@
         let db, auth;
         let currentUnsubscribe = null;
         window.currentSubscribedMonth = null;
+        window.unsubscribeEmployees = null;
 
         const COURT_APP_ID = 'laddarom-court-app'; 
         const COLLECTION_NAME = 'ten_bookings'; 
         const OLD_COLLECTION_NAME = 'bookings';
+        const EMPLOYEES_COLLECTION_NAME = 'users'; // สำหรับเก็บพนักงานแยกต่างหาก
 
         window.allBookings = [];
 
         function getBookingsCollectionRef() { return collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', COLLECTION_NAME); }
         function getBookingDocRef(docId) { return doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', COLLECTION_NAME, docId); }
 
+        function getEmployeesCollectionRef() { return collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', EMPLOYEES_COLLECTION_NAME); }
+        function getEmployeeDocRef(docId) { return doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', EMPLOYEES_COLLECTION_NAME, docId); }
+
+        // =========================================================================
+        // Booking Database Listeners
+        // =========================================================================
         window.subscribeToMonth = function(monthKey) {
             if (!db || !monthKey) return;
             if (window.currentSubscribedMonth === monthKey && currentUnsubscribe) return;
@@ -1563,34 +1798,29 @@
             const q = query(getBookingsCollectionRef(), where('monthKey', '==', monthKey));
             currentUnsubscribe = onSnapshot(q, (snapshot) => {
                 window.allBookings = [];
-                let latestTime = 0; // ตัวแปรเก็บเวลาล่าสุด
+                let latestTime = 0; 
 
                 snapshot.forEach(docSnap => { 
                     let data = docSnap.data(); 
                     data.id = docSnap.id; 
                     window.allBookings.push(data); 
 
-                    // หาเวลาที่มีการบันทึกหรืออัปเดตล่าสุด
                     const timeCheck = data.updatedAt || data.createdAt || 0;
                     if (timeCheck > latestTime) {
                         latestTime = timeCheck;
                     }
                 });
 
-                // อัปเดตข้อความ last update ตรงจุดที่ขีดสีส้ม
                 const lastUpdateEl = document.getElementById('lastUpdateText');
                 if (lastUpdateEl) {
                     if (latestTime > 0) {
                         const d = new Date(latestTime);
                         const day = String(d.getDate()).padStart(2, '0');
                         const month = String(d.getMonth() + 1).padStart(2, '0');
-                        const year = String(d.getFullYear() + 543).slice(-2); // ปี พ.ศ. 2 หลัก
-                        
+                        const year = String(d.getFullYear() + 543).slice(-2);
                         let hours = d.getHours();
                         const ampm = hours >= 12 ? 'pm' : 'am';
-                        hours = hours % 12;
-                        hours = hours ? hours : 12; // จัดการเวลาเที่ยงคืนและเที่ยงวันให้เป็นเลข 12
-                        
+                        hours = hours % 12; hours = hours ? hours : 12; 
                         const strHours = String(hours).padStart(2, '0');
                         const strMins = String(d.getMinutes()).padStart(2, '0');
                         
@@ -1610,6 +1840,30 @@
             });
         };
 
+        // =========================================================================
+        // Employee Database Listeners (ใหม่)
+        // =========================================================================
+        window.subscribeToEmployees = function() {
+            if (!db || !window.isAdmin) return;
+            if (window.unsubscribeEmployees) return; // ติดตามอยู่แล้ว
+
+            const q = query(getEmployeesCollectionRef());
+            window.unsubscribeEmployees = onSnapshot(q, (snapshot) => {
+                window.allEmployees = [];
+                snapshot.forEach(docSnap => {
+                    let data = docSnap.data();
+                    data.id = docSnap.id;
+                    window.allEmployees.push(data);
+                });
+                window.renderEmployeeTable();
+            }, (error) => {
+                console.error("Employee Fetch Error:", error);
+            });
+        };
+
+        // =========================================================================
+        // Cleanup & Migration Tools
+        // =========================================================================
         async function autoCleanupOldImages(forceRun = false) {
             try {
                 const now = new Date();
@@ -1688,10 +1942,18 @@
             }
         }
 
+        // =========================================================================
+        // Cloud Action Functions (Booking & Employees)
+        // =========================================================================
         window.cloudSaveBooking = async function(bookingData) { try { const docId = `B_${Date.now()}_${bookingData.houseNo.replace(/\//g,'-')}`; await setDoc(getBookingDocRef(docId), bookingData); return true; } catch (e) { return false; } };
         window.cloudUpdateBooking = async function(bookingId, bookingData) { try { await updateDoc(getBookingDocRef(bookingId), bookingData); return true; } catch (e) { return false; } };
         window.cloudDeleteBooking = async function(bookingId) { try { await deleteDoc(getBookingDocRef(bookingId)); return true; } catch (e) { return false; } };
         window.cloudUpdateLight = async function(bookingId, updateData) { try { await updateDoc(getBookingDocRef(bookingId), updateData); return true; } catch (e) { return false; } };
+
+        // Functions สำหรับ Users
+        window.cloudSaveEmployee = async function(empData) { try { const docId = `EMP_${Date.now()}`; await setDoc(getEmployeeDocRef(docId), empData); return true; } catch (e) { return false; } };
+        window.cloudUpdateEmployee = async function(docId, empData) { try { await updateDoc(getEmployeeDocRef(docId), empData); return true; } catch (e) { return false; } };
+        window.cloudDeleteEmployee = async function(docId) { try { await deleteDoc(getEmployeeDocRef(docId)); return true; } catch (e) { return false; } };
 
         initFirebase();
     </script>
