@@ -378,11 +378,10 @@
             </div>
         </section>
 
-        <!-- TAB 4: Employee (เพิ่มใหม่สำหรับ Admin จัดการ Users) -->
+        <!-- TAB 4: Employee -->
         <section id="tab-employee" class="tab-content">
             <div class="bg-white rounded-xl shadow p-4 mb-4">
                 
-                <!-- ส่วนที่ 1: ฟอร์มเพิ่ม/แก้ไข ข้อมูลพนักงาน -->
                 <h2 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">เพิ่ม / แก้ไข ข้อมูลพนักงานในระบบ</h2>
                 
                 <input type="hidden" id="editingEmployeeId" value="">
@@ -437,7 +436,6 @@
                     </div>
                 </div>
 
-                <!-- ส่วนที่ 2: ตารางแสดงรายชื่อพนักงาน -->
                 <h2 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2 mb-3 mt-6">รายชื่อพนักงานในระบบ</h2>
                 <div class="overflow-x-auto bg-white border border-gray-200 rounded-xl shadow-sm">
                     <table class="w-full min-w-[500px] emp-table">
@@ -776,12 +774,34 @@
             return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         }
 
+        // =========================================================================
+        // Helpers สำหรับระบบ Log (Audit Trail)
+        // =========================================================================
+        function getCurrentUserLogText() {
+            if (window.isLoggedIn) {
+                const name = localStorage.getItem('userName') || 'Admin';
+                const role = window.userRole ? `(${window.userRole})` : '';
+                return `${name} ${role}`.trim();
+            }
+            return 'ลูกบ้าน (Guest)';
+        }
+
+        function formatLogTime(ts) {
+            if(!ts) return '';
+            const d = new Date(ts);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = String(d.getFullYear() + 543).slice(-2);
+            const hours = String(d.getHours()).padStart(2, '0');
+            const mins = String(d.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${mins}`;
+        }
+
         var selectedDate = getLocalISODate(new Date()); 
         var calendar = null;
         var chartInstance = null;
         
-        // --- เปลี่ยนแปลงระบบสิทธิ์ (Role-based state) ---
-        var isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || localStorage.getItem('isAdmin') === 'true'; // รองรับ session เก่า
+        var isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || localStorage.getItem('isAdmin') === 'true'; 
         var userRole = localStorage.getItem('userRole') || (localStorage.getItem('isAdmin') === 'true' ? 'Admin' : '');
         var isAdmin = userRole === 'Admin';
         
@@ -798,7 +818,7 @@
         }, 5000);
 
         // =========================================================================
-        // ระบบ Multi-Touch Pinch-to-Zoom & Pan (คงเดิม)
+        // ระบบ Multi-Touch Pinch-to-Zoom & Pan
         // =========================================================================
         const zoomControllers = {};
         let currentFullScreenType = 'slip';
@@ -959,10 +979,6 @@
             setupAdminUI();
             initZoomControllers();
         }
-
-        // =========================================================================
-        // สคริปต์สำหรับส่วนระบบจองสนามและแดชบอร์ด
-        // =========================================================================
         
         function toggleLightUploadSection() {
             const isChecked = document.getElementById('toggleNeedLight').checked;
@@ -1007,6 +1023,8 @@
                 }
 
                 const targetMonthKey = bookDate.substring(0, 7);
+                const currentUser = getCurrentUserLogText();
+                const nowMs = Date.now();
 
                 const bookingData = {
                     date: bookDate,
@@ -1019,14 +1037,16 @@
                     amountPaid: needLights ? parseInt(initialAmount) : 0,
                     slipImg: slipBase64,
                     meterImg: needLights && existingBooking ? (existingBooking.meterImg || "") : "",
-                    updatedAt: Date.now()
+                    updatedAt: nowMs,
+                    updatedBy: currentUser
                 };
 
                 let success = false;
                 if (editingId) {
                     success = await window.cloudUpdateBooking(editingId, bookingData);
                 } else {
-                    bookingData.createdAt = Date.now();
+                    bookingData.createdAt = nowMs;
+                    bookingData.createdBy = currentUser;
                     success = await window.cloudSaveBooking(bookingData);
                 }
 
@@ -1097,7 +1117,6 @@
             }
 
             const adminResetSec = document.getElementById('adminResetLightSection');
-            // ให้สิทธิ์พนักงานที่ล็อกอิน "และไม่ใช่ รปภ." สามารถลบและรีเซ็ตไฟได้
             if (window.isLoggedIn && needLight && window.userRole !== 'รปภ') {
                 adminResetSec.classList.remove('hidden');
             } else {
@@ -1121,7 +1140,13 @@
                 
                 try {
                     const updateData = {
-                        isLightUsed: false, amountPaid: 0, slipImg: "", meterImg: "", isImageCleaned: false, updatedAt: Date.now()
+                        isLightUsed: false, 
+                        amountPaid: 0, 
+                        slipImg: "", 
+                        meterImg: "", 
+                        isImageCleaned: false, 
+                        updatedAt: Date.now(),
+                        updatedBy: getCurrentUserLogText()
                     };
                     const success = await window.cloudUpdateBooking(bookingId, updateData);
                     if (success) {
@@ -1210,8 +1235,17 @@
                 const slipBase64 = slipFile ? await new Promise(r => compressImage(slipFile, r)) : "";
                 const meterBase64 = await new Promise(r => compressImage(meterFile, r));
 
-                const updateData = { meterImg: meterBase64, isImageCleaned: false, updatedAt: Date.now() };
-                if (slipBase64) { updateData.slipImg = slipBase64; updateData.amountPaid = amount; updateData.isLightUsed = true; }
+                const updateData = { 
+                    meterImg: meterBase64, 
+                    isImageCleaned: false, 
+                    updatedAt: Date.now(),
+                    updatedBy: getCurrentUserLogText() 
+                };
+                if (slipBase64) { 
+                    updateData.slipImg = slipBase64; 
+                    updateData.amountPaid = amount; 
+                    updateData.isLightUsed = true; 
+                }
 
                 const success = await window.cloudUpdateLight(bookingId, updateData);
                 if (success) {
@@ -1244,7 +1278,6 @@
                     const viewDate = info.view.currentStart;
                     const ym = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}`;
                     const filterEl = document.getElementById('monthFilter');
-                    // ถ้าเข้าสู่ระบบแล้ว ให้ filter ทำงานตรงกับปฏิทิน
                     if (filterEl && window.isLoggedIn) filterEl.value = ym;
                     if (window.subscribeToMonth) window.subscribeToMonth(ym);
                     highlightSelectedDayOnCalendar(window.selectedDate);
@@ -1290,8 +1323,9 @@
                 const isPaid = b.isLightUsed;
                 const hasMeter = !!b.meterImg || !!b.isImageCleaned;
                 let actionHtml = '';
+                let logTextHtml = '';
                 
-                // เจ้าหน้าที่ (isLoggedIn) สามารถมองเห็นปุ่มจัดการไฟได้
+                // สำหรับเจ้าหน้าที่ที่ล็อกอิน: แสดงระบบเปิด/ปิดไฟ และประวัติ Log
                 if (window.isLoggedIn) {
                     if (isPaid && hasMeter) {
                         const cleanBadge = b.isImageCleaned ? `<span class="text-[10px] text-gray-400">(ลบรูปตามรอบ 3 เดือนแล้ว)</span>` : `<button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 px-3 py-1 rounded-lg shadow-sm font-semibold"><i class="fa-solid fa-image mr-1 text-primary"></i>ดูรูปสลิป/มิเตอร์</button>`;
@@ -1300,6 +1334,18 @@
                         actionHtml = `<div class="mt-2 flex flex-col gap-1.5"><span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded font-semibold inline-block w-fit"><i class="fa-solid fa-file-invoice mr-1"></i> แนบสลิปแล้ว (รออัปโหลดมิเตอร์)</span><div class="flex gap-2"><button onclick="openLightModal('${b.id}', '${b.houseNo}', '${b.startTime}-${b.endTime}', true)" class="w-full bg-accent text-white text-xs py-1.5 rounded-lg font-bold hover:bg-amber-600 shadow flex justify-center items-center gap-1.5"><i class="fa-solid fa-camera"></i> แนบรูปมิเตอร์ไฟ</button><button onclick="openViewImages('${b.id}')" class="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-lg shadow-sm"><i class="fa-solid fa-image"></i></button></div></div>`;
                     } else {
                         actionHtml = `<div class="mt-2"><button onclick="openLightModal('${b.id}', '${b.houseNo}', '${b.startTime}-${b.endTime}', false)" class="w-full bg-gray-100 text-gray-700 border border-gray-300 text-xs py-1.5 rounded-lg font-semibold hover:bg-gray-200 shadow-sm flex justify-center items-center gap-1.5"><i class="fa-regular fa-lightbulb text-sm text-accent"></i> ขอเปิดไฟเพิ่ม (แนบสลิป+มิเตอร์)</button></div>`;
+                    }
+
+                    // จัดการการแสดงผล Log ด้วย Text ล้วน
+                    let logTexts = [];
+                    if (b.createdBy) {
+                        logTexts.push(`ลงข้อมูล: ${b.createdBy} (${formatLogTime(b.createdAt)})`);
+                    }
+                    if (b.updatedBy && b.updatedAt && (b.updatedAt !== b.createdAt)) {
+                        logTexts.push(`อัปเดต: ${b.updatedBy} (${formatLogTime(b.updatedAt)})`);
+                    }
+                    if (logTexts.length > 0) {
+                        logTextHtml = `<div class="mt-2.5 pt-2 border-t border-gray-100 text-[10px] text-gray-400 font-medium leading-relaxed">` + logTexts.join(' • ') + `</div>`;
                     }
                 }
 
@@ -1330,6 +1376,7 @@
                             ${editDeleteBtns}
                         </div>
                         ${actionHtml}
+                        ${logTextHtml}
                     </div>
                 `;
             });
@@ -1507,9 +1554,7 @@
             if(tabId === 'dashboard') window.setDashboardView('all');
         }
 
-        // --- อัปเดตฟังก์ชันเช็ค UI ตามสิทธิ์การล็อกอิน ---
         function setupAdminUI() {
-            // อัปเดตข้อมูลบน Header
             const userInfoEl = document.getElementById('userInfo');
             if (window.isLoggedIn) {
                 const dispName = localStorage.getItem('userName') || (window.isAdmin ? 'ผู้ดูแลระบบ' : 'พนักงาน');
@@ -1524,17 +1569,14 @@
 
             const isGuard = window.userRole === 'รปภ';
 
-            // สิ่งที่ เจ้าหน้าที่เห็นได้ (และ รปภ. จะถูกซ่อนบางอย่าง)
             setHidden('userInfo', !window.isLoggedIn);
             setHidden('btnAddBooking', !window.isLoggedIn);
             
-            // รปภ. จะมองไม่เห็น Dashboard และสิ่งที่อยู่ในนั้น
             setHidden('nav-dashboard', !window.isLoggedIn || isGuard);
             setHidden('btnPrintPdf', !window.isLoggedIn || isGuard);
             setHidden('monthFilterBox', !window.isLoggedIn || isGuard);
             setHidden('guardFilterNote', window.isLoggedIn && !isGuard);
 
-            // สิ่งที่ต้องเป็น Admin เท่านั้นถึงจะเห็น
             setHidden('nav-employee', !window.isAdmin); 
             setHidden('adminMigrationSection', !window.isAdmin);
 
@@ -1544,24 +1586,20 @@
                 if(window.unsubscribeEmployees) { window.unsubscribeEmployees(); window.unsubscribeEmployees = null; }
                 const currentTab = document.querySelector('.tab-content.active');
                 
-                // หากพนักงานทั่วไป/รปภ. พยายามเข้าหน้าพนักงาน ให้เด้งกลับ
                 if (window.isLoggedIn && currentTab && currentTab.id === 'tab-employee') {
                     window.switchTab('booking');
                 }
 
-                // หากเป็น รปภ. แล้วพยายามเข้าหน้าแดชบอร์ด ให้เด้งกลับ
                 if (isGuard && currentTab && currentTab.id === 'tab-dashboard') {
                     window.switchTab('booking');
                 }
                 
-                // หากลูกบ้านทั่วไปอยู่ในหน้าต้องห้าม ให้เด้งกลับ
                 if (!window.isLoggedIn && currentTab && (currentTab.id === 'tab-dashboard' || currentTab.id === 'tab-employee')) {
                     window.switchTab('booking');
                 }
             }
         }
 
-        // --- อัปเดตฟังก์ชัน Login ให้เช็คจาก Firebase ---
         window.performLogin = async function() {
             const u = (document.getElementById('inpUser').value || '').trim();
             const p = (document.getElementById('inpPass').value || '').trim();
@@ -1580,13 +1618,11 @@
             btn.disabled = true;
 
             try {
-                // 1. เช็ครหัสผ่าน Admin สำรอง (Master Password)
                 if(u.toLowerCase() === 'admin' && p === 'admin') {
                     handleSuccessfulLogin('Admin', 'Super Admin');
                     return;
                 }
 
-                // 2. เช็คจาก Firebase Collection 'users'
                 if(window.cloudCheckLogin) {
                     const user = await window.cloudCheckLogin(u, p);
                     if(user) {
@@ -1633,7 +1669,7 @@
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('userRole');
             localStorage.removeItem('userName');
-            localStorage.removeItem('isAdmin'); // เคลียร์ session เก่าด้วย
+            localStorage.removeItem('isAdmin'); 
             window.isLoggedIn = false;
             window.userRole = '';
             window.isAdmin = false;
@@ -1708,10 +1744,6 @@
             const box = document.getElementById('customAlertBox'); const el = document.getElementById('customAlert'); el.classList.add('opacity-0'); box.classList.add('scale-95'); setTimeout(() => { el.classList.add('hidden'); }, 300);
         }
 
-        // =========================================================================
-        // สคริปต์สำหรับระบบจัดการพนักงาน (UI Logic)
-        // =========================================================================
-        
         window.allEmployees = [];
 
         window.saveEmployee = async function() {
@@ -1820,7 +1852,6 @@
                 return;
             }
 
-            // เรียงตามเวลาที่สร้าง (ใหม่ไปเก่า) หรือเรียงตามรหัส
             const sortedEmp = [...window.allEmployees].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 
             sortedEmp.forEach(emp => {
@@ -1874,7 +1905,7 @@
         const COURT_APP_ID = 'laddarom-court-app'; 
         const COLLECTION_NAME = 'ten_bookings'; 
         const OLD_COLLECTION_NAME = 'bookings';
-        const EMPLOYEES_COLLECTION_NAME = 'users'; // สำหรับเก็บพนักงานแยกต่างหาก
+        const EMPLOYEES_COLLECTION_NAME = 'users';
 
         window.allBookings = [];
 
@@ -1884,9 +1915,6 @@
         function getEmployeesCollectionRef() { return collection(db, 'artifacts', COURT_APP_ID, 'public', 'data', EMPLOYEES_COLLECTION_NAME); }
         function getEmployeeDocRef(docId) { return doc(db, 'artifacts', COURT_APP_ID, 'public', 'data', EMPLOYEES_COLLECTION_NAME, docId); }
 
-        // =========================================================================
-        // Booking Database Listeners
-        // =========================================================================
         window.subscribeToMonth = function(monthKey) {
             if (!db || !monthKey) return;
             if (window.currentSubscribedMonth === monthKey && currentUnsubscribe) return;
@@ -1941,12 +1969,9 @@
             });
         };
 
-        // =========================================================================
-        // Employee Database Listeners
-        // =========================================================================
         window.subscribeToEmployees = function() {
             if (!db || !window.isAdmin) return;
-            if (window.unsubscribeEmployees) return; // ติดตามอยู่แล้ว
+            if (window.unsubscribeEmployees) return; 
 
             const q = query(getEmployeesCollectionRef());
             window.unsubscribeEmployees = onSnapshot(q, (snapshot) => {
@@ -1962,9 +1987,6 @@
             });
         };
 
-        // =========================================================================
-        // Functions สำหรับเช็ค Login เข้าสู่ระบบ (เปิดให้ Vanilla JS เรียกใช้)
-        // =========================================================================
         window.cloudCheckLogin = async function(username, password) {
             try {
                 const q = query(getEmployeesCollectionRef(), where('empId', '==', username));
@@ -1976,18 +1998,15 @@
                             foundUser = doc.data();
                         }
                     });
-                    return foundUser; // เจอและรหัสตรง
+                    return foundUser; 
                 }
-                return null; // ไม่เจอผู้ใช้
+                return null; 
             } catch(e) {
                 console.error(e);
                 throw e;
             }
         };
 
-        // =========================================================================
-        // Cleanup & Migration Tools
-        // =========================================================================
         async function autoCleanupOldImages(forceRun = false) {
             try {
                 const now = new Date();
@@ -2066,15 +2085,11 @@
             }
         }
 
-        // =========================================================================
-        // Cloud Action Functions (Booking & Employees)
-        // =========================================================================
         window.cloudSaveBooking = async function(bookingData) { try { const docId = `B_${Date.now()}_${bookingData.houseNo.replace(/\//g,'-')}`; await setDoc(getBookingDocRef(docId), bookingData); return true; } catch (e) { return false; } };
         window.cloudUpdateBooking = async function(bookingId, bookingData) { try { await updateDoc(getBookingDocRef(bookingId), bookingData); return true; } catch (e) { return false; } };
         window.cloudDeleteBooking = async function(bookingId) { try { await deleteDoc(getBookingDocRef(bookingId)); return true; } catch (e) { return false; } };
         window.cloudUpdateLight = async function(bookingId, updateData) { try { await updateDoc(getBookingDocRef(bookingId), updateData); return true; } catch (e) { return false; } };
 
-        // Functions สำหรับ Users
         window.cloudSaveEmployee = async function(empData) { try { const docId = `EMP_${Date.now()}`; await setDoc(getEmployeeDocRef(docId), empData); return true; } catch (e) { return false; } };
         window.cloudUpdateEmployee = async function(docId, empData) { try { await updateDoc(getEmployeeDocRef(docId), empData); return true; } catch (e) { return false; } };
         window.cloudDeleteEmployee = async function(docId) { try { await deleteDoc(getEmployeeDocRef(docId)); return true; } catch (e) { return false; } };
